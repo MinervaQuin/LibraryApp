@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "518041808056",
+    "project_id": "library-app-4cf09",
+    "storage_bucket": "library-app-4cf09.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:518041808056:android:bcaa81440ce0152ec7984d",
+        "android_client_info": {
+          "package_name": "com.example.libraryapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAF21CdTN_CvYNR8yQEg2-Av-9HwBlhgok"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
