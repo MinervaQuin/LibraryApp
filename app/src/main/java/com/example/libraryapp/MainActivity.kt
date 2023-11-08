@@ -14,7 +14,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.libraryapp.ui.theme.LibraryAppTheme
+import com.example.libraryapp.theme.LibraryAppTheme
+import com.example.libraryapp.ui.LoginView
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.Firebase
@@ -25,10 +26,11 @@ import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.firestore
 import kotlin.math.log
 
+
 class MainActivity : ComponentActivity() {
     val db = Firebase.firestore
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    /*override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             LibraryAppTheme {
@@ -38,6 +40,17 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     Greeting()
+                }
+            }
+        }
+    }*/
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            LibraryAppTheme {
+                // Use a Surface container using the 'background' color from the theme
+                Surface(color = MaterialTheme.colorScheme.background) {
+                    LoginView() // Aquí colocamos nuestro composable de inicio de sesión
                 }
             }
         }
@@ -155,3 +168,4 @@ fun GreetingPreview() {
         Greeting()
     }
 }
+

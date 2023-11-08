@@ -1,4 +1,4 @@
-package com.example.libraryapp.ui.theme
+package com.example.libraryapp.theme
 
 import android.app.Activity
 import android.os.Build
