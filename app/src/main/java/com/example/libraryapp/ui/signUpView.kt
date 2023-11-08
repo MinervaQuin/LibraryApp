@@ -7,6 +7,8 @@ import android.widget.DatePicker
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,11 +17,15 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.outlined.AccountCircle
+import androidx.compose.material.icons.outlined.ArrowForward
 import androidx.compose.material.icons.outlined.DateRange
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -61,6 +67,10 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.*
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.TextField
+import androidx.compose.runtime.LaunchedEffect
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -75,6 +85,7 @@ fun signUpView(signUpViewModel: signUpViewModel = viewModel()){
 
     var selectedDate by remember { mutableStateOf("") }
 
+    var showFirstRow by remember { mutableStateOf(true) }
 
     Box(modifier = Modifier.fillMaxSize()) {
         // Colocamos la imagen de fondo
@@ -84,6 +95,7 @@ fun signUpView(signUpViewModel: signUpViewModel = viewModel()){
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop // Ajusta la imagen al tamaño del Box, recortando si es necesario
         )
+
         Row (
             modifier = Modifier
                 .align(Alignment.Center)
@@ -91,21 +103,47 @@ fun signUpView(signUpViewModel: signUpViewModel = viewModel()){
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ){
+
             Column (
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ){
                 putText(text = "Registro", color = verdeFuerte, fontSize = 58.sp)
 
-                Spacer(modifier = Modifier.height(8.dp))
-                InputField(value = userName, onChange = {userName = it}, label = "Nombre de Usuario", icon = Icons.Outlined.AccountCircle)
-                Spacer(modifier = Modifier.height(8.dp))
-                InputField(value = userEmail, onChange = {userEmail = it}, label = "Correo", icon = Icons.Outlined.AccountCircle)
-                Spacer(modifier = Modifier.height(8.dp))
-                DatePickerNice()
+                if(showFirstRow){
+                    Spacer(modifier = Modifier.height(8.dp))
+                    InputField(value = userName, onChange = {userName = it}, label = "Nombre de Usuario", icon = Icons.Outlined.AccountCircle)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    InputField(value = userEmail, onChange = {userEmail = it}, label = "Correo", icon = Icons.Outlined.Email)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    DatePickerNice()
+                }
+
+
 
                 Spacer(modifier = Modifier.height(8.dp))
+
+
             }
+        }
+        Row(
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                //.fillMaxWidth()
+                .padding(16.dp),
+
+            ){
+            Button(
+                onClick = { showFirstRow = !showFirstRow },
+                colors = ButtonDefaults.buttonColors(verdeFuerte),
+                shape = CircleShape,
+                modifier = Modifier
+                    .size(75.dp),
+
+                ) {
+                Icon(imageVector = Icons.Outlined.ArrowForward, contentDescription = "Avanzar")
+            }
+            Spacer(modifier = Modifier.height(150.dp))
         }
     }
 }
@@ -116,13 +154,14 @@ fun signUpView(signUpViewModel: signUpViewModel = viewModel()){
 fun DatePickerNice() {
     val calendarState = rememberSheetState()
     val selectedDate = remember { mutableStateOf(LocalDate.now().minusDays(3)) }
-    // Se utiliza para formatear la fecha seleccionada como una cadena
     val dateFormatter = DateTimeFormatter.ofPattern("dd MMMM, yyyy")
+    var isDialogOpen by remember { mutableStateOf(false) }
 
+    // Suponemos que CalendarDialog es un composable que muestra un diálogo
+    // y utiliza calendarState para manejar su estado.
     CalendarDialog(
         state = calendarState,
         selection = CalendarSelection.Date { date ->
-            // Actualizar el estado de la fecha seleccionada
             selectedDate.value = date
         },
         config = CalendarConfig(
@@ -131,18 +170,74 @@ fun DatePickerNice() {
         )
     )
 
+    // TextField que muestra la fecha y abre el diálogo al hacer clic
+    //TODO Controlar la logica cuando se introduce la fecha a mano en vez de con el calendario
+    TextField(
+        value = dateFormatter.format(selectedDate.value),
+        onValueChange = { /* No hacer nada para prevenir la edición */ },
+        readOnly = true, // Hace que el TextField sea de solo lectura
+        leadingIcon = {
+            IconButton(onClick = { calendarState.show() }) {
+                Icon(
+                    imageVector = Icons.Default.DateRange,
+                    contentDescription = "Select Date",
+                    tint = Color.Black
+                )
+            }
+        },
+        shape = RoundedCornerShape(20.dp),
+        colors = TextFieldDefaults.textFieldColors(
+            textColor = Color.Black,
+            disabledTextColor = Color.Transparent,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent,
+            disabledIndicatorColor = Color.Transparent
+        ),
+        interactionSource = remember { MutableInteractionSource() }
+            .also { interactionSource ->
+                LaunchedEffect(interactionSource) {
+                    interactionSource.interactions.collect {
+                        if (it is PressInteraction.Release) {
+                            calendarState.show()
+                        }
+                    }
+                }
+            }
+    )
+}
+
+
+    /*
     Button(
         onClick = {
         calendarState.show()
                   },
         shape = RoundedCornerShape(20.dp),
-        colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.surface)
+        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE7E0EC)), // Color de fondo similar al de los TextField
+        modifier = Modifier.size(width = 275.dp, height = 53.dp),
+
         )
     {
         // El Text ahora muestra la fecha seleccionada formateada
-        Text(text = dateFormatter.format(selectedDate.value))
-    }
-}
+        Row(
+            modifier = Modifier.fillMaxWidth(), // Asegúrate de que el Row ocupe el ancho completo del botón
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.aligned(Alignment.Start)
+        ) {
+            Icon(
+                imageVector = Icons.Default.DateRange, // Usa tu icono deseado
+                contentDescription = "Select Date", // Descripción para accesibilidad
+                modifier = Modifier.padding(end= 8.dp), // Espacio entre el icono y el texto
+                tint = Color.Black // Establece el color del ícono a negro
+            )
+            Text(
+                text = dateFormatter.format(selectedDate.value),
+                color = Color(0xFF49454F) // Asegúrate de que el color del texto sea visible contra el color de fondo del botón
+            )
+        }
+    }*/
+
+
 
 
 /*
