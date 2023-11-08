@@ -6,26 +6,23 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.libraryapp.theme.LibraryAppTheme
 import com.example.libraryapp.ui.LoginView
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.Firebase
-import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.firestore
-import kotlin.math.log
-
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import com.example.libraryapp.ui.signUpView
 
 class MainActivity : ComponentActivity() {
     val db = Firebase.firestore
@@ -44,6 +41,7 @@ class MainActivity : ComponentActivity() {
             }
         }
     }*/
+    /*
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -54,9 +52,23 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }*/
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            librearyApp()
+        }
     }
 }
 
+@Composable
+fun librearyApp(){
+    val navController = rememberNavController()
+    NavHost(navController = navController, startDestination = "login"){
+        composable("login") { LoginView(navController = navController)}
+        composable("signUp") { signUpView()}
+    }
+}
 
 @Composable
 fun Greeting() {

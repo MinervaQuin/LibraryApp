@@ -1,5 +1,6 @@
 package com.example.libraryapp.ui
 
+import android.graphics.drawable.Icon
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -11,19 +12,16 @@ import com.example.libraryapp.R
 import com.example.libraryapp.viewModel.loginViewModel
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowForward
 import androidx.compose.material.icons.outlined.Email
@@ -32,44 +30,40 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
 import com.example.libraryapp.theme.*
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginView(loginViewModel : loginViewModel = viewModel()){
+fun LoginView(loginViewModel : loginViewModel = viewModel(), navController: NavController){
     //@TODO: En vez de 1 solo elemento como fondo, hacer que sean 3 con animación de movimiento
     val image = painterResource(R.drawable.fondo_login)
 
     var userEmail by remember { mutableStateOf(TextFieldValue("")) }
     var password by remember { mutableStateOf(TextFieldValue("")) }
 
-    val textFieldModifier = Modifier
-        .background(Color.LightGray, RoundedCornerShape(8.dp))
-        .padding(horizontal = 16.dp, vertical = 8.dp)
 
     Box(modifier = Modifier.fillMaxSize()) {
         // Colocamos la imagen de fondo
@@ -99,49 +93,11 @@ fun LoginView(loginViewModel : loginViewModel = viewModel()){
 
 
                 //TODO Hacer que al darle al enter cambie el focus en vez de poner un puto enter
-                TextField(
-                    value = userEmail,
-                    onValueChange = { userEmail = it},
-                    label = {
-                        Text(text = "Correo")
-                    },
-                    shape = RoundedCornerShape(20.dp),
-                    colors = TextFieldDefaults.textFieldColors(
-                        disabledTextColor = Color.Transparent,
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent,
-                        disabledIndicatorColor = Color.Transparent
-                    ),
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Outlined.Email,
-                            contentDescription = "Correo"
-                        )
-                    },
-                )
+                InputField(value = userEmail, onChange = {userEmail = it}, label = "Correo", icon = Icons.Outlined.Email)
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                TextField(
-                    value = password,
-                    onValueChange = { password = it},
-                    label = {
-                        Text(text = "Contraseña")
-                    },
-                    shape = RoundedCornerShape(20.dp),
-                    colors = TextFieldDefaults.textFieldColors(
-                        disabledTextColor = Color.Transparent,
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent,
-                        disabledIndicatorColor = Color.Transparent
-                    ),
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Outlined.Lock,
-                            contentDescription = "Contraseña"
-                        )
-                    }
-                )
+                InputField(value = password, onChange = {password = it}, label = "Contraseña", icon = Icons.Outlined.Lock, visualTransformation = PasswordVisualTransformation())
 
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(text = "¿Has Olvidado la contraseña?")
@@ -179,8 +135,13 @@ fun LoginView(loginViewModel : loginViewModel = viewModel()){
             Text(
                 text = "Registrate",
                 fontWeight = FontWeight.Bold, // Esto pone el texto en negrita
-                textDecoration = TextDecoration.Underline // Esto subraya el texto
-                )
+                textDecoration = TextDecoration.Underline, // Esto subraya el texto
+                modifier = Modifier.clickable {
+                    navController.navigate("signUp") {
+                        popUpTo("login") { inclusive = true }
+                    }
+                }
+            )
             Spacer(modifier = Modifier.height(50.dp))
         }
         Spacer(modifier = Modifier.height(100.dp))
@@ -207,10 +168,44 @@ fun putText(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun InputField(
+    value: TextFieldValue,
+    onChange: (TextFieldValue) -> Unit,
+    modifier: Modifier = Modifier,
+    label: String,
+    icon: ImageVector,
+    visualTransformation: VisualTransformation = VisualTransformation.None
+) {
+    TextField(
+        value = value,
+        onValueChange = onChange,
+        label = { Text(text = label) },
+        shape = RoundedCornerShape(20.dp),
+        colors = TextFieldDefaults.textFieldColors(
+            disabledTextColor = Color.Transparent,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent,
+            disabledIndicatorColor = Color.Transparent
+        ),
+        leadingIcon = {
+            Icon(
+                imageVector = icon,
+                contentDescription = null
+            )
+        },
+        visualTransformation = visualTransformation,
+        modifier = modifier
+    )
+}
+
 @Preview(showBackground = true)
 @Composable
-fun LoginViewPreview() {
-    LoginView()
+fun PreviewLoginView() {
+    // Creas un NavController ficticio que no hará nada en la previsualización
+    val navController = rememberNavController()
+    LoginView(navController = navController)
 }
 /*
             OutlinedTextField(

@@ -10,7 +10,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.libraryapp"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 33
         versionCode = 1
         versionName = "1.0"
@@ -73,4 +73,21 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1")
+    implementation ("androidx.navigation:navigation-compose:2.4.1") // Usa la última versión disponible
+
+    /*
+    #####DEPENDENCIAS DE TERCEROS####
+    DEPENDENCIAS = https://maxkeppeler.notion.site/Sheets-Compose-Dialogs-804f0ebcb2c84b98b7afa5f687295aed
+    REPOSITORIO = https://github.com/maxkeppeler/sheets-compose-dialogs
+    FICHERO = signUpView
+     */
+    // CORE
+    implementation ("com.maxkeppeler.sheets-compose-dialogs:core:1.0.2")
+    // CALENDAR
+    implementation ("com.maxkeppeler.sheets-compose-dialogs:calendar:1.0.2")
+
+    /*
+    #####FIN DEPENDENCIAS DE TERCEROS####
+     */
+
 }
