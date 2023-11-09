@@ -28,6 +28,7 @@ import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.ArrowForward
 import androidx.compose.material.icons.outlined.DateRange
 import androidx.compose.material.icons.outlined.Email
+import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -70,11 +71,14 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun signUpView(signUpViewModel: signUpViewModel = viewModel()){
+fun signUpView(signUpViewModel: signUpViewModel = viewModel(), navController: NavController){
     //@TODO Sustituir el fondo por vectores animados
     val image = painterResource(R.drawable.vector_sign_up)
 
@@ -82,6 +86,7 @@ fun signUpView(signUpViewModel: signUpViewModel = viewModel()){
     var userEmail by remember { mutableStateOf(TextFieldValue("")) }
     var userBirthDay by remember { mutableStateOf(TextFieldValue("")) }
     var userPassword by remember { mutableStateOf(TextFieldValue("")) }
+    var userPasswordConfirm by remember { mutableStateOf(TextFieldValue("")) }
 
     var selectedDate by remember { mutableStateOf("") }
 
@@ -118,9 +123,11 @@ fun signUpView(signUpViewModel: signUpViewModel = viewModel()){
                     Spacer(modifier = Modifier.height(8.dp))
                     DatePickerNice()
                 }
-
-
-
+                else{
+                    InputField(value = userPassword, onChange = {userPassword = it}, label = "Contraseña", icon = Icons.Outlined.Lock, visualTransformation = PasswordVisualTransformation())
+                    Spacer(modifier = Modifier.height(8.dp))
+                    InputField(value = userPasswordConfirm, onChange = {userPasswordConfirm = it}, label = "Confirmar contraseña", icon = Icons.Outlined.Lock, visualTransformation = PasswordVisualTransformation())
+                }
                 Spacer(modifier = Modifier.height(8.dp))
 
 
@@ -145,6 +152,7 @@ fun signUpView(signUpViewModel: signUpViewModel = viewModel()){
             }
             Spacer(modifier = Modifier.height(150.dp))
         }
+        
     }
 }
 
@@ -281,5 +289,6 @@ private fun rememberDatePickerDialog(
 @Preview(showBackground = true)
 @Composable
 fun signUpViewPreview() {
-    signUpView()
+    val navController = rememberNavController()
+    signUpView(navController = navController)
 }

@@ -1,6 +1,7 @@
 package com.example.libraryapp.ui
 
 import android.graphics.drawable.Icon
+import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -18,9 +19,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -37,12 +40,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -54,17 +60,29 @@ import com.example.libraryapp.theme.*
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.libraryapp.model.firebaseAuth.SignInState
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginView(loginViewModel : loginViewModel = viewModel(), navController: NavController){
+fun LoginView(loginViewModel : loginViewModel = viewModel(), navController: NavController,state: SignInState, onSignInClick: () -> Unit){
     //@TODO: En vez de 1 solo elemento como fondo, hacer que sean 3 con animación de movimiento
     val image = painterResource(R.drawable.fondo_login)
+    val googleIconImageVector = ImageVector.vectorResource(id = R.drawable.vector_google)
 
     var userEmail by remember { mutableStateOf(TextFieldValue("")) }
     var password by remember { mutableStateOf(TextFieldValue("")) }
 
+    val context = LocalContext.current
+    LaunchedEffect(key1 = state.signInError){
+        state.signInError?.let { error ->
+            Toast.makeText(
+                context,
+                error,
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         // Colocamos la imagen de fondo
@@ -102,6 +120,32 @@ fun LoginView(loginViewModel : loginViewModel = viewModel(), navController: NavC
 
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(text = "¿Has Olvidado la contraseña?")
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(
+                    onClick = onSignInClick,
+                    modifier = Modifier
+                        .height(50.dp), // Altura del botón
+                    colors = ButtonDefaults.buttonColors(containerColor = verdeFuerte)
+
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center,
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp) // Padding horizontal para el contenido
+                    ) {
+                        Icon(
+                            imageVector = googleIconImageVector,
+                            contentDescription = "Icono de Google",
+                            modifier = Modifier.size(24.dp) // Tamaño del ícono
+                        )
+                        Spacer(Modifier.width(8.dp)) // Espacio entre el ícono y el texto
+                        Text(
+                            text = "Iniciar Sesión con Google",
+                            fontSize = 16.sp
+                        )
+                    }
+                }
 
             }
         }
@@ -207,31 +251,5 @@ fun InputField(
 fun PreviewLoginView() {
     // Creas un NavController ficticio que no hará nada en la previsualización
     val navController = rememberNavController()
-    LoginView(navController = navController)
+    //LoginView(navController = navController, onSignInClick = null, )
 }
-/*
-            OutlinedTextField(
-                value = username,
-                onValueChange = { username = it },
-                label = { Text("Usuario") },
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-                modifier = Modifier
-
-                    .padding(4.dp),
-                shape = RoundedCornerShape(20.dp),
-                colors = TextFieldDefaults.outlinedTextFieldColors(Color.LightGray)
-            )
-
-            OutlinedTextField(
-                value = password,
-                onValueChange = { password = it },
-                label = { Text("Contraseña") },
-                singleLine = true,
-                visualTransformation = PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                keyboardActions = KeyboardActions(), //creo que aquí se llama a algo
-                shape = RoundedCornerShape(20.dp)
-
-            )
-             */

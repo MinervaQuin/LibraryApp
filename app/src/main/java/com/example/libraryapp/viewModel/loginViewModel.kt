@@ -1,17 +1,25 @@
 package com.example.libraryapp.viewModel
 
-import android.app.usage.UsageEvents
-import androidx.compose.ui.graphics.BlendMode.Companion.Screen
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.example.libraryapp.model.firebaseAuth.SignInResult
+import com.example.libraryapp.model.firebaseAuth.SignInState
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+
 class loginViewModel: ViewModel() {
-    private val _username = MutableLiveData("")
-    val username: LiveData<String> = _username
 
-    private val _password = MutableLiveData("")
-    val password: LiveData<String> = _password
+    private val _state = MutableStateFlow(SignInState())
+    val state = _state.asStateFlow()
 
+    fun onSignInResult(result: SignInResult) {
+        _state.update { it.copy(
+            isSignInSuccessful = result.data != null,
+            signInError = result.errorMessage
+        ) }
+    }
 
+    fun resetState() {
+        _state.update { SignInState() }
+    }
 }
-

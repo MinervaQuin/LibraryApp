@@ -61,6 +61,7 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
     implementation("com.google.firebase:firebase-firestore:24.9.1")
+    implementation("com.google.firebase:firebase-auth:22.2.0")
 
 
 
@@ -74,6 +75,15 @@ dependencies {
 
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1")
     implementation ("androidx.navigation:navigation-compose:2.4.1") // Usa la última versión disponible
+
+    implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.0")
+    implementation ("androidx.lifecycle:lifecycle-runtime-compose:2.6.0")
+
+    implementation ("androidx.navigation:navigation-compose:2.5.3")
+    implementation ("io.coil-kt:coil-compose:2.2.2")
+    implementation ("androidx.lifecycle:lifecycle-runtime-ktx:2.4.0")
+
+    implementation ("com.google.android.gms:play-services-auth:19.2.0")
 
     /*
     #####DEPENDENCIAS DE TERCEROS####

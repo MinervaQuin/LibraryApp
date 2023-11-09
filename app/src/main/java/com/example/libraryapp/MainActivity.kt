@@ -1,15 +1,24 @@
 package com.example.libraryapp
 
+import android.app.Activity.RESULT_OK
 import android.content.ContentValues
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.libraryapp.theme.LibraryAppTheme
 import com.example.libraryapp.ui.LoginView
 import com.google.android.gms.tasks.Task
@@ -23,9 +32,22 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.libraryapp.ui.signUpView
+import com.example.libraryapp.viewModel.loginViewModel
+import androidx.lifecycle.lifecycleScope
+import com.example.libraryapp.model.firebaseAuth.GoogleAuthUiClient
+import com.example.libraryapp.ui.HomeView
+import com.google.android.gms.auth.api.identity.Identity
+import kotlinx.coroutines.launch
+
 
 class MainActivity : ComponentActivity() {
     val db = Firebase.firestore
+    public val googleAuthUiClient by lazy {
+        GoogleAuthUiClient(
+            context = applicationContext,
+            oneTapClient = Identity.getSignInClient(applicationContext)
+        )
+    }
 
     /*override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,18 +78,89 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            librearyApp()
+            val navController = rememberNavController()
+            NavHost(navController = navController, startDestination = "login"){
+                composable("login") {
+
+                    val viewModel = viewModel<loginViewModel>()
+                    val state by viewModel.state.collectAsStateWithLifecycle()
+
+                    LaunchedEffect(key1 = Unit){
+                        if(googleAuthUiClient.getSignedInUser() != null){
+                            navController.navigate("homePage")
+                        }
+                    }
+
+                    val launcher = rememberLauncherForActivityResult(
+                        contract = ActivityResultContracts.StartIntentSenderForResult(),
+                        onResult = {result ->
+                            if(result.resultCode == RESULT_OK) {
+                                lifecycleScope.launch {
+                                    val signInResult = googleAuthUiClient.signInWithIntent(
+                                        intent = result.data ?: return@launch
+                                    )
+                                    viewModel.onSignInResult(signInResult)
+                                }
+                            }
+                        }
+                    )
+
+                    LaunchedEffect(key1 = state.isSignInSuccessful) {
+                        if(state.isSignInSuccessful) {
+                            Toast.makeText(
+                                applicationContext,
+                                "Sesión Iniciada",
+                                Toast.LENGTH_LONG
+                            ).show()
+
+                            navController.navigate("homePage")
+                            viewModel.resetState()
+                        }
+                    }
+
+                    LoginView(
+                        navController = navController,
+                        state = state,
+                        onSignInClick = {
+                            lifecycleScope.launch {
+                                val signInIntentSender = googleAuthUiClient.signIn()
+                                launcher.launch(
+                                    IntentSenderRequest.Builder(
+                                        signInIntentSender ?: return@launch
+                                    ).build()
+                                )
+                            }
+                        }
+                    )
+                }
+
+                composable("homePage"){
+                    HomeView(
+                        userData = googleAuthUiClient.getSignedInUser(),
+                        onSignOut = {
+                            lifecycleScope.launch {
+                                googleAuthUiClient.signOut()
+                                Toast.makeText(
+                                    applicationContext,
+                                    "Sesión Cerrada",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                                navController.popBackStack()
+                            }
+                        }
+
+                    )
+                }
+
+                composable("signUp") { signUpView(navController = navController)}
+            }
         }
     }
 }
 
 @Composable
 fun librearyApp(){
-    val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = "login"){
-        composable("login") { LoginView(navController = navController)}
-        composable("signUp") { signUpView()}
-    }
+
 }
 
 @Composable
