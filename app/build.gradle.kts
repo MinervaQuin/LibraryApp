@@ -64,7 +64,6 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.5.0")
     implementation ("com.github.bumptech.glide:glide:4.16.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
-    implementation("br.com.devsrsouza.compose.icons:{ICON_PACK}:1.1.0")
 
 
 
