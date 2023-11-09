@@ -61,6 +61,12 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
     implementation("com.google.firebase:firebase-firestore:24.9.1")
+    implementation("io.coil-kt:coil-compose:2.5.0")
+    implementation ("com.github.bumptech.glide:glide:4.16.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
+    implementation("br.com.devsrsouza.compose.icons:{ICON_PACK}:1.1.0")
+
+
 
 
 
