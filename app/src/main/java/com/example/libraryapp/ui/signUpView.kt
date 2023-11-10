@@ -74,6 +74,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import androidx.activity.compose.BackHandler
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -91,6 +92,15 @@ fun signUpView(signUpViewModel: signUpViewModel = viewModel(), navController: Na
     var selectedDate by remember { mutableStateOf("") }
 
     var showFirstRow by remember { mutableStateOf(true) }
+
+    BackHandler {
+        // Aquí puedes definir la lógica para navegar a otra pantalla
+        // Por ejemplo, para navegar a la pantalla con la ruta "rutaPantallaDestino":
+        navController.navigate("login") {
+            // Configuraciones adicionales de navegación si las necesitas
+            popUpTo("signUp") { inclusive = true }
+        }
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         // Colocamos la imagen de fondo

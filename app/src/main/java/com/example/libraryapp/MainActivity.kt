@@ -132,6 +132,7 @@ class MainActivity : ComponentActivity() {
                                 )
                             }
                         }
+
                     )
                 }
 
@@ -157,11 +158,6 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-}
-
-@Composable
-fun librearyApp(){
-
 }
 
 @Composable

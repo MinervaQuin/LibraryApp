@@ -90,4 +90,29 @@ class GoogleAuthUiClient (
             .setAutoSelectEnabled(true)
             .build()
     }
+
+    //Funciones autentificación correo-contraseña
+    suspend fun signInWithEmail(email: String, password: String): SignInResult {
+        return try {
+            val user = auth.signInWithEmailAndPassword(email, password).await().user
+            SignInResult(
+                data = user?.run {
+                    UserData(
+                        userId = uid,
+                        userName = displayName,
+                        profilePictureUrl = photoUrl?.toString()
+                    )
+                },
+                errorMessage = null
+            )
+        } catch (e: Exception) {
+            e.printStackTrace()
+            if (e is CancellationException) throw e
+            SignInResult(
+                data = null,
+                errorMessage = e.message
+            )
+        }
+    }
+
 }
