@@ -10,7 +10,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.libraryapp"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 33
         versionCode = 1
         versionName = "1.0"
@@ -52,7 +52,6 @@ android {
 
 dependencies {
 
-    implementation("androidx.core:core-ktx:1.9.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
     implementation("androidx.activity:activity-compose:1.8.0")
     implementation(platform("androidx.compose:compose-bom:2023.03.00"))
@@ -61,13 +60,12 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
     implementation("com.google.firebase:firebase-firestore:24.9.1")
+
     implementation("io.coil-kt:coil-compose:2.5.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
-    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.6.1")
-    implementation("androidx.navigation:navigation-compose:2.5.3")
 
 
-
+    implementation("com.google.firebase:firebase-auth:22.2.0")
 
 
 
@@ -78,4 +76,34 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
+
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1")
+    implementation ("androidx.navigation:navigation-compose:2.4.1") // Usa la última versión disponible
+
+    implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.0")
+    implementation ("androidx.lifecycle:lifecycle-runtime-compose:2.6.0")
+
+    implementation ("androidx.navigation:navigation-compose:2.5.3")
+    implementation ("androidx.lifecycle:lifecycle-runtime-ktx:2.4.0")
+
+    implementation ("com.google.android.gms:play-services-auth:19.2.0")
+    implementation("io.coil-kt:coil-compose:2.4.0")
+    implementation ("androidx.compose.material:material-icons-core:1.0.5")
+    implementation ("androidx.compose.material:material-icons-extended:1.0.5")
+
+    /*
+    #####DEPENDENCIAS DE TERCEROS####
+    DEPENDENCIAS = https://maxkeppeler.notion.site/Sheets-Compose-Dialogs-804f0ebcb2c84b98b7afa5f687295aed
+    REPOSITORIO = https://github.com/maxkeppeler/sheets-compose-dialogs
+    FICHERO = signUpView
+     */
+    // CORE
+    implementation ("com.maxkeppeler.sheets-compose-dialogs:core:1.0.2")
+    // CALENDAR
+    implementation ("com.maxkeppeler.sheets-compose-dialogs:calendar:1.0.2")
+
+    /*
+    #####FIN DEPENDENCIAS DE TERCEROS####
+     */
+
 }
