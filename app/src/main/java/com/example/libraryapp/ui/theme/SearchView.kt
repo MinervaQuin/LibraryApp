@@ -1,10 +1,13 @@
-package com.example.libraryapp
+package com.example.libraryapp.ui.theme
 
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -15,7 +18,6 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -26,23 +28,29 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.libraryapp.ui.theme.LibraryAppTheme
-import com.example.libraryapp.ui.theme.GreenApp
+import androidx.navigation.NavHostController
+import coil.compose.AsyncImage
+import com.example.libraryapp.R
 
 
 
 @Composable
 fun ListOfBooks(
+    names: List<String> = List(1000) { "$it" },
     modifier: Modifier = Modifier.padding(10.dp),
-    names: List<String> = List(1000) { "$it" }
+    navController: NavHostController,
+    bookTitle: String = "Reina Roja"
 ){
+    val navController2 = navController
     Column {
         SearchAppBar()
-        Text(text = "Resultados para: Reina Roja",
+        Text(text = "Resultados para: " + bookTitle,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(start = 6.dp))
         LazyVerticalGrid(
@@ -50,12 +58,15 @@ fun ListOfBooks(
             modifier = Modifier.padding(bottom = 10.dp, top = 10.dp)
         ){
             items(items = names) {
-                BookItem(modifier = Modifier)
+                BookItem(modifier = Modifier, navController)
             }
         }
     }
 
 }
+
+
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -77,10 +88,9 @@ fun SearchAppBar() {
         },
         trailingIcon = {
 
-            IconButton(onClick = { /*TODO*/ }) {
+            IconButton(onClick = { /*TODO*/ }) { // Ir a pagina de scan codigo de barras
                 Icon(
                     painter = painterResource(id = R.drawable.upc_scan),
-                    //imageVector = Icons.Outlined.Info,
                     contentDescription = "Close Icon",
                     tint = GreenApp
                 )
@@ -98,23 +108,50 @@ fun SearchAppBar() {
 
 
 @Composable
-fun BookItem(modifier: Modifier) {
+fun BookItem(modifier: Modifier, navController: NavHostController) {
     Column(
         modifier = Modifier
+            .clickable { navController.navigate("BookDetailsView") } //BookDetail(
         ,verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
 
     ) {
-        ShowRectangle()
-        BookInfo()
+        //ShowRectangle()
+        LoadBookCover("https://m.media-amazon.com/images/I/41uWfObYYQL._SY445_SX342_.jpg")
 
+        //LoadBookCover(imageUrl = "http://books.google.com/books/content?id=8U2oAAAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api")
+
+        //LoadBookCover(imageUrl = "https://books.google.com/books/content?id=8U2oAAAAQBAJ&printsec=frontcover&img=1&zoom=1")
+
+        BookInfo()
 
 
     }
 }
 
+
 @Composable
-fun BookInfo(){
+fun LoadBookCover(imageUrl: String){
+    Box(
+        modifier = Modifier
+            .width(180.dp)
+            .height(250.dp),
+        contentAlignment = Alignment.CenterStart
+    ) {
+
+        AsyncImage(
+            model = imageUrl,
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.FillHeight
+        )
+    }
+}
+@Composable
+fun BookInfo(bookTitle: String = "Reina Roja",
+             authorName: String = "Juan Gómez-Jurado",
+             bookPrice: Number = 12.5){
+
     Row(modifier = Modifier
         .width(180.dp),
     ) {
@@ -122,11 +159,13 @@ fun BookInfo(){
             .weight(0.7f),
             verticalArrangement = Arrangement.Center,
         ) {
-            Text(text = "Reina Roja")
-            Text(text = "Juan Gómez-Jurado")
+            Text(text = bookTitle)
+            Text(text = authorName)
         }
 
-        Text(text = "12,5€")
+        Text(text = bookPrice.toString() + "€", modifier = Modifier.padding(end=10.dp),
+            style = TextStyle(color = Color.DarkGray, fontWeight =FontWeight.Bold)
+        )
     }
 }
 
@@ -137,7 +176,7 @@ fun ShowRectangle() {
         .size(180.dp, 250.dp)) {
 
         drawRect(
-            color = Color.Red
+            color = GreenApp
         )
     }
 
@@ -152,10 +191,3 @@ fun Greeting2Preview() {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun Greeting3Preview() {
-    LibraryAppTheme {
-        ListOfBooks()
-    }
-}
