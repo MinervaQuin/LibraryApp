@@ -80,10 +80,12 @@ dependencies {
     implementation ("androidx.lifecycle:lifecycle-runtime-compose:2.6.0")
 
     implementation ("androidx.navigation:navigation-compose:2.5.3")
-    implementation ("io.coil-kt:coil-compose:2.2.2")
     implementation ("androidx.lifecycle:lifecycle-runtime-ktx:2.4.0")
 
     implementation ("com.google.android.gms:play-services-auth:19.2.0")
+    implementation("io.coil-kt:coil-compose:2.4.0")
+    implementation ("androidx.compose.material:material-icons-core:1.0.5")
+    implementation ("androidx.compose.material:material-icons-extended:1.0.5")
 
     /*
     #####DEPENDENCIAS DE TERCEROS####

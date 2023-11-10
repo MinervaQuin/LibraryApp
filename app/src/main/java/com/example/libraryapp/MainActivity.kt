@@ -80,6 +80,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             val navController = rememberNavController()
             NavHost(navController = navController, startDestination = "login"){
+
                 composable("login") {
 
                     val viewModel = viewModel<loginViewModel>()
