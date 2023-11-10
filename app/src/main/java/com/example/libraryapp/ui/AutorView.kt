@@ -43,7 +43,6 @@ import androidx.compose.ui.unit.sp
 import com.example.libraryapp.R
 import com.example.libraryapp.model.Author
 import com.example.libraryapp.model.Book
-import com.example.libraryapp.theme.Green
 import java.lang.Math.floor
 
 @Composable
