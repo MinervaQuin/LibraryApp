@@ -3,15 +3,15 @@
 Before merging, make sure your branch is up-to-date with the latest changes from the main branch. You can do this by pulling the latest changes:
 
 ```bash
-git checkout main
-git pull origin main
+git checkout dev
+git pull origin dev
 git checkout your-feature-branch
 ```
 ## 2. Resolve Conflicts Locally:
 If there are any conflicts between your branch and the main branch, resolve them locally before attempting to merge. Use a merge tool or manually edit the conflicting files.
 
 ```bash
-git merge main
+git merge dev
 ```
 If conflicts occur, Git will mark the conflicted files. After resolving conflicts, mark them as resolved:
 
@@ -33,7 +33,7 @@ git commit -m "Merge main into feature branch and resolve conflicts"
 Push your branch with the new merge commit to the remote repository:
 
 ```bash
-git push origin your-feature-branch
+git push dev your-feature-branch
 ```
 
 ## 6. Create a Pull Request (if using a platform like GitHub):
