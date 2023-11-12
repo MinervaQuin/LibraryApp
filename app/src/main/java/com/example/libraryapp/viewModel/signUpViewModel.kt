@@ -6,6 +6,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.libraryapp.model.firebaseAuth.EmailAuthUiClient
+import com.example.libraryapp.model.firebaseAuth.GoogleAuthUiClient
+import com.google.android.gms.auth.api.identity.Identity
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -26,6 +28,10 @@ class signUpViewModel(): ViewModel(){
     private var _showFirstScreen2 = MutableStateFlow(true)
     var showFirstScreen2 = _showFirstScreen2.asStateFlow()
 
+    val emailService by lazy {
+        EmailAuthUiClient(auth)
+    }
+
     fun changeScreen(){
         if(_showFirstScreen2.value){
             _showFirstScreen2.value = false
@@ -37,6 +43,7 @@ class signUpViewModel(): ViewModel(){
 
     }
 
+    /*
     fun registerUser(email: String, password: String) {
         viewModelScope.launch {
             try {
@@ -50,8 +57,8 @@ class signUpViewModel(): ViewModel(){
             }
         }
     }
+*/
 
-    /*
     fun registerUser(email: String, password: String) {
         viewModelScope.launch {
             _loading.value = true
@@ -63,5 +70,5 @@ class signUpViewModel(): ViewModel(){
             _loading.value = false
         }
     }
-*/
+
 }

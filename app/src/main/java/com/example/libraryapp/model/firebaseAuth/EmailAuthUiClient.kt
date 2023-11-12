@@ -11,8 +11,6 @@ class EmailAuthUiClient (
     //need a context?
     private val auth: FirebaseAuth
 ){
-
-
     suspend fun signInWithEmail(email: String, password: String): SignInResult {
         return try {
             val user = auth.signInWithEmailAndPassword(email, password).await().user
