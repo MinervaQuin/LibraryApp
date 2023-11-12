@@ -58,7 +58,6 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.libraryapp.model.firebaseAuth.SignInState
-import com.example.libraryapp.model.firebaseAuth.GoogleAuthUiClient
 
 @Composable
 fun LoginView(loginViewModel : loginViewModel = viewModel(), navController: NavController,state: SignInState, onSignInClick: () -> Unit){
