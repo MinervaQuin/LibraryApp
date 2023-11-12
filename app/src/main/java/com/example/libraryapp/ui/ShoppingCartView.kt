@@ -1,6 +1,8 @@
 package com.example.libraryapp.ui
 
 
+import CartItem
+import CartViewModel
 import android.annotation.SuppressLint
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
@@ -27,6 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.example.libraryapp.theme.gray
 import com.example.libraryapp.theme.green
@@ -120,12 +123,8 @@ fun BottomBar() {
 }
 
 
-
-data class Book(val title: String, val author: String, val price: Double, val imageUrl: String, var quantity: Int = 1)
-
-
 @Composable
-fun BookItem(book: Book, onRemoveClick: () -> Unit, onAddClick: () -> Unit, onSubtractClick: () -> Unit) {
+fun BookItem(cartItem: CartItem, onRemoveClick: () -> Unit, onAddClick: () -> Unit, onSubtractClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -140,7 +139,7 @@ fun BookItem(book: Book, onRemoveClick: () -> Unit, onAddClick: () -> Unit, onSu
                 .height(100.dp)
         ) {
             AsyncImage(
-                model = book.imageUrl,
+                model = cartItem.book.imageUrl,
                 contentDescription = null,
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop
@@ -153,9 +152,9 @@ fun BookItem(book: Book, onRemoveClick: () -> Unit, onAddClick: () -> Unit, onSu
         Column(
             modifier = Modifier.weight(1f)
         ) {
-            Text(text = book.title, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-            Text(text = "${book.author}")
-            Text(text = "${book.price}€")
+            Text(text = cartItem.book.title, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+            Text(text = "${cartItem.book.author}")
+            Text(text = "${cartItem.book.price}€")
         }
 
         Spacer(modifier = Modifier.width(16.dp))
@@ -173,7 +172,7 @@ fun BookItem(book: Book, onRemoveClick: () -> Unit, onAddClick: () -> Unit, onSu
                 }
                 Spacer(modifier = Modifier.width(8.dp))
 
-                Text(text = book.quantity.toString(), fontSize = 18.sp)
+                Text(text = cartItem.quantity.value.toString(), fontSize = 18.sp)
 
                 Spacer(modifier = Modifier.width(8.dp))
 
@@ -202,13 +201,18 @@ fun BookItem(book: Book, onRemoveClick: () -> Unit, onAddClick: () -> Unit, onSu
 }
 
 @Composable
-fun Cart(cartState: CartState, booksInCart: MutableList<Book>) {
-    val booksInCartState = remember { mutableStateListOf(*booksInCart.toTypedArray()) }
+fun Cart(cartViewModel: CartViewModel) {
+    val cartItems by cartViewModel.cartItems.collectAsState()
+
+    LaunchedEffect(cartItems) {
+        cartViewModel.recalculateCart()
+    }
 
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
         Spacer(modifier = Modifier.height(55.dp))
+
         // Título
         Text(
             text = "Tu Pedido",
@@ -221,9 +225,6 @@ fun Cart(cartState: CartState, booksInCart: MutableList<Book>) {
                 .wrapContentSize(Alignment.Center)
         )
 
-        // Ordenar la lista por título
-        booksInCartState.sortBy { it.title }
-
         // Lista de libros en el carrito
         Box(
             modifier = Modifier
@@ -235,24 +236,20 @@ fun Cart(cartState: CartState, booksInCart: MutableList<Book>) {
             LazyColumn(
                 modifier = Modifier.fillMaxWidth()
             ) {
-                items(booksInCartState) { book ->
+                items(cartItems) { cartItem ->
+                    // Pasamos 'cartItem.quantity' directamente
                     BookItem(
-                        book = book,
+                        cartItem = cartItem,
                         onRemoveClick = {
-                            booksInCartState.remove(book)
+                            cartViewModel.removeBookFromCart(cartItem)
                         },
-                        onAddClick = { // Incrementar cantidad del libro
-                            book.quantity++
-                            // Importante: Notificar el cambio en la lista mutable
-                            booksInCartState.remove(book)
-                            booksInCartState.add(book)
+                        onAddClick = {
+                            cartViewModel.addBookToCart(cartItem.book)
                         },
-                        onSubtractClick = { // Reducir cantidad del libro
-                            if (book.quantity > 1) {
-                                book.quantity--
-                                // Importante: Notificar el cambio en la lista mutable
-                                booksInCartState.remove(book)
-                                booksInCartState.add(book)
+                        onSubtractClick = {
+                            val newQuantity = cartItem.quantity.value - 1
+                            if (newQuantity > 0) {
+                                cartViewModel.updateCartItemQuantity(cartItem, newQuantity)
                             }
                         }
                     )
@@ -261,19 +258,22 @@ fun Cart(cartState: CartState, booksInCart: MutableList<Book>) {
         }
 
         // Grupo de opciones para elegir el método de entrega
-        DeliveryOptions(cartState)
+        DeliveryOptions(cartViewModel)
 
         // Calcular subtotal, gastos de envío y total
-        PricingSummary(booksInCartState, cartState.deliveryOption)
+        PricingSummary(cartViewModel.cartState)
 
         // Botón de acción
-        ActionButton(cartState.deliveryOption)
+        ActionButton(cartViewModel.cartState.value)
         Spacer(modifier = Modifier.height(50.dp))
     }
 }
 
+
 @Composable
-fun DeliveryOptions(cartState: CartState) {
+fun DeliveryOptions(cartViewModel: CartViewModel) {
+    val cartState = cartViewModel.cartState
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -286,11 +286,13 @@ fun DeliveryOptions(cartState: CartState) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
-                        .height(32.dp)
+                    .height(32.dp)
             ) {
                 RadioButton(
-                    selected = cartState.deliveryOption == DeliveryOption.PICK_UP,
-                    onClick = { cartState.deliveryOption = DeliveryOption.PICK_UP },
+                    selected = cartState.value.deliveryOption == CartViewModel.DeliveryOption.PICK_UP,
+                    onClick = {
+                        cartViewModel.updateDeliveryOption(CartViewModel.DeliveryOption.PICK_UP)
+                    },
                     colors = RadioButtonDefaults.colors(green)
                 )
                 Text("Recoger en tienda")
@@ -301,8 +303,10 @@ fun DeliveryOptions(cartState: CartState) {
                     .height(32.dp)
             ) {
                 RadioButton(
-                    selected = cartState.deliveryOption == DeliveryOption.HOME_DELIVERY,
-                    onClick = { cartState.deliveryOption = DeliveryOption.HOME_DELIVERY },
+                    selected = cartState.value.deliveryOption == CartViewModel.DeliveryOption.HOME_DELIVERY,
+                    onClick = {
+                        cartViewModel.updateDeliveryOption(CartViewModel.DeliveryOption.HOME_DELIVERY)
+                    },
                     colors = RadioButtonDefaults.colors(green)
                 )
                 Text("Envío a domicilio")
@@ -311,12 +315,10 @@ fun DeliveryOptions(cartState: CartState) {
     }
 }
 
-@Composable
-fun PricingSummary(booksInCart: List<Book>, deliveryOption: DeliveryOption) {
-    val subtotal = booksInCart.sumOf { it.price * it.quantity}
-    val deliveryCost = if (deliveryOption == DeliveryOption.PICK_UP) 0.0 else 2.99
-    val total = subtotal + deliveryCost
 
+@Composable
+fun PricingSummary(cartState: MutableState<CartViewModel.CartState>) {
+    val state = cartState.value // Obtener el valor actual de MutableState
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -325,7 +327,7 @@ fun PricingSummary(booksInCart: List<Book>, deliveryOption: DeliveryOption) {
     ) {
         Text("Subtotal", fontSize = 18.sp)
         Spacer(modifier = Modifier.weight(1f))
-        Text("${"%.2f".format(subtotal)}€", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+        Text("${"%.2f".format(state.cartSubtotal.value)}€", fontWeight = FontWeight.Bold, fontSize = 18.sp)
     }
 
     Row(
@@ -336,7 +338,7 @@ fun PricingSummary(booksInCart: List<Book>, deliveryOption: DeliveryOption) {
     ) {
         Text("Gastos de envío", fontSize = 18.sp)
         Spacer(modifier = Modifier.weight(1f))
-        Text("${"%.2f".format(deliveryCost)}€", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+        Text("${"%.2f".format(state.deliveryCost.value)}€", fontWeight = FontWeight.Bold, fontSize = 18.sp)
     }
 
     Row(
@@ -347,17 +349,17 @@ fun PricingSummary(booksInCart: List<Book>, deliveryOption: DeliveryOption) {
     ) {
         Text("Total", fontSize = 18.sp)
         Spacer(modifier = Modifier.weight(1f))
-        Text("${"%.2f".format(total)}€", fontWeight = FontWeight.Bold, fontSize = 20.sp)
+        Text("${"%.2f".format(state.cartTotal.value)}€", fontWeight = FontWeight.Bold, fontSize = 20.sp)
     }
 }
 
 
 
 @Composable
-fun ActionButton(deliveryOption: DeliveryOption) {
+fun ActionButton(cartState: CartViewModel.CartState) {
     Button(
         onClick = {
-            if (deliveryOption == DeliveryOption.PICK_UP) {
+            if (cartState.deliveryOption == CartViewModel.DeliveryOption.PICK_UP) {
                 // Navegar a la pantalla de selección de tienda (no implementada)
             } else {
                 // Navegar a la pantalla de compra (no implementada)
@@ -370,7 +372,7 @@ fun ActionButton(deliveryOption: DeliveryOption) {
         border = BorderStroke(2.dp, green)
 
     ) {
-        if (deliveryOption == DeliveryOption.PICK_UP) {
+        if (cartState.deliveryOption == CartViewModel.DeliveryOption.PICK_UP) {
             Text("Elegir tienda",
                 color= gray
             )
@@ -385,15 +387,8 @@ fun ActionButton(deliveryOption: DeliveryOption) {
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun CartScreen() {
-    val cartState = remember { CartState() }
-    val booksInCart = remember { mutableStateListOf<Book>() }
+fun CartScreen(cartViewModel: CartViewModel = viewModel()) {
 
-    // Agrega libros al carrito de compras (puedes modificar esta lista según tus necesidades)
-    booksInCart.add(Book("Libro 1", "Autor 1", 19.99, "https://m.media-amazon.com/images/I/51F0ZfflZKL._SY445_SX342_.jpg"))
-    booksInCart.add(Book("Libro 2", "Autor 2", 20.99, "https://m.media-amazon.com/images/I/51F0ZfflZKL._SY445_SX342_.jpg"))
-    booksInCart.add(Book("Libro 3", "Autor 3", 18.99, "https://m.media-amazon.com/images/I/51F0ZfflZKL._SY445_SX342_.jpg"))
-    booksInCart.add(Book("Libro 4", "Autor 4", 30.99, "https://m.media-amazon.com/images/I/51F0ZfflZKL._SY445_SX342_.jpg"))
     Scaffold(
         topBar = {
             // Parte superior de la pantalla (TopBar)
@@ -409,7 +404,7 @@ fun CartScreen() {
             modifier = Modifier
                 .fillMaxSize()
         ) {
-            Cart(cartState, booksInCart)
+            Cart(cartViewModel)
         }
     }
 }
@@ -420,11 +415,5 @@ fun CartPreview() {
     CartScreen()
 }
 
-enum class DeliveryOption {
-    PICK_UP,
-    HOME_DELIVERY
-}
 
-class CartState {
-    var deliveryOption by mutableStateOf(DeliveryOption.PICK_UP)
-}
+
