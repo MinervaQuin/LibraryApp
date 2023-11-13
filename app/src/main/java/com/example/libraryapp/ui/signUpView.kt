@@ -82,8 +82,18 @@ fun signUpView(signUpViewModel: signUpViewModel = viewModel(), navController: Na
 
     val loading by signUpViewModel.loading.collectAsState()
     val message by signUpViewModel.message.collectAsState()
-
+    //TODO Ver diferencias entre observeAsState() y collectAsState() y entender cual es mejor
+    val shouldNavigate by signUpViewModel.navigateToNextScreen.collectAsState()
     val showFirstScreen by signUpViewModel.showFirstScreen2.collectAsState()
+
+    LaunchedEffect(shouldNavigate) {
+        if (shouldNavigate == true) {
+            navController.navigate("login") {
+                // Configuraciones adicionales de navegación si las necesitas
+                popUpTo("signUp") { inclusive = true }
+            }
+        }
+    }
 
     BackHandler {
         if(showFirstScreen){

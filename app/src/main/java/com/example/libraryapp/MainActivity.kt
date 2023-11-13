@@ -137,6 +137,7 @@ class MainActivity : ComponentActivity() {
                 }
 
                 composable("homePage"){
+
                     HomeView(
                         userData = googleAuthUiClient.getSignedInUser(),
                         onSignOut = {

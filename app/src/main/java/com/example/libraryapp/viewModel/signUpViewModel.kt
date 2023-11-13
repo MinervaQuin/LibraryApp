@@ -18,6 +18,8 @@ class signUpViewModel(): ViewModel(){
 
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
 
+    private var _navigateToNextScreen = MutableStateFlow(false)
+    var navigateToNextScreen = _navigateToNextScreen.asStateFlow()
     // Estado para UI
     private val _loading = MutableStateFlow(false)
     val loading = _loading.asStateFlow()
@@ -64,8 +66,13 @@ class signUpViewModel(): ViewModel(){
             _loading.value = true
             val result = emailService.registerUser(email, password)
             _message.value = result.fold(
-                onSuccess = { it },
-                onFailure = { "Error de registro: ${it.message}" }
+                onSuccess = {
+                    _navigateToNextScreen.value = true // Indica que el registro fue exitoso y se debe navegar
+                    it
+                },
+                onFailure = {
+                    "Error de registro: ${it.message}"
+                }
             )
             _loading.value = false
         }
