@@ -90,4 +90,8 @@ class GoogleAuthUiClient (
             .setAutoSelectEnabled(true)
             .build()
     }
+
+    //Funciones autentificación correo-contraseña
+
+
 }
