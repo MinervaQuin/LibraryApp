@@ -1,5 +1,6 @@
 package com.example.libraryapp
 
+
 import CartViewModel
 import android.app.Activity.RESULT_OK
 import android.content.ContentValues
@@ -45,6 +46,8 @@ import androidx.navigation.compose.navigation
 import com.example.libraryapp.model.firebaseAuth.GoogleAuthUiClient
 import com.example.libraryapp.ui.Cart
 import com.example.libraryapp.ui.HomeView
+import com.example.libraryapp.ui.theme.AddReview
+import com.example.libraryapp.ui.theme.BookDetailsScreen
 import com.google.android.gms.auth.api.identity.Identity
 import kotlinx.coroutines.launch
 
@@ -58,20 +61,6 @@ class MainActivity : ComponentActivity() {
         )
     }
 
-    /*override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            LibraryAppTheme {
-                // A surface container using the 'background' color from the theme
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    Greeting()
-                }
-            }
-        }
-    }*/
     /*
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -89,7 +78,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             val navController = rememberNavController()
-            NavHost(navController = navController, startDestination = "firstScreens"){
+            NavHost(navController = navController, startDestination = "bookDetailsView"){
                 navigation(
                     startDestination = "login",
                     route = "firstScreens"
@@ -197,6 +186,18 @@ class MainActivity : ComponentActivity() {
                             }
                         )
                     }
+                }
+
+                composable("signUp") { signUpView(navController = navController)}
+
+                composable("bookDetailsView"){
+                    BookDetailsScreen(navController = navController)
+                }
+                composable("addReviewView"){
+//                    AddReview(navController= navController)
+                }
+                composable("cartView"){
+//                    CartScreen()
                 }
 
             }
