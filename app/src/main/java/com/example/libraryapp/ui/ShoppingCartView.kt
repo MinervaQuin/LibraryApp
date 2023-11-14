@@ -30,98 +30,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.example.libraryapp.BottomBar
+import com.example.libraryapp.TopBar
 import com.example.libraryapp.theme.gray
 import com.example.libraryapp.theme.green
 import com.example.libraryapp.theme.white
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun TopBar() {
-    TopAppBar(
-        colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = green),
-        title = {
-            Text(
-                text = "Palabras en Papel",
-                fontSize = 20.sp,
-                color = gray,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentSize(Alignment.Center)
-            )
-        },
-        navigationIcon = {
-            IconButton(
-                onClick = {
-                    // Maneja el evento de hacer clic en el icono de navegación (por ejemplo, el botón de menú).
-                }
-            ) {
-                Icon(imageVector = Icons.Default.Menu, contentDescription = "Menú",
-                    tint = gray
-                )
-            }
-        },
-        actions = {
-            IconButton(
-                onClick = {
-                    // Maneja el evento de hacer clic en el icono de carrito de la compra.
-                }
-            ) {
-                Icon(imageVector = Icons.Default.ShoppingCart, contentDescription = "Carrito",
-                    tint = gray
-                )
-            }
-        }
-    )
-}
-
-@Composable
-fun BottomBar() {
-    BottomAppBar(
-        containerColor = green,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(65.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(
-                onClick = {
-                    // Acción cuando se presiona el icono de usuario
-                }
-            ) {
-                Icon(imageVector = Icons.Default.Person, contentDescription = "Usuario",
-                    tint = gray,
-                    modifier = Modifier.size(32.dp)
-                )
-            }
-            IconButton(
-                onClick = {
-                    // Acción cuando se presiona el botón de inicio (casa)
-                }
-            ) {
-                Icon(imageVector = Icons.Default.Home, contentDescription = "Inicio",
-                    tint = gray,
-                    modifier = Modifier.size(32.dp)
-                )
-            }
-            IconButton(
-                onClick = {
-                    // Acción cuando se presiona el icono de localización
-                }
-            ) {
-                Icon(imageVector = Icons.Default.LocationOn, contentDescription = "Localización",
-                    tint = gray,
-                    modifier = Modifier.size(32.dp)
-                )
-            }
-        }
-    }
-}
-
 
 @Composable
 fun BookItem(cartItem: CartItem, onRemoveClick: () -> Unit, onAddClick: () -> Unit, onSubtractClick: () -> Unit) {
@@ -201,7 +116,7 @@ fun BookItem(cartItem: CartItem, onRemoveClick: () -> Unit, onAddClick: () -> Un
 }
 
 @Composable
-fun Cart(cartViewModel: CartViewModel) {
+fun Cart(navController: NavController, cartViewModel: CartViewModel) {
     val cartItems by cartViewModel.cartItems.collectAsState()
 
     LaunchedEffect(cartItems) {
@@ -264,7 +179,7 @@ fun Cart(cartViewModel: CartViewModel) {
         PricingSummary(cartViewModel.cartState)
 
         // Botón de acción
-        ActionButton(cartViewModel.cartState.value)
+        ActionButton(cartViewModel.cartState.value, navController)
         Spacer(modifier = Modifier.height(50.dp))
     }
 }
@@ -356,13 +271,15 @@ fun PricingSummary(cartState: MutableState<CartViewModel.CartState>) {
 
 
 @Composable
-fun ActionButton(cartState: CartViewModel.CartState) {
+fun ActionButton(cartState: CartViewModel.CartState, navController: NavController) {
     Button(
         onClick = {
             if (cartState.deliveryOption == CartViewModel.DeliveryOption.PICK_UP) {
                 // Navegar a la pantalla de selección de tienda (no implementada)
+                navController.navigate("map")
             } else {
                 // Navegar a la pantalla de compra (no implementada)
+                navController.navigate("payment")
             }
         },
         colors = ButtonDefaults.buttonColors(white),
@@ -384,36 +301,6 @@ fun ActionButton(cartState: CartViewModel.CartState) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@Composable
-fun CartScreen(cartViewModel: CartViewModel = viewModel()) {
-
-    Scaffold(
-        topBar = {
-            // Parte superior de la pantalla (TopBar)
-            TopBar()
-        },
-        bottomBar = {
-            // Parte inferior de la pantalla (BottomBar)
-            BottomBar()
-        }
-    ) {
-        // Contenido principal
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-        ) {
-            Cart(cartViewModel)
-        }
-    }
-}
-
-@Preview
-@Composable
-fun CartPreview() {
-    CartScreen()
-}
 
 
 

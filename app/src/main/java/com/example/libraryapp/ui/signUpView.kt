@@ -90,7 +90,7 @@ fun signUpView(signUpViewModel: signUpViewModel = viewModel(), navController: Na
         if (shouldNavigate == true) {
             navController.navigate("login") {
                 // Configuraciones adicionales de navegación si las necesitas
-                popUpTo("signUp") { inclusive = true }
+                popUpTo("seconScreens") { inclusive = true }
             }
         }
     }
