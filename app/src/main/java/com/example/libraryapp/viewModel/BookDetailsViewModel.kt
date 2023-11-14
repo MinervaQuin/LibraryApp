@@ -26,8 +26,6 @@ class BookDetailsViewModel: ViewModel() {
                 showDialog = false
             )
         }
-        Log.d("fav", _bookUiState.value.comment)
-        Log.d("fav", comment)
 
     }
 
