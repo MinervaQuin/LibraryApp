@@ -78,7 +78,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             val navController = rememberNavController()
-            NavHost(navController = navController, startDestination = "bookDetailsView"){
+            NavHost(navController = navController, startDestination = "firstScreens"){
                 navigation(
                     startDestination = "login",
                     route = "firstScreens"
@@ -148,7 +148,7 @@ class MainActivity : ComponentActivity() {
                     composable("homePage"){
                         Scaffold(
                             bottomBar = { BottomBar(navController = navController) },
-                            topBar = { TopBar(navController = navController)},
+                            topBar = { TopBar(navController = navController) },
                             content = { padding ->
                                 Box(
                                     modifier = Modifier
@@ -176,30 +176,24 @@ class MainActivity : ComponentActivity() {
                         // Contenido de la pantalla del carrito
                         Scaffold(
                             bottomBar = { BottomBar(navController = navController) },
-                            topBar = { TopBar(navController = navController)},
+                            topBar = { TopBar(navController = navController) },
                             content = { padding ->
                                 Box(
                                     modifier = Modifier
-                                        .padding(padding),
+                                        .padding(padding)
                                 )
-                                Cart(navController,viewModel)
+                                Cart(navController, viewModel)
                             }
                         )
                     }
-                }
 
-                composable("signUp") { signUpView(navController = navController)}
-
-                composable("bookDetailsView"){
-                    BookDetailsScreen(navController = navController)
-                }
-                composable("addReviewView"){
+                    composable("bookDetailsView"){
+                        BookDetailsScreen(navController = navController)
+                    }
+                    composable("addReviewView"){
 //                    AddReview(navController= navController)
+                    }
                 }
-                composable("cartView"){
-//                    CartScreen()
-                }
-
             }
         }
     }
