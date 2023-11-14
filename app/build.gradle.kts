@@ -105,5 +105,5 @@ dependencies {
     /*
     #####FIN DEPENDENCIAS DE TERCEROS####
      */
-
+    implementation ("androidx.compose.material:material:1.4.2")
 }
