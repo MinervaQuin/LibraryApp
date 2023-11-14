@@ -33,7 +33,7 @@ git commit -m "Merge main into feature branch and resolve conflicts"
 Push your branch with the new merge commit to the remote repository:
 
 ```bash
-git push dev your-feature-branch
+git push origin your-feature-branch
 ```
 
 ## 6. Create a Pull Request (if using a platform like GitHub):
