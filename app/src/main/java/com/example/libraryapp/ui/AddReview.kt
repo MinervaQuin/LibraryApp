@@ -3,12 +3,12 @@ package com.example.libraryapp.ui.theme
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
@@ -22,8 +22,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.semantics.SemanticsProperties.ImeAction
-import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -31,12 +29,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.text.input.ImeAction
+import androidx.navigation.NavHostController
 import com.example.libraryapp.theme.LibraryAppTheme
 
 @Composable
-fun AddReview() {
-
+fun AddReview2(navController: NavHostController) {
+    MyDialog()
 
 }
 
@@ -60,8 +58,7 @@ fun MyDialog(bookTitle: String = "Reina Roja") {
         Dialog(
             onDismissRequest = {
                 showDialog = false
-            },
-
+            }
         ) {
             Column(
                 modifier = Modifier
@@ -77,42 +74,39 @@ fun MyDialog(bookTitle: String = "Reina Roja") {
                     style = TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
                 )
                 AnimatedRatingBar(currentRating = myRating, onRatingChanged = {myRating = it} ) //conectar con la pantalla anterior
-
-                OutlinedTextField(value= "", onValueChange = {} ,
-                    modifier = Modifier.fillMaxWidth()
-                        .padding(start = 15.dp, end = 15.dp),
-                    colors = TextFieldDefaults.outlinedTextFieldColors(
-
-                        unfocusedBorderColor = GreenApp,
-                        focusedBorderColor = GreenApp,
-                        cursorColor = GreenApp
-                    ))
-
-                OutlinedTextField(
-                    value = comentarioTexto,
-                    onValueChange = { comentarioTexto = it },
-                    label = { Text("Ingresa tu comentario") },
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .fillMaxWidth(),
-                    keyboardOptions = KeyboardOptions.Default.copy(
-                        imeAction = androidx.compose.ui.text.input.ImeAction.Send
-
-                    ),
-                    keyboardActions = KeyboardActions(
-                        onSend = {
-                            // Agregar el comentario a la lista
-                            Log.d("asdf", comentarioTexto)
-                            myRating = 0
-                            comentarios.add(comentarioTexto)
-                            comentarioTexto = ""
-                        }
+                SelectionContainer {
+                    OutlinedTextField(
+                        value = comentarioTexto,
+                        onValueChange = { comentarioTexto = it },
+                        label = { Text("Ingresa tu comentario") },
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .fillMaxWidth()
+                            .height(160.dp),
+                        keyboardOptions = KeyboardOptions.Default.copy(
+                            imeAction = androidx.compose.ui.text.input.ImeAction.Send
+                        ),
+                        keyboardActions = KeyboardActions(
+                            onSend = {
+                                // Agregar el comentario a la lista
+                                Log.d("asdf", comentarioTexto)
+                                myRating = 0
+                                comentarios.add(comentarioTexto)
+                                comentarioTexto = ""
+                            }
+                        ),
+                        colors = TextFieldDefaults.outlinedTextFieldColors(
+                            unfocusedBorderColor = GreenApp,
+                            focusedBorderColor = GreenApp,
+                            cursorColor = GreenApp
+                        )
                     )
-                )
+                }
+
                 Button(
                     onClick = { showDialog = false}
                 ) {
-                    Text("Enviar")
+                    Text("Enviar") //conectar con la pantalla
                 }
             }
         }
