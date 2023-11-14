@@ -32,6 +32,7 @@ fun HomeView(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ){
+        println(userData)
         if(userData?.profilePictureUrl != null){
             AsyncImage(
                 model = userData.profilePictureUrl,
@@ -46,6 +47,15 @@ fun HomeView(
         if(userData?.userName != null) {
             Text(
                text = userData.userName,
+                textAlign = TextAlign.Center,
+                fontSize = 36.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+        if(userData?.userId != null){
+            Text(
+                text = userData.userId,
                 textAlign = TextAlign.Center,
                 fontSize = 36.sp,
                 fontWeight = FontWeight.SemiBold

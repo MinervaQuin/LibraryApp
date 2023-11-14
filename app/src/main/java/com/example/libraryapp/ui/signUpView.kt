@@ -1,12 +1,7 @@
 package com.example.libraryapp.ui
 
-import android.app.DatePickerDialog
-import android.os.Build
-import android.util.Log
-import android.widget.DatePicker
-import androidx.annotation.RequiresApi
+
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Arrangement
@@ -15,9 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -26,12 +19,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.ArrowForward
-import androidx.compose.material.icons.outlined.DateRange
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -44,11 +35,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -56,10 +44,6 @@ import com.example.libraryapp.R
 import com.example.libraryapp.theme.verdeFuerte
 import com.example.libraryapp.viewModel.signUpViewModel
 import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalContext
 import com.maxkeppeker.sheets.core.models.base.rememberSheetState
 import com.maxkeppeler.sheets.calendar.CalendarDialog
 import com.maxkeppeler.sheets.calendar.models.CalendarConfig
@@ -69,14 +53,18 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.AlertDialogDefaults.shape
+import androidx.compose.runtime.collectAsState
+import androidx.compose.foundation.shape.*
+import androidx.compose.material3.*
+import androidx.compose.ui.unit.dp
 
-
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun signUpView(signUpViewModel: signUpViewModel = viewModel(), navController: NavController){
     //@TODO Sustituir el fondo por vectores animados
@@ -90,7 +78,34 @@ fun signUpView(signUpViewModel: signUpViewModel = viewModel(), navController: Na
 
     var selectedDate by remember { mutableStateOf("") }
 
-    var showFirstRow by remember { mutableStateOf(true) }
+
+
+    val loading by signUpViewModel.loading.collectAsState()
+    val message by signUpViewModel.message.collectAsState()
+    //TODO Ver diferencias entre observeAsState() y collectAsState() y entender cual es mejor
+    val shouldNavigate by signUpViewModel.navigateToNextScreen.collectAsState()
+    val showFirstScreen by signUpViewModel.showFirstScreen2.collectAsState()
+
+    LaunchedEffect(shouldNavigate) {
+        if (shouldNavigate == true) {
+            navController.navigate("login") {
+                // Configuraciones adicionales de navegación si las necesitas
+                popUpTo("seconScreens") { inclusive = true }
+            }
+        }
+    }
+
+    BackHandler {
+        if(showFirstScreen){
+            navController.navigate("login") {
+                // Configuraciones adicionales de navegación si las necesitas
+                popUpTo("signUp") { inclusive = true }
+            }
+        }else{
+            signUpViewModel.changeScreen()
+        }
+
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         // Colocamos la imagen de fondo
@@ -115,7 +130,7 @@ fun signUpView(signUpViewModel: signUpViewModel = viewModel(), navController: Na
             ){
                 putText(text = "Registro", color = verdeFuerte, fontSize = 58.sp)
 
-                if(showFirstRow){
+                if(showFirstScreen){
                     Spacer(modifier = Modifier.height(8.dp))
                     InputField(value = userName, onChange = {userName = it}, label = "Nombre de Usuario", icon = Icons.Outlined.AccountCircle)
                     Spacer(modifier = Modifier.height(8.dp))
@@ -127,31 +142,54 @@ fun signUpView(signUpViewModel: signUpViewModel = viewModel(), navController: Na
                     InputField(value = userPassword, onChange = {userPassword = it}, label = "Contraseña", icon = Icons.Outlined.Lock, visualTransformation = PasswordVisualTransformation())
                     Spacer(modifier = Modifier.height(8.dp))
                     InputField(value = userPasswordConfirm, onChange = {userPasswordConfirm = it}, label = "Confirmar contraseña", icon = Icons.Outlined.Lock, visualTransformation = PasswordVisualTransformation())
+                    Row(
+                        modifier = Modifier
+
+                            .padding(16.dp),
+                    ) {
+                        Button(
+                            onClick = { signUpViewModel.registerUser(userEmail.text, userPassword.text) },
+                            modifier = Modifier
+
+                                .height(50.dp),
+                            colors = ButtonDefaults.buttonColors(verdeFuerte),
+                            shape = CircleShape,
+                        ) {
+                            Text("Registrarse", modifier = Modifier.padding(8.dp))
+                        }
+
+                    }
                 }
                 Spacer(modifier = Modifier.height(8.dp))
 
 
             }
         }
-        Row(
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                //.fillMaxWidth()
-                .padding(16.dp),
-
-            ){
-            Button(
-                onClick = { showFirstRow = !showFirstRow },
-                colors = ButtonDefaults.buttonColors(verdeFuerte),
-                shape = CircleShape,
+        if(showFirstScreen){
+            Row(
                 modifier = Modifier
-                    .size(75.dp),
+                    .align(Alignment.BottomEnd)
+                    //.fillMaxWidth()
+                    .padding(16.dp),
 
-                ) {
-                Icon(imageVector = Icons.Outlined.ArrowForward, contentDescription = "Avanzar")
+                ){
+                Button(
+                    onClick = { signUpViewModel.changeScreen() },
+                    colors = ButtonDefaults.buttonColors(verdeFuerte),
+                    shape = CircleShape,
+                    modifier = Modifier
+                        .size(75.dp),
+
+                    ) {
+                    Icon(imageVector = Icons.Outlined.ArrowForward, contentDescription = "Avanzar")
+                }
+                Spacer(modifier = Modifier.height(150.dp))
             }
-            Spacer(modifier = Modifier.height(150.dp))
         }
+        else{
+
+        }
+
         
     }
 }

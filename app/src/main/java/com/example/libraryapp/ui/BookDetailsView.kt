@@ -1,5 +1,7 @@
 package com.example.libraryapp.ui.theme
 
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -12,7 +14,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Face
@@ -23,8 +29,11 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,6 +46,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
@@ -44,29 +54,52 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.libraryapp.model.BookDetailsUiState
 import com.example.libraryapp.theme.LibraryAppTheme
+import com.example.libraryapp.viewModel.BookDetailsViewModel
 import java.util.Date
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.platform.LocalContext
+import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.Month
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 
 @Composable
 fun BookDetailsScreen(
     reviews: List<String> = List(5) { "$it" },
-    navController: NavHostController
+    dates: List<LocalDateTime> = listOf(
+        LocalDateTime.of(2023, Month.NOVEMBER, 14, 12, 30, 0),
+        LocalDateTime.of(2023, Month.NOVEMBER, 13, 12, 30, 0),
+        LocalDateTime.of(2023, Month.NOVEMBER, 5, 12, 30, 0),
+        LocalDateTime.of(2023, Month.NOVEMBER, 14, 10, 40, 0),
+        LocalDateTime.of(2023, Month.JULY, 14, 12, 30, 0)
+    ),
+    navController: NavHostController,
+    bookDetailsViewModel: BookDetailsViewModel = viewModel()
 ){
-    val offset = remember { mutableStateOf(0f)
-    }
+    val offset = remember { mutableStateOf(0f) }
+    val bookUiState by bookDetailsViewModel.bookUiState.collectAsState()
+
     Column (modifier = Modifier.verticalScroll(rememberScrollState())
     ){
         BookInitialInfo()
         BookSinopsis()
         FactSheet()
-        ReviewBook("Reina Roja")
+        ReviewBook("Reina Roja", bookDetailsViewModel, bookUiState)
         Divider()
         ResumeOfReviews()
         Column {
-            for (i in reviews) {
-                UserReview()
+            for (i in dates) {
+                UserReview(reviewDate = i, bookDetailsViewModel = bookDetailsViewModel)
             }
         }
     }
@@ -79,7 +112,6 @@ fun ResumeOfReviews(
     mediaScore: Number = 4.5,
     rateScore: Int = 4,
     num_opi: Int = 124,
-
 ){
     Row (modifier = Modifier.padding(top=20.dp, bottom = 10.dp, start = 15.dp)){
         Box (modifier = Modifier.weight(0.2f),
@@ -126,9 +158,14 @@ fun createCircle(){
 fun UserReview(
     userName: String = "Tobias",
     rate: Int = 4,
-    reviewDate: Date = Date(2022, 12, 31, 23, 59, 59),
-    comment: String = "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum."
+    reviewDate: LocalDateTime,
+    comment: String = "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
+    bookDetailsViewModel: BookDetailsViewModel
 ){
+    var expanded by remember {mutableStateOf(false)}
+    val formatter = DateTimeFormatter.ofPattern("dd/MM/yy")
+    val formattedDate = bookDetailsViewModel.getFormattedTimeAgo(reviewDate)
+
     Column(modifier = Modifier.padding(10.dp)) {
         Row {
             Icon(
@@ -141,23 +178,42 @@ fun UserReview(
                 .padding(top = 5.dp)
                 .height(50.dp)
             ) {
-                Text(text = userName )
+                Row {
+                    Text(text = userName )
+                    Text(text = formattedDate,
+                        modifier = Modifier.padding(start = 8.dp),
+                        style = TextStyle(color = Color.Gray),
+                        )
+                }
                 RatingBar(currentRating = rate)
-                Text(text = "")
             }
 
         }
-        Text(text = comment, maxLines = 3,
+        Text(text = comment,
+            maxLines = if (expanded) Int.MAX_VALUE else 3,
             overflow = TextOverflow.Ellipsis,
             textAlign = TextAlign.Justify,
             modifier = Modifier.padding(5.dp))
+
+        ClickableText(
+            text= if (expanded) AnnotatedString("Leer menos") else AnnotatedString("Leer más"),
+            onClick = {expanded = !expanded},
+
+            style = TextStyle(color = GreenApp, fontWeight =FontWeight.Bold, textDecoration = TextDecoration.Underline ),
+            modifier = Modifier
+                .padding(start = 8.dp, bottom = 5.dp)
+                .fillMaxWidth()
+
+        )
     }
-
-
 }
 
 @Composable
-fun ReviewBook(bookTitle: String){
+fun ReviewBook(
+    bookTitle: String,
+    bookDetailsViewModel: BookDetailsViewModel,
+    bookUiState: BookDetailsUiState
+){
     var myRating by remember { mutableStateOf(0) }
 
     Column (
@@ -181,36 +237,156 @@ fun ReviewBook(bookTitle: String){
         )
         Text(text = "¿Qué te ha parecido?")
         AnimatedRatingBar(
-            currentRating = myRating,
-            onRatingChanged = { myRating = it }
+            currentRating = bookUiState.reviewScore,
+            onRatingChanged = { bookDetailsViewModel.updateRating(it) }
         )
         Button(
-            onClick = { /*TODO*/ }, //Ir a la páginad de hacer una opinión
+            onClick = { bookDetailsViewModel.showDialog(true) }, //Ir a la páginad de hacer una opinión
             colors = ButtonDefaults.buttonColors(containerColor = GreenApp),
 
             ) {
             Text("Deja tu opinión")
+            AddReview(showDialog = bookUiState.showDialog,
+                sendComment = { bookDetailsViewModel.sendReview( it )  },
+                updateRating = { bookDetailsViewModel.updateRating( it ) },
+                bookUiState= bookUiState,
+                bookDetailsViewModel = bookDetailsViewModel,
+            )
         }
-
-
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AddReview(
+    bookTitle: String = "Reina Roja",
+    showDialog: Boolean,
+    sendComment: (String) -> Unit,
+    updateRating: (Int) -> Unit,
+    bookUiState: BookDetailsUiState,
+    bookDetailsViewModel: BookDetailsViewModel,
+
+    )
+{
+
+    if (showDialog) {
+        Dialog(
+            onDismissRequest = {}
+        ) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(400.dp)
+                    .padding(16.dp)
+
+                    .shadow(8.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color.White,
+                ),
+                shape = RoundedCornerShape(16.dp),
+
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 10.dp)
+                        //.background(color = Color.White)
+                            ,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        "¿Has leído " + bookTitle + "?",
+                        style = TextStyle(fontSize = 25.sp, fontWeight = FontWeight.Bold,),
+                        color = Color.Black
+                    )
+                    Text(
+                        "Deja tu opinión para ayudar a otros lectores",
+                        style = TextStyle(
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center,
+                            color = Color.Black
+                        )
+                    )
+                    AnimatedRatingBar(
+                        currentRating = bookUiState.reviewScore,
+                        onRatingChanged = { bookDetailsViewModel.updateRating(it)  }) //conectar con la pantalla anterior
+                    SelectionContainer {
+                        OutlinedTextField(
+                            value = bookUiState.comment,
+                            onValueChange = { bookDetailsViewModel.updateComment(it)},
+                            label = { Text("Ingresa tu comentario") },
+                            modifier = Modifier
+                                .padding(8.dp)
+                                .fillMaxWidth()
+                                .height(160.dp),
+                            keyboardOptions = KeyboardOptions.Default.copy(
+                                imeAction = ImeAction.Send
+                            ),
+                            keyboardActions = KeyboardActions(
+                                onSend = {
+                                    sendComment(bookUiState.comment)
+                                }
+                            ),
+                            colors = TextFieldDefaults.outlinedTextFieldColors(
+                                unfocusedBorderColor = GreenApp,
+                                focusedBorderColor = GreenApp,
+                                cursorColor = GreenApp
+                            )
+                        )
+                    }
+                    Row {
+                        Button(
+                            onClick = {
+                                bookDetailsViewModel.showDialog(false)
+                            },
+                            colors = ButtonDefaults.buttonColors(Color.Gray),
+                            modifier = Modifier
+                                .weight(0.5f)
+                                .padding(start = 8.dp, end = 5.dp)
+                        ) {
+                            Text("Cancelar") //conectar con la pantalla
+                        }
+                        Button(
+                            onClick = {
+                                sendComment(bookUiState.comment)
+                            },
+                            colors = ButtonDefaults.buttonColors(GreenApp),
+                            modifier = Modifier
+                                .weight(0.5f)
+                                .padding(start = 5.dp, end = 8.dp)
+                        ) {
+                            Text("Enviar") //conectar con la pantalla
+                        }
+
+                    }
 
 
 
+                }
+            }
+        }
+    }
 }
 
 @Composable
-fun BookInitialInfo(){
+fun showSuccessNotify() {
+    Toast.makeText(LocalContext.current, "Enviado", Toast.LENGTH_SHORT).show()
+}
+
+
+@Composable
+fun BookInitialInfo() {
     Row(
         modifier = Modifier.padding(top=10.dp, bottom = 10.dp)
     ) {
         LoadBookCover("https://m.media-amazon.com/images/I/41uWfObYYQL._SY445_SX342_.jpg")
         Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
+            horizontalAlignment = Alignment.Start,
             modifier = Modifier.padding(start = 10.dp)
         ) {
             BookLittleInfo()
-            Button(onClick = { /*TODO*/ }) {//Ir a la pagina de la cesta
+            Button(onClick = { /**/ }) {//Ir a la pagina de la cesta
                 Text(text = "Añadir a la cesta")
             }
         }
@@ -295,8 +471,6 @@ fun BookSinopsis(sinopsis: String = "Antonia Scott es una mujer muy especial. Ti
             .fillMaxWidth()
 
     )
-
-
 
 }
 
@@ -434,11 +608,13 @@ fun AnimatedRatingBar(
 }
 
 
+
+
 @Preview(showBackground = true)
 @Composable
 fun Greeting4Preview() {
     LibraryAppTheme {
-        BookInitialInfo()
+        //UserReview()
     }
 }
 

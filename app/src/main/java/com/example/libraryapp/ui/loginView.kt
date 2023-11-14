@@ -1,6 +1,6 @@
 package com.example.libraryapp.ui
 
-import android.graphics.drawable.Icon
+
 import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,14 +12,11 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.libraryapp.R
 import com.example.libraryapp.viewModel.loginViewModel
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -62,13 +59,13 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.libraryapp.model.firebaseAuth.SignInState
 
-
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginView(loginViewModel : loginViewModel = viewModel(), navController: NavController,state: SignInState, onSignInClick: () -> Unit){
     //@TODO: En vez de 1 solo elemento como fondo, hacer que sean 3 con animación de movimiento
     val image = painterResource(R.drawable.fondo_login)
     val googleIconImageVector = ImageVector.vectorResource(id = R.drawable.vector_google)
+
+
 
     var userEmail by remember { mutableStateOf(TextFieldValue("")) }
     var password by remember { mutableStateOf(TextFieldValue("")) }
@@ -158,7 +155,12 @@ fun LoginView(loginViewModel : loginViewModel = viewModel(), navController: NavC
 
         ){
             Button(
-                onClick = { /*TODO*/ },
+                onClick = {
+                    //loginViewModel.updateCredentials(userEmail.text, password.text)
+                    loginViewModel.signInWithEmail(userEmail.text,password.text){ //TODO A esto de iniciar sesión con el usuario y contraseña hay que echarle un ojo, muy poco MVVM
+                        navController.navigate("homePage")
+                    }
+                          },
                 colors = ButtonDefaults.buttonColors(verdeFuerte),
                 shape = CircleShape,
                 modifier = Modifier
