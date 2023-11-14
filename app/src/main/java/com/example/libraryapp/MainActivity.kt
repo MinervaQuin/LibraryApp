@@ -148,7 +148,7 @@ class MainActivity : ComponentActivity() {
                     composable("homePage"){
                         Scaffold(
                             bottomBar = { BottomBar(navController = navController) },
-                            topBar = { TopBar(navController = navController)},
+                            topBar = { TopBar(navController = navController) },
                             content = { padding ->
                                 Box(
                                     modifier = Modifier
@@ -176,19 +176,17 @@ class MainActivity : ComponentActivity() {
                         // Contenido de la pantalla del carrito
                         Scaffold(
                             bottomBar = { BottomBar(navController = navController) },
-                            topBar = { TopBar(navController = navController)},
+                            topBar = { TopBar(navController = navController) },
                             content = { padding ->
                                 Box(
                                     modifier = Modifier
-                                        .padding(padding),
+                                        .padding(padding)
                                 )
-                                Cart(navController,viewModel)
+                                Cart(navController, viewModel)
                             }
                         )
                     }
-                }
 
-<<<<<<< HEAD
                 composable("signUp") { signUpView(navController = navController)}
 
                 composable("bookDetailsView"){
@@ -201,6 +199,13 @@ class MainActivity : ComponentActivity() {
 //                    CartScreen()
                 }
 
+                    composable("bookDetailsView"){
+                        BookDetailsScreen(navController = navController)
+                    }
+                    composable("addReviewView"){
+//                    AddReview(navController= navController)
+                    }
+                }
             }
         }
     }
