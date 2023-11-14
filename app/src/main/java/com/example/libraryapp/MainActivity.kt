@@ -41,6 +41,7 @@ import androidx.navigation.compose.composable
 import com.example.libraryapp.ui.signUpView
 import com.example.libraryapp.viewModel.loginViewModel
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.compose.navigation
 import com.example.libraryapp.model.firebaseAuth.GoogleAuthUiClient
 import com.example.libraryapp.ui.Cart
 import com.example.libraryapp.ui.HomeView
@@ -88,106 +89,116 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             val navController = rememberNavController()
-            NavHost(navController = navController, startDestination = "login"){
+            NavHost(navController = navController, startDestination = "firstScreens"){
+                navigation(
+                    startDestination = "login",
+                    route = "firstScreens"
+                ){
+                    composable("login") {
 
-                composable("login") {
+                        val viewModel = viewModel<loginViewModel>()
+                        val state by viewModel.state.collectAsStateWithLifecycle()
 
-                    val viewModel = viewModel<loginViewModel>()
-                    val state by viewModel.state.collectAsStateWithLifecycle()
-
-                    LaunchedEffect(key1 = Unit){
-                        if(googleAuthUiClient.getSignedInUser() != null){
-                            navController.navigate("homePage")
+                        LaunchedEffect(key1 = Unit){
+                            if(googleAuthUiClient.getSignedInUser() != null){
+                                navController.navigate("seconScreens")
+                            }
                         }
-                    }
 
-                    val launcher = rememberLauncherForActivityResult(
-                        contract = ActivityResultContracts.StartIntentSenderForResult(),
-                        onResult = {result ->
-                            if(result.resultCode == RESULT_OK) {
+                        val launcher = rememberLauncherForActivityResult(
+                            contract = ActivityResultContracts.StartIntentSenderForResult(),
+                            onResult = {result ->
+                                if(result.resultCode == RESULT_OK) {
+                                    lifecycleScope.launch {
+                                        val signInResult = googleAuthUiClient.signInWithIntent(
+                                            intent = result.data ?: return@launch
+                                        )
+                                        viewModel.onSignInResult(signInResult)
+                                    }
+                                }
+                            }
+                        )
+
+                        LaunchedEffect(key1 = state.isSignInSuccessful) {
+                            if(state.isSignInSuccessful) {
+                                Toast.makeText(
+                                    applicationContext,
+                                    "Sesión Iniciada",
+                                    Toast.LENGTH_LONG
+                                ).show()
+
+                                navController.navigate("seconScreens")
+                                viewModel.resetState()
+                            }
+                        }
+
+                        LoginView(
+                            navController = navController,
+                            state = state,
+                            onSignInClick = {
                                 lifecycleScope.launch {
-                                    val signInResult = googleAuthUiClient.signInWithIntent(
-                                        intent = result.data ?: return@launch
+                                    val signInIntentSender = googleAuthUiClient.signIn()
+                                    launcher.launch(
+                                        IntentSenderRequest.Builder(
+                                            signInIntentSender ?: return@launch
+                                        ).build()
                                     )
-                                    viewModel.onSignInResult(signInResult)
                                 }
                             }
-                        }
-                    )
 
-                    LaunchedEffect(key1 = state.isSignInSuccessful) {
-                        if(state.isSignInSuccessful) {
-                            Toast.makeText(
-                                applicationContext,
-                                "Sesión Iniciada",
-                                Toast.LENGTH_LONG
-                            ).show()
-
-                            navController.navigate("homePage")
-                            viewModel.resetState()
-                        }
+                        )
                     }
 
-                    LoginView(
-                        navController = navController,
-                        state = state,
-                        onSignInClick = {
-                            lifecycleScope.launch {
-                                val signInIntentSender = googleAuthUiClient.signIn()
-                                launcher.launch(
-                                    IntentSenderRequest.Builder(
-                                        signInIntentSender ?: return@launch
-                                    ).build()
+                    composable("signUp") { signUpView(navController = navController)}
+                }
+
+                navigation(
+                    startDestination = "homePage",
+                    route = "seconScreens"
+                ){
+                    composable("homePage"){
+                        Scaffold(
+                            bottomBar = { BottomBar(navController = navController) },
+                            topBar = { TopBar(navController = navController)},
+                            content = { padding ->
+                                Box(
+                                    modifier = Modifier
+                                        .padding(padding),
                                 )
+                                HomeView(
+                                    userData = googleAuthUiClient.getSignedInUser(),
+                                    onSignOut = {
+                                        lifecycleScope.launch {
+                                            googleAuthUiClient.signOut()
+                                            Toast.makeText(
+                                                applicationContext,
+                                                "Sesión Cerrada",
+                                                Toast.LENGTH_LONG
+                                            ).show()
+                                            navController.popBackStack()
+                                        }
+                                    }
+                                ) }
+                        )
+                    }
+
+                    composable("cartDestination") {
+                        val viewModel = viewModel<CartViewModel>()
+                        // Contenido de la pantalla del carrito
+                        Scaffold(
+                            bottomBar = { BottomBar(navController = navController) },
+                            topBar = { TopBar(navController = navController)},
+                            content = { padding ->
+                                Box(
+                                    modifier = Modifier
+                                        .padding(padding),
+                                )
+                                Cart(navController,viewModel)
                             }
-                        }
-
-                    )
+                        )
+                    }
                 }
 
-                composable("signUp") { signUpView(navController = navController)}
-
-                composable("homePage"){
-                    Scaffold(
-                        bottomBar = { BottomBar(navController = navController) },
-                        topBar = { TopBar(navController = navController)},
-                        content = { padding ->
-                            Box(
-                                modifier = Modifier
-                                    .padding(padding),
-                            )
-                            HomeView(
-                            userData = googleAuthUiClient.getSignedInUser(),
-                            onSignOut = {
-                                lifecycleScope.launch {
-                                    googleAuthUiClient.signOut()
-                                    Toast.makeText(
-                                        applicationContext,
-                                        "Sesión Cerrada",
-                                        Toast.LENGTH_LONG
-                                    ).show()
-                                    navController.popBackStack()
-                                }
-                            }
-                        ) }
-                    )
-                }
-
-                composable("cartDestination") {
-                    val viewModel = viewModel<CartViewModel>()
-                    // Contenido de la pantalla del carrito
-                    Scaffold(
-                        bottomBar = { BottomBar(navController = navController) },
-                        topBar = { TopBar(navController = navController)},
-                        content = { padding ->
-                            Box(
-                                modifier = Modifier
-                                    .padding(padding),
-                            )
-                            Cart(navController,viewModel)
-                        }
-                    )
-                }
             }
         }
     }
