@@ -78,7 +78,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             val navController = rememberNavController()
-            NavHost(navController = navController, startDestination = "firstScreens"){
+            NavHost(navController = navController, startDestination = "bookDetailsView"){
                 navigation(
                     startDestination = "login",
                     route = "firstScreens"
@@ -188,7 +188,6 @@ class MainActivity : ComponentActivity() {
                     }
                 }
 
-<<<<<<< HEAD
                 composable("signUp") { signUpView(navController = navController)}
 
                 composable("bookDetailsView"){

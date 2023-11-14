@@ -24,6 +24,8 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -38,6 +40,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -58,15 +61,21 @@ import androidx.navigation.NavHostController
 import com.example.libraryapp.model.BookDetailsUiState
 import com.example.libraryapp.theme.LibraryAppTheme
 import com.example.libraryapp.viewModel.BookDetailsViewModel
-import java.util.Date
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.ui.draw.shadow
+import java.time.LocalDateTime
+import java.time.Month
+import java.time.format.DateTimeFormatter
 
 
 @Composable
 fun BookDetailsScreen(
     reviews: List<String> = List(5) { "$it" },
+    dates: List<LocalDateTime> = listOf(
+        LocalDateTime.of(2023, Month.NOVEMBER, 14, 12, 30, 0),
+        LocalDateTime.of(2023, Month.NOVEMBER, 13, 12, 30, 0),
+        LocalDateTime.of(2023, Month.NOVEMBER, 5, 12, 30, 0),
+        LocalDateTime.of(2023, Month.NOVEMBER, 14, 10, 40, 0),
+        LocalDateTime.of(2023, Month.JULY, 14, 12, 30, 0)
+    ),
     navController: NavHostController,
     bookDetailsViewModel: BookDetailsViewModel = viewModel()
 ){
@@ -75,6 +84,7 @@ fun BookDetailsScreen(
 
     Column (modifier = Modifier.verticalScroll(rememberScrollState())
     ){
+
         BookInitialInfo()
         BookSinopsis()
         FactSheet()
@@ -82,8 +92,8 @@ fun BookDetailsScreen(
         Divider()
         ResumeOfReviews()
         Column {
-            for (i in reviews) {
-                UserReview()
+            for (i in dates) {
+                UserReview(reviewDate = i, bookDetailsViewModel = bookDetailsViewModel)
             }
         }
     }
@@ -142,9 +152,14 @@ fun createCircle(){
 fun UserReview(
     userName: String = "Tobias",
     rate: Int = 4,
-    reviewDate: Date = Date(2022, 12, 31, 23, 59, 59),
-    comment: String = "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum."
+    reviewDate: LocalDateTime,
+    comment: String = "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
+    bookDetailsViewModel: BookDetailsViewModel
 ){
+    var expanded by remember {mutableStateOf(false)}
+    val formatter = DateTimeFormatter.ofPattern("dd/MM/yy")
+    val formattedDate = bookDetailsViewModel.getFormattedTimeAgo(reviewDate)
+
     Column(modifier = Modifier.padding(10.dp)) {
         Row {
             Icon(
@@ -157,16 +172,33 @@ fun UserReview(
                 .padding(top = 5.dp)
                 .height(50.dp)
             ) {
-                Text(text = userName )
+                Row {
+                    Text(text = userName )
+                    Text(text = formattedDate,
+                        modifier = Modifier.padding(start = 8.dp),
+                        style = TextStyle(color = Color.Gray),
+                        )
+                }
                 RatingBar(currentRating = rate)
-                Text(text = "")
             }
 
         }
-        Text(text = comment, maxLines = 3,
+        Text(text = comment,
+            maxLines = if (expanded) Int.MAX_VALUE else 3,
             overflow = TextOverflow.Ellipsis,
             textAlign = TextAlign.Justify,
             modifier = Modifier.padding(5.dp))
+
+        ClickableText(
+            text= if (expanded) AnnotatedString("Leer menos") else AnnotatedString("Leer más"),
+            onClick = {expanded = !expanded},
+
+            style = TextStyle(color = GreenApp, fontWeight =FontWeight.Bold, textDecoration = TextDecoration.Underline ),
+            modifier = Modifier
+                .padding(start = 8.dp, bottom = 5.dp)
+                .fillMaxWidth()
+
+        )
     }
 }
 
@@ -218,6 +250,8 @@ fun ReviewBook(
     }
 }
 
+
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddReview(
@@ -231,7 +265,6 @@ fun AddReview(
     )
 {
     var comentarioTexto by remember { mutableStateOf("") }
-
     // Dialog composable
     if (showDialog) {
         Dialog(
@@ -249,13 +282,13 @@ fun AddReview(
                 ),
                 shape = RoundedCornerShape(16.dp),
 
-            ) {
+                ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 10.dp)
-                        //.background(color = Color.White)
-                            ,
+                    //.background(color = Color.White)
+                    ,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
@@ -309,11 +342,13 @@ fun AddReview(
                     ) {
                         Text("Enviar") //conectar con la pantalla
                     }
+
                 }
             }
         }
     }
 }
+
 
 @Composable
 fun BookInitialInfo() {
@@ -322,7 +357,7 @@ fun BookInitialInfo() {
     ) {
         LoadBookCover("https://m.media-amazon.com/images/I/41uWfObYYQL._SY445_SX342_.jpg")
         Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
+            horizontalAlignment = Alignment.Start,
             modifier = Modifier.padding(start = 10.dp)
         ) {
             BookLittleInfo()
@@ -368,7 +403,7 @@ fun BookLittleInfo(authorName: String = "Juán Gómez-Jurando",
             Text(text = bookPrice.toString() + "€", modifier = Modifier.padding(end=10.dp),
                 style = TextStyle(color = Color.DarkGray, fontWeight =FontWeight.Bold,
                     fontSize = 20.sp),
-                )
+            )
         }
 
 
@@ -443,12 +478,12 @@ fun FactSheet(
                 .padding(8.dp)
         )
         Text(
-                buildAnnotatedString {
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append("Editorial: ")
-                    }
-                    append(editorial)
-                },
+            buildAnnotatedString {
+                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                    append("Editorial: ")
+                }
+                append(editorial)
+            },
             Modifier
                 .padding(8.dp)
         )
@@ -463,22 +498,22 @@ fun FactSheet(
                 .padding(8.dp)
         )
         Text(
-                buildAnnotatedString {
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append("Encuadernación: ")
-                    }
-                    append(encuadernacion.toString())
-                },
+            buildAnnotatedString {
+                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                    append("Encuadernación: ")
+                }
+                append(encuadernacion.toString())
+            },
             Modifier
                 .padding(8.dp)
         )
         Text(
-                buildAnnotatedString {
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append("ISBN: ")
-                    }
-                    append(isbn.toString())
-                },
+            buildAnnotatedString {
+                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                    append("ISBN: ")
+                }
+                append(isbn.toString())
+            },
             Modifier
                 .padding(8.dp)
         )
@@ -500,8 +535,6 @@ fun FactSheet(
 
     }
 
-
-
 }
 
 @Composable
@@ -514,12 +547,12 @@ fun RatingBar(
         for (i in 1..maxRating) {
             Icon(
                 imageVector = if (i <= currentRating) Icons.Filled.Star
-                              else Icons.Outlined.Star,
-                                contentDescription = null,
+                else Icons.Outlined.Star,
+                contentDescription = null,
                 tint = if (i <= currentRating) starsColor
-                              else Color.Unspecified,
+                else Color.Unspecified,
 
-            )
+                )
         }
     }
 }
