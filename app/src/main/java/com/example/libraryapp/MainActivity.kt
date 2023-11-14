@@ -1,5 +1,6 @@
 package com.example.libraryapp
 
+import CartViewModel
 import android.app.Activity.RESULT_OK
 import android.content.ContentValues
 import android.os.Bundle
@@ -10,12 +11,18 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -35,6 +42,7 @@ import com.example.libraryapp.ui.signUpView
 import com.example.libraryapp.viewModel.loginViewModel
 import androidx.lifecycle.lifecycleScope
 import com.example.libraryapp.model.firebaseAuth.GoogleAuthUiClient
+import com.example.libraryapp.ui.Cart
 import com.example.libraryapp.ui.HomeView
 import com.google.android.gms.auth.api.identity.Identity
 import kotlinx.coroutines.launch
@@ -75,6 +83,7 @@ class MainActivity : ComponentActivity() {
             }
         }
     }*/
+    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -136,26 +145,49 @@ class MainActivity : ComponentActivity() {
                     )
                 }
 
+                composable("signUp") { signUpView(navController = navController)}
+
                 composable("homePage"){
-
-                    HomeView(
-                        userData = googleAuthUiClient.getSignedInUser(),
-                        onSignOut = {
-                            lifecycleScope.launch {
-                                googleAuthUiClient.signOut()
-                                Toast.makeText(
-                                    applicationContext,
-                                    "Sesión Cerrada",
-                                    Toast.LENGTH_LONG
-                                ).show()
-                                navController.popBackStack()
+                    Scaffold(
+                        bottomBar = { BottomBar(navController = navController) },
+                        topBar = { TopBar(navController = navController)},
+                        content = { padding ->
+                            Box(
+                                modifier = Modifier
+                                    .padding(padding),
+                            )
+                            HomeView(
+                            userData = googleAuthUiClient.getSignedInUser(),
+                            onSignOut = {
+                                lifecycleScope.launch {
+                                    googleAuthUiClient.signOut()
+                                    Toast.makeText(
+                                        applicationContext,
+                                        "Sesión Cerrada",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                    navController.popBackStack()
+                                }
                             }
-                        }
-
+                        ) }
                     )
                 }
 
-                composable("signUp") { signUpView(navController = navController)}
+                composable("cartDestination") {
+                    val viewModel = viewModel<CartViewModel>()
+                    // Contenido de la pantalla del carrito
+                    Scaffold(
+                        bottomBar = { BottomBar(navController = navController) },
+                        topBar = { TopBar(navController = navController)},
+                        content = { padding ->
+                            Box(
+                                modifier = Modifier
+                                    .padding(padding),
+                            )
+                            Cart(navController,viewModel)
+                        }
+                    )
+                }
             }
         }
     }
