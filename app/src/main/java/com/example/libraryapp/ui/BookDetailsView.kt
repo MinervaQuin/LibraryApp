@@ -1,5 +1,7 @@
 package com.example.libraryapp.ui.theme
 
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -62,11 +64,25 @@ import java.util.Date
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.platform.LocalContext
+import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.Month
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 
 @Composable
 fun BookDetailsScreen(
     reviews: List<String> = List(5) { "$it" },
+    dates: List<LocalDateTime> = listOf(
+        LocalDateTime.of(2023, Month.NOVEMBER, 14, 12, 30, 0),
+        LocalDateTime.of(2023, Month.NOVEMBER, 13, 12, 30, 0),
+        LocalDateTime.of(2023, Month.NOVEMBER, 5, 12, 30, 0),
+        LocalDateTime.of(2023, Month.NOVEMBER, 14, 10, 40, 0),
+        LocalDateTime.of(2023, Month.JULY, 14, 12, 30, 0)
+    ),
     navController: NavHostController,
     bookDetailsViewModel: BookDetailsViewModel = viewModel()
 ){
@@ -82,8 +98,8 @@ fun BookDetailsScreen(
         Divider()
         ResumeOfReviews()
         Column {
-            for (i in reviews) {
-                UserReview()
+            for (i in dates) {
+                UserReview(reviewDate = i, bookDetailsViewModel = bookDetailsViewModel)
             }
         }
     }
@@ -142,9 +158,14 @@ fun createCircle(){
 fun UserReview(
     userName: String = "Tobias",
     rate: Int = 4,
-    reviewDate: Date = Date(2022, 12, 31, 23, 59, 59),
-    comment: String = "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum."
+    reviewDate: LocalDateTime,
+    comment: String = "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
+    bookDetailsViewModel: BookDetailsViewModel
 ){
+    var expanded by remember {mutableStateOf(false)}
+    val formatter = DateTimeFormatter.ofPattern("dd/MM/yy")
+    val formattedDate = bookDetailsViewModel.getFormattedTimeAgo(reviewDate)
+
     Column(modifier = Modifier.padding(10.dp)) {
         Row {
             Icon(
@@ -157,16 +178,33 @@ fun UserReview(
                 .padding(top = 5.dp)
                 .height(50.dp)
             ) {
-                Text(text = userName )
+                Row {
+                    Text(text = userName )
+                    Text(text = formattedDate,
+                        modifier = Modifier.padding(start = 8.dp),
+                        style = TextStyle(color = Color.Gray),
+                        )
+                }
                 RatingBar(currentRating = rate)
-                Text(text = "")
             }
 
         }
-        Text(text = comment, maxLines = 3,
+        Text(text = comment,
+            maxLines = if (expanded) Int.MAX_VALUE else 3,
             overflow = TextOverflow.Ellipsis,
             textAlign = TextAlign.Justify,
             modifier = Modifier.padding(5.dp))
+
+        ClickableText(
+            text= if (expanded) AnnotatedString("Leer menos") else AnnotatedString("Leer más"),
+            onClick = {expanded = !expanded},
+
+            style = TextStyle(color = GreenApp, fontWeight =FontWeight.Bold, textDecoration = TextDecoration.Underline ),
+            modifier = Modifier
+                .padding(start = 8.dp, bottom = 5.dp)
+                .fillMaxWidth()
+
+        )
     }
 }
 
@@ -230,9 +268,7 @@ fun AddReview(
 
     )
 {
-    var comentarioTexto by remember { mutableStateOf("") }
 
-    // Dialog composable
     if (showDialog) {
         Dialog(
             onDismissRequest = {}
@@ -277,8 +313,8 @@ fun AddReview(
                         onRatingChanged = { bookDetailsViewModel.updateRating(it)  }) //conectar con la pantalla anterior
                     SelectionContainer {
                         OutlinedTextField(
-                            value = comentarioTexto,
-                            onValueChange = { comentarioTexto = it },
+                            value = bookUiState.comment,
+                            onValueChange = { bookDetailsViewModel.updateComment(it)},
                             label = { Text("Ingresa tu comentario") },
                             modifier = Modifier
                                 .padding(8.dp)
@@ -289,8 +325,7 @@ fun AddReview(
                             ),
                             keyboardActions = KeyboardActions(
                                 onSend = {
-                                    sendComment(comentarioTexto)
-                                    comentarioTexto = ""
+                                    sendComment(bookUiState.comment)
                                 }
                             ),
                             colors = TextFieldDefaults.outlinedTextFieldColors(
@@ -300,20 +335,45 @@ fun AddReview(
                             )
                         )
                     }
-                    Button(
-                        onClick = {
-                            sendComment(comentarioTexto)
-                            comentarioTexto = ""
-                        },
-                        colors = ButtonDefaults.buttonColors(GreenApp)
-                    ) {
-                        Text("Enviar") //conectar con la pantalla
+                    Row {
+                        Button(
+                            onClick = {
+                                bookDetailsViewModel.showDialog(false)
+                            },
+                            colors = ButtonDefaults.buttonColors(Color.Gray),
+                            modifier = Modifier
+                                .weight(0.5f)
+                                .padding(start = 8.dp, end = 5.dp)
+                        ) {
+                            Text("Cancelar") //conectar con la pantalla
+                        }
+                        Button(
+                            onClick = {
+                                sendComment(bookUiState.comment)
+                            },
+                            colors = ButtonDefaults.buttonColors(GreenApp),
+                            modifier = Modifier
+                                .weight(0.5f)
+                                .padding(start = 5.dp, end = 8.dp)
+                        ) {
+                            Text("Enviar") //conectar con la pantalla
+                        }
+
                     }
+
+
+
                 }
             }
         }
     }
 }
+
+@Composable
+fun showSuccessNotify() {
+    Toast.makeText(LocalContext.current, "Enviado", Toast.LENGTH_SHORT).show()
+}
+
 
 @Composable
 fun BookInitialInfo() {
@@ -322,7 +382,7 @@ fun BookInitialInfo() {
     ) {
         LoadBookCover("https://m.media-amazon.com/images/I/41uWfObYYQL._SY445_SX342_.jpg")
         Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
+            horizontalAlignment = Alignment.Start,
             modifier = Modifier.padding(start = 10.dp)
         ) {
             BookLittleInfo()
@@ -554,7 +614,7 @@ fun AnimatedRatingBar(
 @Composable
 fun Greeting4Preview() {
     LibraryAppTheme {
-        BookInitialInfo()
+        //UserReview()
     }
 }
 
