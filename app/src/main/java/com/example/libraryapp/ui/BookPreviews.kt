@@ -1,5 +1,6 @@
 package com.example.libraryapp.ui
 
+import android.widget.RatingBar
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -29,6 +30,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.rememberNavController
 import com.example.libraryapp.R
 import com.example.libraryapp.model.Book
+import com.example.libraryapp.ui.theme.RatingBar
 import com.example.libraryapp.viewModel.CategoryViewModel
 
 @Composable
@@ -97,12 +99,16 @@ fun BookPreview (obra : Book){
             )
             Row {
                 val rate = obra.score.toDouble()
+                val fillStars = Math.floor(rate / 2)
+                RatingBar (currentRating = fillStars.toInt())
+
+/*                val rate = obra.score.toDouble()
                 val fillStars = Math.floor (rate / 2)
                 val halfStars = rate % 2
                 val unfilledStars = 5 - (fillStars + halfStars)
                 iconpainter(R.drawable.openmoji_star,fillStars.toInt())
                 iconpainter(R.drawable.openmoji_half_star,halfStars.toInt())
-                iconpainter(R.drawable.openmoji_black_star,unfilledStars.toInt())
+                iconpainter(R.drawable.openmoji_black_star,unfilledStars.toInt())*/
             }
         }
     }
@@ -165,11 +171,12 @@ fun BookPreviewWide (obra : Book) {
                 Row {
                     val rate = obra.score.toDouble()
                     val fillStars = Math.floor(rate / 2)
-                    val halfStars = rate % 2
+                    RatingBar (currentRating = fillStars.toInt())
+/*                    val halfStars = rate % 2
                     val unfilledStars = 5 - (fillStars + halfStars)
                     iconpainter(R.drawable.openmoji_star, fillStars.toInt())
                     iconpainter(R.drawable.openmoji_half_star, halfStars.toInt())
-                    iconpainter(R.drawable.openmoji_black_star, unfilledStars.toInt())
+                    iconpainter(R.drawable.openmoji_black_star, unfilledStars.toInt())*/
                 }
                 Text(
                     text = obra.cover,

@@ -120,7 +120,6 @@ fun ResumeOfReviews(
                     fontSize = 20.sp,
                     fontWeight = FontWeight(700),
                     color = Color(0xFF342E37),
-
                     textAlign = TextAlign.Center,
                 )
             )
