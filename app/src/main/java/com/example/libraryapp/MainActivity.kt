@@ -45,9 +45,13 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.navigation
 import com.example.libraryapp.model.firebaseAuth.GoogleAuthUiClient
 import com.example.libraryapp.ui.Cart
+import com.example.libraryapp.ui.CategoryView
 import com.example.libraryapp.ui.HomeView
 import com.example.libraryapp.ui.theme.AddReview
 import com.example.libraryapp.ui.theme.BookDetailsScreen
+import com.example.libraryapp.view.AutorScreen
+import com.example.libraryapp.viewModel.AuthorViewModel
+import com.example.libraryapp.viewModel.CategoryViewModel
 import com.google.android.gms.auth.api.identity.Identity
 import kotlinx.coroutines.launch
 
@@ -78,7 +82,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             val navController = rememberNavController()
-            NavHost(navController = navController, startDestination = "firstScreens"){
+            NavHost(navController = navController, startDestination = "CategoryDestination"){
                 navigation(
                     startDestination = "login",
                     route = "firstScreens"
@@ -187,6 +191,7 @@ class MainActivity : ComponentActivity() {
                         )
                     }
 
+
                 composable("signUp") { signUpView(navController = navController)}
 
                 composable("bookDetailsView"){
@@ -205,6 +210,37 @@ class MainActivity : ComponentActivity() {
                     composable("addReviewView"){
 //                    AddReview(navController= navController)
                     }
+
+                }
+                composable("CategoryDestination") {
+                    val viewModel = viewModel<CategoryViewModel>()
+                    // Contenido de la pantalla del carrito
+                    Scaffold(
+                        bottomBar = { BottomBar(navController = navController) },
+                        topBar = { TopBar(navController = navController)},
+                        content = { padding ->
+                            Box(
+                                modifier = Modifier
+                                    .padding(padding),
+                            )
+                            CategoryView(navController,viewModel)
+                        }
+                    )
+                }
+                composable("AuthorDestination") {
+                    val viewModel = viewModel<AuthorViewModel>()
+                    // Contenido de la pantalla del carrito
+                    Scaffold(
+                        bottomBar = { BottomBar(navController = navController) },
+                        topBar = { TopBar(navController = navController)},
+                        content = { padding ->
+                            Box(
+                                modifier = Modifier
+                                    .padding(padding),
+                            )
+                            AutorScreen(navController,viewModel)
+                        }
+                    )
                 }
             }
         }

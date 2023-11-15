@@ -167,7 +167,7 @@ fun AutorScreen (navController: NavController, ViewModel: AuthorViewModel){
             )
         }
         LazyRow(){
-            items(autor.obras.size){
+            items(1){
                 for (i in 0 until autor.obras.size){
                     BookPreview(autor.obras[i])
                 }

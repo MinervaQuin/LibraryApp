@@ -64,8 +64,6 @@ import com.example.libraryapp.viewModel.CategoryViewModel
 import java.lang.Math.floor
 @Composable
 fun CategoryView (navController: NavController, ViewModel: CategoryViewModel){
-    val novedades = ViewModel.novedades
-    val filtrado = ViewModel.filtrados
     //val selectedCategory by rememberUpdatedState(newValue = ViewModel.selectedCategory)
     Column (
         modifier = Modifier
@@ -114,9 +112,9 @@ fun CategoryView (navController: NavController, ViewModel: CategoryViewModel){
                 .background(Color.Black)
         )
         LazyRow(){
-            items(novedades.size){
-                for (i in 0 until novedades.size){
-                    BookPreview(novedades[i])
+            items(1){
+                for (i in 0 until ViewModel.novedades.size){
+                    BookPreview(ViewModel.novedades[i])
                 }
             }
         }
@@ -127,6 +125,9 @@ fun CategoryView (navController: NavController, ViewModel: CategoryViewModel){
                 ViewModel.updateSelectedCategory(category)
             }
         )
+        for (i in 0 until ViewModel.filtrados.size){
+            BookPreviewWide(ViewModel.filtrados[i])
+        }
     }
 }
 
@@ -173,9 +174,6 @@ fun BookCategoriesDropdown(
             }
         }
     }
-}
-fun MenuCategorias(){
-
 }
 
 @Preview(showBackground = true)
