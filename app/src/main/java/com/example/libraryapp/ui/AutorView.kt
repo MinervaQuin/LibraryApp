@@ -26,6 +26,7 @@ import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -40,13 +41,29 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.libraryapp.R
 import com.example.libraryapp.model.Author
 import com.example.libraryapp.model.Book
+import com.example.libraryapp.viewModel.AuthorViewModel
+import com.example.libraryapp.viewModel.CategoryViewModel
 import java.lang.Math.floor
 
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.*
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.libraryapp.ui.BookPreview
+
 @Composable
-fun AutorScreen (autor: Author){
+fun AutorScreen (navController: NavController, ViewModel: AuthorViewModel){
+    val autor = ViewModel.Autor
     Column (
         modifier = Modifier
             .fillMaxWidth()
@@ -54,6 +71,7 @@ fun AutorScreen (autor: Author){
         verticalArrangement = Arrangement.Center,
     )
     {
+        Spacer(modifier = Modifier.height(55.dp))
         Text(
             text = autor.name,
             style = TextStyle(
@@ -155,98 +173,8 @@ fun AutorScreen (autor: Author){
                 }
             }
         }
+        Spacer(modifier = Modifier.height(55.dp))
 
     }
 }
 
-@Composable
-fun BookPreview (obra : Book ){
-    Box(modifier = Modifier
-        .padding(10.dp)
-        .width(180.dp)
-        .height(330.dp)
-        .shadow(elevation = 4.dp, spotColor = Color(0x40000000), ambientColor = Color(0x40000000))
-        .border(width = 1.dp, color = Color(0xFF000000))
-        .clickable {
-        }
-    )
-    {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(10.dp)
-        ){
-            Image(
-                painter = painterResource(id = R.drawable.image_22),
-                contentDescription = "image description",
-                contentScale = ContentScale.FillBounds,
-                modifier = Modifier
-                    .width(102.dp)
-                    .height(163.2.dp)
-                    .align(Alignment.CenterHorizontally)
-            )
-            Text(
-                text = obra.cover,
-                style = TextStyle(
-                    fontSize = 8.sp,
-                    fontWeight = FontWeight(700),
-                    color = Color(0xFF000000),
-                    )
-            )
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(2.dp)
-                    .background(Color.Black)
-            )
-            Text(
-                text = obra.title,
-                style = TextStyle(
-                    fontSize = 8.sp,
-                    fontWeight = FontWeight(700),
-                    color = Color(0xFF000000),
-                    )
-            )
-            Text(
-                text = obra.author_name,
-                style = TextStyle(
-                    fontSize = 8.sp,
-                    fontWeight = FontWeight(400),
-                    color = Color(0xFF000000),
-                )
-            )
-            Text(
-                text = "${obra.price} €",
-                style = TextStyle(
-                    fontSize = 8.sp,
-                    fontWeight = FontWeight(400),
-                    color = Color(0xFF841F0B)
-                    )
-            )
-            Row {
-                val rate = obra.score.toDouble()
-                val fillStars = floor (rate / 2)
-                val halfStars = rate % 2
-                val unfilledStars = 5 - (fillStars + halfStars)
-                iconpainter(R.drawable.openmoji_star,fillStars.toInt())
-                iconpainter(R.drawable.openmoji_half_star,halfStars.toInt())
-                iconpainter(R.drawable.openmoji_black_star,unfilledStars.toInt())
-            }
-        }
-    }
-}
-
-
-//Función que dibuja el drawable pasado por parametro n veces
-@Composable
-fun iconpainter (id : Int, rep: Int){
-    repeat (rep) {
-        Icon(
-            painter = painterResource(id),
-            contentDescription = null,
-            tint= Color.Unspecified,
-            modifier = Modifier
-                .size(20.dp)
-        )
-    }
-}
