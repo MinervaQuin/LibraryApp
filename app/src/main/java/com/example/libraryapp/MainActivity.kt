@@ -12,6 +12,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -48,10 +49,13 @@ import com.example.libraryapp.ui.Cart
 import com.example.libraryapp.ui.HomeView
 import com.example.libraryapp.ui.theme.AddReview
 import com.example.libraryapp.ui.theme.BookDetailsScreen
+import com.example.libraryapp.viewModel.homeViewModel
 import com.google.android.gms.auth.api.identity.Identity
+import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 
-
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     val db = Firebase.firestore
     public val googleAuthUiClient by lazy {
@@ -61,23 +65,12 @@ class MainActivity : ComponentActivity() {
         )
     }
 
-    /*
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            LibraryAppTheme {
-                // Use a Surface container using the 'background' color from the theme
-                Surface(color = MaterialTheme.colorScheme.background) {
-                    LoginView() // Aquí colocamos nuestro composable de inicio de sesión
-                }
-            }
-        }
-    }*/
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             val navController = rememberNavController()
+
             NavHost(navController = navController, startDestination = "firstScreens"){
                 navigation(
                     startDestination = "login",
@@ -166,7 +159,8 @@ class MainActivity : ComponentActivity() {
                                             ).show()
                                             navController.popBackStack()
                                         }
-                                    }
+                                    },
+                                    viewModel = viewModel<homeViewModel>()
                                 ) }
                         )
                     }
@@ -187,7 +181,7 @@ class MainActivity : ComponentActivity() {
                         )
                     }
 
-                composable("signUp") { signUpView(navController = navController)}
+                //composable("signUp") { signUpView(navController = navController)}
 
                 composable("bookDetailsView"){
                     BookDetailsScreen(navController = navController)
