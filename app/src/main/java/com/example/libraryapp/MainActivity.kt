@@ -192,7 +192,7 @@ class MainActivity : ComponentActivity() {
                     }
 
 
-                composable("signUp") { signUpView(navController = navController)}
+                //composable("signUp") { signUpView(navController = navController)}
 
                 composable("bookDetailsView"){
                     BookDetailsScreen(navController = navController)
@@ -203,13 +203,6 @@ class MainActivity : ComponentActivity() {
                 composable("cartView"){
 //                    CartScreen()
                 }
-
-                    composable("bookDetailsView"){
-                        BookDetailsScreen(navController = navController)
-                    }
-                    composable("addReviewView"){
-//                    AddReview(navController= navController)
-                    }
 
                 }
                 composable("CategoryDestination") {
