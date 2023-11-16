@@ -26,6 +26,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.libraryapp.theme.LibraryAppTheme
@@ -70,7 +71,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             val navController = rememberNavController()
-
+            val homeViewModel : homeViewModel  = hiltViewModel()
             NavHost(navController = navController, startDestination = "firstScreens"){
                 navigation(
                     startDestination = "login",
@@ -160,7 +161,7 @@ class MainActivity : ComponentActivity() {
                                             navController.popBackStack()
                                         }
                                     },
-                                    viewModel = viewModel<homeViewModel>()
+                                    viewModel = homeViewModel
                                 ) }
                         )
                     }

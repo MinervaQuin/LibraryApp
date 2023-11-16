@@ -107,10 +107,16 @@ dependencies {
      */
 
     implementation ("androidx.compose.material:material:1.4.2")
-    implementation("com.google.dagger:hilt-android:2.44")
-    kapt("com.google.dagger:hilt-android-compiler:2.44")
+    implementation ("com.google.dagger:hilt-android:2.48.1")
+    kapt ("com.google.dagger:hilt-compiler:2.48.1")
+
+    implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
+
 }
 
 kapt {
     correctErrorTypes = true
+}
+hilt {
+    enableExperimentalClasspathAggregation = true
 }
