@@ -71,7 +71,7 @@ fun HomeView(
             Text(text = "Cerrar Sesión")
         }
         Button(onClick = { viewModel.getBookAndLog("B9svfDJglRgEPyN6wSAh") }) {
-            Text(text = "Cerrar Sesión")
+            Text(text = "obtener libro")
         }
     }
 }

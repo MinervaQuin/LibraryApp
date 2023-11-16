@@ -3,6 +3,7 @@ package com.example.libraryapp.viewModel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.libraryapp.model.Book
 import com.example.libraryapp.model.FirestoreRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -14,12 +15,12 @@ class homeViewModel @Inject constructor(
 ): ViewModel(){
     fun getBookAndLog(bookId: String) {
         viewModelScope.launch {
-            try {
-                val book = firestoreRepository.getBook(bookId)
-                // Imprimir los detalles del libro en el Log
-                Log.d("BookViewModel", "Libro encontrado: ${book.title}, Autor: ${book.author_name}")
-            } catch (e: Exception) {
-                Log.e("BookViewModel", "Error al obtener el libro", e)
+            val book: Book? = firestoreRepository.getBook(bookId)
+            if (book != null) {
+                Log.d("HomeViewModel", "Book: $book")
+                Log.d("Coso supremo", "Precio = ${book.price}")
+            } else {
+                Log.d("HomeViewModel", "Book not found or error occurred")
             }
         }
     }
