@@ -252,6 +252,6 @@ fun TopBar(navController: NavController) {
                     modifier = Modifier.size(32.dp)
                 )
             }
-        }
+        },
     )
 }

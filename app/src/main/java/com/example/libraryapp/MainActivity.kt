@@ -2,7 +2,6 @@ package com.example.libraryapp
 
 
 import CartViewModel
-import android.app.Activity.RESULT_OK
 import android.content.ContentValues
 import android.os.Bundle
 import android.util.Log
@@ -14,7 +13,6 @@ import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -26,9 +24,26 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.navigation
+import androidx.navigation.compose.rememberNavController
+import com.example.libraryapp.model.firebaseAuth.GoogleAuthUiClient
 import com.example.libraryapp.theme.LibraryAppTheme
+import com.example.libraryapp.ui.Cart
+import com.example.libraryapp.ui.CategoryView
+import com.example.libraryapp.ui.HomeView
 import com.example.libraryapp.ui.LoginView
+import com.example.libraryapp.ui.signUpView
+import com.example.libraryapp.ui.theme.BookDetailsScreen
+import com.example.libraryapp.ui.theme.BookScreen
+import com.example.libraryapp.view.AutorScreen
+import com.example.libraryapp.viewModel.AuthorViewModel
+import com.example.libraryapp.viewModel.CategoryViewModel
+import com.example.libraryapp.viewModel.loginViewModel
+import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.Firebase
@@ -36,23 +51,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.firestore
-import androidx.navigation.compose.rememberNavController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import com.example.libraryapp.ui.signUpView
-import com.example.libraryapp.viewModel.loginViewModel
-import androidx.lifecycle.lifecycleScope
-import androidx.navigation.compose.navigation
-import com.example.libraryapp.model.firebaseAuth.GoogleAuthUiClient
-import com.example.libraryapp.ui.Cart
-import com.example.libraryapp.ui.CategoryView
-import com.example.libraryapp.ui.HomeView
-import com.example.libraryapp.ui.theme.AddReview
-import com.example.libraryapp.ui.theme.BookDetailsScreen
-import com.example.libraryapp.view.AutorScreen
-import com.example.libraryapp.viewModel.AuthorViewModel
-import com.example.libraryapp.viewModel.CategoryViewModel
-import com.google.android.gms.auth.api.identity.Identity
 import kotlinx.coroutines.launch
 
 
@@ -82,7 +80,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             val navController = rememberNavController()
-            NavHost(navController = navController, startDestination = "CategoryDestination"){
+            NavHost(navController = navController, startDestination = "SearchScreen"){
                 navigation(
                     startDestination = "login",
                     route = "firstScreens"
@@ -146,7 +144,7 @@ class MainActivity : ComponentActivity() {
                 }
 
                 navigation(
-                    startDestination = "homePage",
+                    startDestination = "bookDetailsView",
                     route = "seconScreens"
                 ){
                     composable("homePage"){
@@ -194,15 +192,15 @@ class MainActivity : ComponentActivity() {
 
                 //composable("signUp") { signUpView(navController = navController)}
 
-                composable("bookDetailsView"){
-                    BookDetailsScreen(navController = navController)
-                }
-                composable("addReviewView"){
-//                    AddReview(navController= navController)
-                }
-                composable("cartView"){
-//                    CartScreen()
-                }
+                    composable("bookDetailsView"){
+                        BookDetailsScreen(navController = navController)
+                    }
+                    composable("addReviewView"){
+    //                    AddReview(navController= navController)
+                    }
+                    composable("cartView"){
+    //                    CartScreen()
+                    }
 
                 }
                 composable("CategoryDestination") {
@@ -232,6 +230,19 @@ class MainActivity : ComponentActivity() {
                                     .padding(padding),
                             )
                             AutorScreen(navController,viewModel)
+                        }
+                    )
+                }
+                composable("SearchScreen"){
+                    Scaffold(
+                        bottomBar = { BottomBar(navController = navController) },
+                        topBar = { TopBar(navController = navController)},
+                        content = { padding ->
+                            Box(
+                                modifier = Modifier
+                                    .padding(padding),
+                            )
+                            BookScreen(navController= navController)
                         }
                     )
                 }

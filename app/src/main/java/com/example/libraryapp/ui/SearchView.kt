@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -41,7 +42,7 @@ import com.example.libraryapp.theme.LibraryAppTheme
 
 
 @Composable
-fun ListOfBooks(
+fun BookScreen(
     names: List<String> = List(1000) { "$it" },
     modifier: Modifier = Modifier.padding(10.dp),
     navController: NavHostController,
@@ -49,6 +50,7 @@ fun ListOfBooks(
 ){
     val navController2 = navController
     Column {
+        Spacer(modifier = Modifier.height(57.dp))
         SearchAppBar()
         Text(text = "Resultados para: " + bookTitle,
             fontWeight = FontWeight.Bold,
@@ -61,6 +63,7 @@ fun ListOfBooks(
                 BookItem(modifier = Modifier, navController)
             }
         }
+        Spacer(modifier = Modifier.height(55.dp))
     }
 
 }
@@ -111,6 +114,7 @@ fun SearchAppBar() {
 fun BookItem(modifier: Modifier, navController: NavHostController) {
     Column(
         modifier = Modifier
+            .padding(bottom = 8.dp)
             .clickable { navController.navigate("BookDetailsView") } //BookDetail(
         ,verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
@@ -153,7 +157,8 @@ fun BookInfo(bookTitle: String = "Reina Roja",
              bookPrice: Number = 12.5){
 
     Row(modifier = Modifier
-        .width(180.dp),
+        .width(180.dp)
+        .padding(start = 5.dp)
     ) {
         Column(modifier = Modifier
             .weight(0.7f),
