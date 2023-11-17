@@ -13,6 +13,7 @@ import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -80,7 +81,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             val navController = rememberNavController()
-            NavHost(navController = navController, startDestination = "SearchScreen"){
+            NavHost(navController = navController, startDestination = "firstScreens"){
                 navigation(
                     startDestination = "login",
                     route = "firstScreens"
@@ -144,7 +145,7 @@ class MainActivity : ComponentActivity() {
                 }
 
                 navigation(
-                    startDestination = "bookDetailsView",
+                    startDestination = "homePage",
                     route = "seconScreens"
                 ){
                     composable("homePage"){
@@ -179,12 +180,16 @@ class MainActivity : ComponentActivity() {
                         Scaffold(
                             bottomBar = { BottomBar(navController = navController) },
                             topBar = { TopBar(navController = navController) },
-                            content = { padding ->
-                                Box(
+                            content = { paddingValues ->
+                                Column(
                                     modifier = Modifier
-                                        .padding(padding)
-                                )
-                                Cart(navController, viewModel)
+                                        .padding(paddingValues)
+                                        .fillMaxSize()
+                                ) {
+                                    // Resto de tu contenido aquí
+                                    // Puedes agregar tus componentes, como Cart(navController, viewModel), dentro de este Column
+                                    Cart(navController, viewModel)
+                                }
                             }
                         )
                     }

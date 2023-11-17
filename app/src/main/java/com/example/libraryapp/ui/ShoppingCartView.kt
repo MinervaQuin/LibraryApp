@@ -125,7 +125,6 @@ fun Cart(navController: NavController, cartViewModel: CartViewModel) {
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
-        Spacer(modifier = Modifier.height(55.dp))
 
         // Título
         Text(
@@ -179,7 +178,6 @@ fun Cart(navController: NavController, cartViewModel: CartViewModel) {
 
         // Botón de acción
         ActionButton(cartViewModel.cartState.value, navController)
-        Spacer(modifier = Modifier.height(50.dp))
     }
 }
 
