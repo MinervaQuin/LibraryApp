@@ -107,7 +107,7 @@ fun AutorScreen (autor: Author){
                     .padding(5.dp)
             )
             Text(
-                text = autor.Biografia,
+                text = autor.biography,
                 style = TextStyle(
                     fontSize = 12.sp,
                     fontWeight = FontWeight(400),
@@ -149,9 +149,12 @@ fun AutorScreen (autor: Author){
             )
         }
         LazyRow(){
-            items(autor.obras.size){
-                for (i in 0 until autor.obras.size){
-                    BookPreview(autor.obras[i])
+            //TODO HE TOCADO ESTO
+            items(autor.works.size){
+                for (i in 0 until autor.works.size){
+                    autor.works[i]?.let { book ->
+                        BookPreview(book)
+                    }
                 }
             }
         }

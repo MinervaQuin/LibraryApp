@@ -70,7 +70,10 @@ fun HomeView(
         Button(onClick = onSignOut){
             Text(text = "Cerrar Sesión")
         }
-        Button(onClick = { viewModel.getBookAndLog("B9svfDJglRgEPyN6wSAh") }) {
+        Button(onClick = {
+            //viewModel.getBookAndLog("B9svfDJglRgEPyN6wSAh")
+            viewModel.getAuthorAndLog("Rkwq8a3v54TV6FSGw2n9")
+        }) {
             Text(text = "obtener libro")
         }
     }
