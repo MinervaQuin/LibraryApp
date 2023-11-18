@@ -27,7 +27,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 
 @Composable
 fun HomeView(
-    userData: UserData?,
+    userData: UserData?, //TODO esto hay que ponerlo en el viewModel
     onSignOut: () -> Unit,
     viewModel: homeViewModel
     ) {
@@ -72,9 +72,12 @@ fun HomeView(
         }
         Button(onClick = {
             //viewModel.getBookAndLog("B9svfDJglRgEPyN6wSAh")
-            viewModel.getAuthorAndLog("Rkwq8a3v54TV6FSGw2n9")
+            //viewModel.getAuthorAndLog("Rkwq8a3v54TV6FSGw2n9")
+            //viewModel.getCollectionAndLog("oBMLVCnbNsPQJiPexKL7")
+            //viewModel.getReviewsAndLog("B9svfDJglRgEPyN6wSAh")
+            viewModel.uploadReviewTest()
         }) {
-            Text(text = "obtener libro")
+            Text(text = "Probar el Coso")
         }
     }
 }
