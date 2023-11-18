@@ -29,12 +29,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.rememberNavController
 import com.example.libraryapp.R
-import com.example.libraryapp.model.Book
+import com.example.libraryapp.model.resources.Book
 import com.example.libraryapp.ui.theme.RatingBar
 import com.example.libraryapp.viewModel.CategoryViewModel
 
 @Composable
-fun BookPreview (obra : Book){
+fun BookPreview (obra : Book?){
     Box(modifier = Modifier
         .padding(10.dp)
         .width(180.dp)
@@ -60,7 +60,7 @@ fun BookPreview (obra : Book){
                     .align(Alignment.CenterHorizontally)
             )
             Text(
-                text = obra.cover,
+                text = obra!!.cover,
                 style = TextStyle(
                     fontSize = 8.sp,
                     fontWeight = FontWeight(700),
@@ -221,5 +221,5 @@ fun iconpainter (id : Int, rep: Int){
 @Preview(showBackground = true)
 @Composable
 fun Previewview() {
-    BookPreviewWide(Book(1, 10, "Arturo Pérez Reverte", "Linea de fuego", "hola hola", 3, "Tapa Dura", 20))
+    BookPreviewWide(Book(1, 10, "Arturo Pérez Reverte", "Linea de fuego", "hola hola", 3, "Tapa Dura", 20.0))
 }

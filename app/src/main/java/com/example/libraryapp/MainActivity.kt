@@ -24,6 +24,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -43,6 +44,7 @@ import com.example.libraryapp.ui.theme.BookScreen
 import com.example.libraryapp.view.AutorScreen
 import com.example.libraryapp.viewModel.AuthorViewModel
 import com.example.libraryapp.viewModel.CategoryViewModel
+import com.example.libraryapp.viewModel.homeViewModel
 import com.example.libraryapp.viewModel.loginViewModel
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.tasks.Task
@@ -52,9 +54,10 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.firestore
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
-
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     val db = Firebase.firestore
     public val googleAuthUiClient by lazy {
@@ -76,11 +79,14 @@ class MainActivity : ComponentActivity() {
             }
         }
     }*/
+
+
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             val navController = rememberNavController()
+            val homeViewModel : homeViewModel = hiltViewModel()
             NavHost(navController = navController, startDestination = "firstScreens"){
                 navigation(
                     startDestination = "login",
@@ -169,7 +175,8 @@ class MainActivity : ComponentActivity() {
                                             ).show()
                                             navController.popBackStack()
                                         }
-                                    }
+                                    },
+                                    viewModel = homeViewModel
                                 ) }
                         )
                     }

@@ -57,8 +57,8 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.libraryapp.R
-import com.example.libraryapp.model.Author
-import com.example.libraryapp.model.Book
+import com.example.libraryapp.model.resources.Author
+import com.example.libraryapp.model.resources.Book
 import com.example.libraryapp.ui.theme.GreenApp
 import com.example.libraryapp.viewModel.CategoryViewModel
 import java.lang.Math.floor
