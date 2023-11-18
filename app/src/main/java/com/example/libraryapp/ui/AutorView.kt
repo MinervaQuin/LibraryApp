@@ -43,6 +43,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.libraryapp.R
+import com.example.libraryapp.model.resources.Author
+import com.example.libraryapp.model.resources.Book
 import com.example.libraryapp.model.Author
 import com.example.libraryapp.model.Book
 import com.example.libraryapp.viewModel.AuthorViewModel
@@ -167,9 +169,12 @@ fun AutorScreen (navController: NavController, ViewModel: AuthorViewModel){
             )
         }
         LazyRow(){
-            items(1){
-                for (i in 0 until autor.obras.size){
-                    BookPreview(autor.obras[i])
+            //TODO HE TOCADO ESTO
+            items(autor.works.size){
+                for (i in 0 until autor.works.size){
+                    autor.works[i]?.let { book ->
+                        BookPreview(book)
+                    }
                 }
             }
         }

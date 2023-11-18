@@ -2,6 +2,8 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.gms.google-services")
+    kotlin("kapt")
+    id("com.google.dagger.hilt.android")
 }
 
 android {
@@ -31,12 +33,10 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
+
     buildFeatures {
         compose = true
     }
@@ -105,5 +105,18 @@ dependencies {
     /*
     #####FIN DEPENDENCIAS DE TERCEROS####
      */
+
     implementation ("androidx.compose.material:material:1.4.2")
+    implementation ("com.google.dagger:hilt-android:2.48.1")
+    kapt ("com.google.dagger:hilt-compiler:2.48.1")
+
+    implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
+
+}
+
+kapt {
+    correctErrorTypes = true
+}
+hilt {
+    enableExperimentalClasspathAggregation = true
 }

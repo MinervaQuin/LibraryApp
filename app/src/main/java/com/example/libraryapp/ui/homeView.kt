@@ -18,20 +18,25 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.example.libraryapp.model.firebaseAuth.UserData
+import com.example.libraryapp.viewModel.homeViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
 
 
 @Composable
 fun HomeView(
-    userData: UserData?,
-    onSignOut: () -> Unit
+    userData: UserData?, //TODO esto hay que ponerlo en el viewModel
+    onSignOut: () -> Unit,
+    viewModel: homeViewModel
     ) {
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ){
+
         println(userData)
         if(userData?.profilePictureUrl != null){
             AsyncImage(
@@ -64,6 +69,15 @@ fun HomeView(
         }
         Button(onClick = onSignOut){
             Text(text = "Cerrar Sesión")
+        }
+        Button(onClick = {
+            //viewModel.getBookAndLog("B9svfDJglRgEPyN6wSAh")
+            //viewModel.getAuthorAndLog("Rkwq8a3v54TV6FSGw2n9")
+            //viewModel.getCollectionAndLog("oBMLVCnbNsPQJiPexKL7")
+            //viewModel.getReviewsAndLog("B9svfDJglRgEPyN6wSAh")
+            viewModel.uploadReviewTest()
+        }) {
+            Text(text = "Probar el Coso")
         }
     }
 }
