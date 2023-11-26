@@ -1,6 +1,6 @@
 package com.example.libraryapp
 
-
+import com.example.libraryapp.viewModel.CategoryViewModel
 import CartViewModel
 import android.content.ContentValues
 import android.os.Bundle
@@ -43,7 +43,6 @@ import com.example.libraryapp.ui.theme.BookDetailsScreen
 import com.example.libraryapp.ui.theme.BookScreen
 import com.example.libraryapp.view.AutorScreen
 import com.example.libraryapp.viewModel.AuthorViewModel
-import com.example.libraryapp.viewModel.CategoryViewModel
 import com.example.libraryapp.viewModel.homeViewModel
 import com.example.libraryapp.viewModel.loginViewModel
 import com.google.android.gms.auth.api.identity.Identity
@@ -200,6 +199,86 @@ class MainActivity : ComponentActivity() {
                             }
                         )
                     }
+                    composable("CategoryImprescindibles") {
+                        val viewModel = viewModel<CategoryViewModel>()
+                        viewModel.updateSelectedCategory("Imprescindibles")
+                        // Contenido de la pantalla del carrito
+                        Scaffold(
+                            bottomBar = { BottomBar(navController = navController) },
+                            topBar = { TopBar(navController = navController)},
+                            content = { padding ->
+                                Box(
+                                    modifier = Modifier
+                                        .padding(padding),
+                                )
+                                CategoryView(navController,viewModel)
+                            }
+                        )
+                    }
+                    composable("CategoryFiction") {
+                        val viewModel = viewModel<CategoryViewModel>()
+                        // Contenido de la pantalla del carrito
+                        Scaffold(
+                            bottomBar = { BottomBar(navController = navController) },
+                            topBar = { TopBar(navController = navController)},
+                            content = { padding ->
+                                Box(
+                                    modifier = Modifier
+                                        .padding(padding),
+                                )
+                                viewModel.updateSelectedCategory("Ficción")
+                                CategoryView(navController,viewModel)
+                            }
+                        )
+                    }
+                    composable("CategoryNoFiction") {
+                        val viewModel = viewModel<CategoryViewModel>()
+                        // Contenido de la pantalla del carrito
+                        Scaffold(
+                            bottomBar = { BottomBar(navController = navController) },
+                            topBar = { TopBar(navController = navController)},
+                            content = { padding ->
+                                Box(
+                                    modifier = Modifier
+                                        .padding(padding),
+                                )
+                                viewModel.updateSelectedCategory("No Ficción")
+                                CategoryView(navController,viewModel)
+                            }
+                        )
+                    }
+                    composable("Categoryinfantil") {
+                        val viewModel = viewModel<CategoryViewModel>()
+                        // Contenido de la pantalla del carrito
+                        Scaffold(
+                            bottomBar = { BottomBar(navController = navController) },
+                            topBar = { TopBar(navController = navController)},
+                            content = { padding ->
+                                Box(
+                                    modifier = Modifier
+                                        .padding(padding),
+                                )
+                                viewModel.updateSelectedCategory("Infantil")
+                                CategoryView(navController,viewModel)
+                            }
+                        )
+                    }
+                    composable("CategoryCómic-Manga") {
+                        val viewModel = viewModel<CategoryViewModel>()
+                        // Contenido de la pantalla del carrito
+                        Scaffold(
+                            bottomBar = { BottomBar(navController = navController) },
+                            topBar = { TopBar(navController = navController)},
+                            content = { padding ->
+                                Box(
+                                    modifier = Modifier
+                                        .padding(padding),
+                                )
+                                viewModel.updateSelectedCategory("Cómic y Manga")
+                                CategoryView(navController,viewModel)
+                            }
+                        )
+                    }
 
 
                 //composable("signUp") { signUpView(navController = navController)}
@@ -214,21 +293,6 @@ class MainActivity : ComponentActivity() {
     //                    CartScreen()
                     }
 
-                }
-                composable("CategoryDestination") {
-                    val viewModel = viewModel<CategoryViewModel>()
-                    // Contenido de la pantalla del carrito
-                    Scaffold(
-                        bottomBar = { BottomBar(navController = navController) },
-                        topBar = { TopBar(navController = navController)},
-                        content = { padding ->
-                            Box(
-                                modifier = Modifier
-                                    .padding(padding),
-                            )
-                            CategoryView(navController,viewModel)
-                        }
-                    )
                 }
                 composable("AuthorDestination") {
                     val viewModel = viewModel<AuthorViewModel>()

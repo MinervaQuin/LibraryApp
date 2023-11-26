@@ -91,31 +91,31 @@ fun TopBar(navController: NavController) {
             title = "Imprescindibles",
             selectedIcon = Icons.Filled.Book,
             unselectedIcon = Icons.Outlined.Book,
-            route = "must"
+            route = "CategoryImprescindibles"
         ),
         NavigationItem(
             title = "Ficción",
             selectedIcon = Icons.Filled.Book,
             unselectedIcon = Icons.Outlined.Book,
-            route = "fiction"
+            route = "CategoryFiction"
         ),
         NavigationItem(
             title = "No Ficción",
             selectedIcon = Icons.Filled.Book,
             unselectedIcon = Icons.Outlined.Book,
-            route = "not_fiction"
+            route = "CategoryNoFiction"
         ),
         NavigationItem(
             title = "Infantil",
             selectedIcon = Icons.Filled.Book,
             unselectedIcon = Icons.Outlined.Book,
-            route = "kids"
+            route = "Categoryinfantil"
         ),
         NavigationItem(
             title = "Cómic y Manga",
             selectedIcon = Icons.Filled.Book,
             unselectedIcon = Icons.Outlined.Book,
-            route = "manga"
+            route = "CategoryCómic-Manga"
         ),
         NavigationItem(
             title = "Ofertas",

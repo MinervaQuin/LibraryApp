@@ -20,14 +20,14 @@ class CategoryViewModel : ViewModel() {
         private set
     init {
         // Inicializa la lista de libros con datos de prueba o desde algún origen de datos
-        categories = listOf("Fiction", "Non-Fiction", "Mystery", "Science Fiction", "Fantasy")
+        categories = listOf("Imprescindibles","Ficción", "No Ficción", "Infantil", "Cómic y Manga")
         selectedCategory = categories.firstOrNull().toString()
         novedades = getNovedadesNew(selectedCategory)
         filtrados = getBookFiltrados(selectedCategory)
     }
 
     private fun getBookFiltrados(Categorias : String): Array<Book> {
-        if(Categorias == "Mystery"){
+        if(Categorias == "Ficción"){
             return arrayOf(
                 Book(12, 15, "Stephen King", "Misery1", "hola hola", 3, "Tapa Dura", 35.0),
                 Book(12, 15, "Stephen King", "Misery2", "hola hola", 7, "Tapa Dura", 40.0),
@@ -46,7 +46,7 @@ class CategoryViewModel : ViewModel() {
     }
 
     private fun getNovedadesNew(Categorias : String): Array<Book> {
-        if(Categorias == "Mystery"){
+        if(Categorias == "Ficción"){
             return arrayOf(
                 Book(12, 15, "Stephen King", "Misery1", "hola hola", 3, "Tapa Dura", 35.0),
                 Book(12, 15, "Stephen King", "Misery2", "hola hola", 7, "Tapa Dura", 40.0),
