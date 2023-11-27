@@ -42,33 +42,41 @@ import com.example.libraryapp.ui.theme.GreenApp
 import com.example.libraryapp.viewModel.CategoryViewModel
 
 @Composable
-fun CategoryView (navController: NavController, ViewModel: CategoryViewModel){
+fun CategoryView (navController: NavController, ViewModel: CategoryViewModel,categoria: String ){
     //val selectedCategory by rememberUpdatedState(newValue = ViewModel.selectedCategory)
+    //ViewModel.updateSelectedCategory(categoria)
+    val executedOnce = remember { mutableSetOf<Boolean>() }
+
+    if (executedOnce.add(true)) {
+        // La siguiente línea de código se ejecutará solo la primera vez que se llame al composable
+        println("Esta línea se ejecutará solo una vez")
+        ViewModel.updateSelectedCategory(categoria)
+    }
+
     Column (
         modifier = Modifier
             .fillMaxWidth()
-            .padding(20.dp)
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.Center,
     )
     {
-        Spacer(modifier = Modifier.height(55.dp))
         ViewModel.selectedCategory?.let {
             Text(
                 text = it,
                 style = TextStyle(
-                    fontSize = 48.sp,
+                    fontSize = 43.sp,
                     fontWeight = FontWeight(700),
                     color = GreenApp,
                     textAlign = TextAlign.Center,
                 ) ,
                 modifier = Modifier
                     .align(alignment = Alignment.CenterHorizontally)
-                    .padding(25.dp)
+                    .padding(20.dp)
             )
         }
         Box(
             modifier = Modifier
+                .padding(horizontal = 10.dp)
                 .fillMaxWidth()
                 .height(2.dp)
                 .background(Color.Black)
@@ -86,6 +94,7 @@ fun CategoryView (navController: NavController, ViewModel: CategoryViewModel){
         )
         Box(
             modifier = Modifier
+                .padding(horizontal = 10.dp)
                 .fillMaxWidth()
                 .height(2.dp)
                 .background(Color.Black)
@@ -120,6 +129,7 @@ fun BookCategoriesDropdown(
     // Dropdown menu
     Box(
         modifier = Modifier
+            .padding(horizontal = 10.dp)
             .width(149.dp)
             .height(27.dp)
             .clickable {
@@ -155,10 +165,11 @@ fun BookCategoriesDropdown(
     }
 }
 
+/*
 @Preview(showBackground = true)
 @Composable
 fun PreviewCategory() {
     val navController = rememberNavController()
-    CategoryView(navController, CategoryViewModel())
-}
+    CategoryView(navController, CategoryViewModel(), "Ficción")
+}*/
 //ComposeQuadrantApp()

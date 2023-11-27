@@ -201,33 +201,40 @@ class MainActivity : ComponentActivity() {
                     }
                     composable("CategoryImprescindibles") {
                         val viewModel = viewModel<CategoryViewModel>()
-                        viewModel.updateSelectedCategory("Imprescindibles")
                         // Contenido de la pantalla del carrito
                         Scaffold(
                             bottomBar = { BottomBar(navController = navController) },
                             topBar = { TopBar(navController = navController)},
-                            content = { padding ->
-                                Box(
+                            content = { paddingValues ->
+                                Column(
                                     modifier = Modifier
-                                        .padding(padding),
-                                )
-                                CategoryView(navController,viewModel)
+                                        .padding(paddingValues)
+                                        .fillMaxSize()
+                                ) {
+                                    // Resto de tu contenido aquí
+                                    // Puedes agregar tus componentes, como Cart(navController, viewModel), dentro de este Column
+                                    CategoryView(navController,viewModel,"Imprescindibles")
+                                }
                             }
                         )
                     }
+
                     composable("CategoryFiction") {
                         val viewModel = viewModel<CategoryViewModel>()
                         // Contenido de la pantalla del carrito
                         Scaffold(
                             bottomBar = { BottomBar(navController = navController) },
                             topBar = { TopBar(navController = navController)},
-                            content = { padding ->
-                                Box(
+                            content = { paddingValues ->
+                                Column(
                                     modifier = Modifier
-                                        .padding(padding),
-                                )
-                                viewModel.updateSelectedCategory("Ficción")
-                                CategoryView(navController,viewModel)
+                                        .padding(paddingValues)
+                                        .fillMaxSize()
+                                ) {
+                                    // Resto de tu contenido aquí
+                                    // Puedes agregar tus componentes, como Cart(navController, viewModel), dentro de este Column
+                                    CategoryView(navController,viewModel,"Ficción")
+                                }
                             }
                         )
                     }
@@ -237,13 +244,16 @@ class MainActivity : ComponentActivity() {
                         Scaffold(
                             bottomBar = { BottomBar(navController = navController) },
                             topBar = { TopBar(navController = navController)},
-                            content = { padding ->
-                                Box(
+                            content = { paddingValues ->
+                                Column(
                                     modifier = Modifier
-                                        .padding(padding),
-                                )
-                                viewModel.updateSelectedCategory("No Ficción")
-                                CategoryView(navController,viewModel)
+                                        .padding(paddingValues)
+                                        .fillMaxSize()
+                                ) {
+                                    // Resto de tu contenido aquí
+                                    // Puedes agregar tus componentes, como Cart(navController, viewModel), dentro de este Column
+                                    CategoryView(navController,viewModel,"No Ficción")
+                                }
                             }
                         )
                     }
@@ -253,13 +263,16 @@ class MainActivity : ComponentActivity() {
                         Scaffold(
                             bottomBar = { BottomBar(navController = navController) },
                             topBar = { TopBar(navController = navController)},
-                            content = { padding ->
-                                Box(
+                            content = { paddingValues ->
+                                Column(
                                     modifier = Modifier
-                                        .padding(padding),
-                                )
-                                viewModel.updateSelectedCategory("Infantil")
-                                CategoryView(navController,viewModel)
+                                        .padding(paddingValues)
+                                        .fillMaxSize()
+                                ) {
+                                    // Resto de tu contenido aquí
+                                    // Puedes agregar tus componentes, como Cart(navController, viewModel), dentro de este Column
+                                    CategoryView(navController,viewModel,"Infantil")
+                                }
                             }
                         )
                     }
@@ -269,14 +282,18 @@ class MainActivity : ComponentActivity() {
                         Scaffold(
                             bottomBar = { BottomBar(navController = navController) },
                             topBar = { TopBar(navController = navController)},
-                            content = { padding ->
-                                Box(
+                            content = { paddingValues ->
+                                Column(
                                     modifier = Modifier
-                                        .padding(padding),
-                                )
-                                viewModel.updateSelectedCategory("Cómic y Manga")
-                                CategoryView(navController,viewModel)
+                                        .padding(paddingValues)
+                                        .fillMaxSize()
+                                ) {
+                                    // Resto de tu contenido aquí
+                                    // Puedes agregar tus componentes, como Cart(navController, viewModel), dentro de este Column
+                                    CategoryView(navController,viewModel, "Cómic y Manga")
+                                }
                             }
+
                         )
                     }
 
@@ -309,6 +326,21 @@ class MainActivity : ComponentActivity() {
                         }
                     )
                 }
+                /*composable("CategoryImprescindibles1") {
+                    val viewModel = viewModel<CategoryViewModel>()
+                    // Contenido de la pantalla del carrito
+                    Scaffold(
+                        bottomBar = { BottomBar(navController = navController) },
+                        topBar = { TopBar(navController = navController)},
+                        content = { padding ->
+                            Box(
+                                modifier = Modifier
+                                    .padding(padding),
+                            )
+                            CategoryView(navController,viewModel)
+                        }
+                    )
+                }*/
                 composable("SearchScreen"){
                     Scaffold(
                         bottomBar = { BottomBar(navController = navController) },
