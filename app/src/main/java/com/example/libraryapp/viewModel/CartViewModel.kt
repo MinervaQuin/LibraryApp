@@ -1,66 +1,75 @@
+package com.example.libraryapp.viewModel
+
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-
+import androidx.lifecycle.viewModelScope
+import com.example.libraryapp.model.FirestoreRepository
+import com.example.libraryapp.model.resources.Book
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
+@HiltViewModel
+class CartViewModel @Inject constructor(
+    private val firestoreRepository: FirestoreRepository
+) : ViewModel() {
 
-data class Book(val title: String, val author: String, val price: Double, val imageUrl: String)
-data class CartItem(val book: Book, var quantity: MutableState<Int> = mutableStateOf(1))
-class CartViewModel : ViewModel() {
-    private val _cartItems = MutableStateFlow<List<CartItem>>(emptyList())
-    val cartItems: StateFlow<List<CartItem>> = _cartItems
+    private val _cartItems = mutableMapOf<Book, Int>()
+    private val _cartItemsStateFlow = MutableStateFlow(_cartItems.toMap())
+    val cartItems: StateFlow<Map<Book, Int>> = _cartItemsStateFlow.asStateFlow()
     val cartState = mutableStateOf(CartState())
-    private val _cartItemsStateFlow = MutableStateFlow(Unit)
 
-    private val _booksInStock = listOf(
-        Book("El señor de los anillos", "J.R.R. Tolkien", 19.99, "https://m.media-amazon.com/images/I/91ddMPYKaYL._SY342_.jpg"),
-        Book("Cien años de soledad", "Gabriel García Márquez", 14.99, "https://m.media-amazon.com/images/I/91ddMPYKaYL._SY342_.jpg"),
-        Book("1984", "George Orwell", 12.99, "https://m.media-amazon.com/images/I/91ddMPYKaYL._SY342_.jpg"),
-        Book("Don Quijote de la Mancha", "Miguel de Cervantes", 16.99, "https://m.media-amazon.com/images/I/91ddMPYKaYL._SY342_.jpg")
-        // Puedes agregar más libros según sea necesario
-    )
-
+    /* para probar el funcionamiento descomentar esto
     init {
-        // Inicializar el carrito con algunos libros
-        _booksInStock.forEach { book ->
-            addBookToCart(book)
+        // Inicializar el carrito con algunos libros desde la base de datos
+        viewModelScope.launch {
+            addBookToCartFromDatabase("B9svfDJglRgEPyN6wSAh")
+            // Puedes agregar más libros según sea necesario
+        }
+    }
+    */
+
+    suspend fun addBookToCartFromDatabase(isbn: String) {
+        val book: Book? = firestoreRepository.getBook(isbn)
+
+        if (book != null) {
+            val existingQuantity = _cartItems[book] ?: 0
+            _cartItems[book] = existingQuantity + 1
+
+            recalculateCart()
+            updateCartItems()
         }
     }
 
     fun addBookToCart(book: Book) {
-        val existingItem = cartItems.value.find { it.book == book }
+        val existingQuantity = _cartItems[book] ?: 0
+        _cartItems[book] = existingQuantity + 1
 
-        if (existingItem != null) {
-            existingItem.quantity.value++
-        } else {
-            _cartItems.value = cartItems.value + CartItem(book, mutableStateOf(1))
-        }
         recalculateCart()
     }
 
-    fun removeBookFromCart(cartItem: CartItem) {
-        val updatedItems = cartItems.value.toMutableList()
-        updatedItems.remove(cartItem)
-        _cartItems.value = updatedItems
-        recalculateCart() // Asegúrate de recalcular el carrito después de eliminar un artículo
+    fun removeBookFromCart(book: Book) {
+        _cartItems.remove(book)
+        recalculateCart()
+        updateCartItems()
     }
 
+    fun updateCartItemQuantity(book: Book, newQuantity: Int) {
+        _cartItems[book] = newQuantity
+        recalculateCart()
+        updateCartItems()
+    }
 
-    fun updateCartItemQuantity(cartItem: CartItem, newQuantity: Int) {
-        val updatedItems = _cartItems.value.toMutableList()
-        val index = updatedItems.indexOf(cartItem)
-
-        if (index != -1) {
-            updatedItems[index] = cartItem.copy(quantity = mutableStateOf(newQuantity))
-            _cartItems.value = updatedItems
-            recalculateCart()
-        }
+    private fun updateCartItems() {
+        _cartItemsStateFlow.value = _cartItems.toMap()
     }
 
     fun recalculateCart() {
-        val subtotal = _cartItems.value.sumOf { it.book.price * it.quantity.value }
+        val subtotal = _cartItems.entries.sumOf { (book, quantity) -> book.price * quantity }
         val deliveryCost = if (cartState.value.deliveryOption == DeliveryOption.PICK_UP) 0.0 else 2.99
         val total = subtotal + deliveryCost
 
@@ -68,8 +77,10 @@ class CartViewModel : ViewModel() {
         cartState.value.cartSubtotal.value = subtotal
         cartState.value.deliveryCost.value = deliveryCost
 
-        _cartItemsStateFlow.value = Unit
+        // Actualizar el StateFlow con el nuevo mapa
+        _cartItemsStateFlow.value = _cartItems.toMap()
     }
+
 
     fun updateDeliveryOption(deliveryOption: DeliveryOption) {
         cartState.value = cartState.value.copy(deliveryOption = deliveryOption)
@@ -82,9 +93,9 @@ class CartViewModel : ViewModel() {
         var deliveryCost: MutableState<Double> = mutableStateOf(0.0),
         var cartTotal: MutableState<Double> = mutableStateOf(0.0)
     )
+
     enum class DeliveryOption {
         PICK_UP,
         HOME_DELIVERY
     }
 }
-

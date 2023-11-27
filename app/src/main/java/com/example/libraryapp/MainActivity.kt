@@ -1,7 +1,6 @@
 package com.example.libraryapp
 
 import com.example.libraryapp.viewModel.CategoryViewModel
-import CartViewModel
 import android.content.ContentValues
 import android.os.Bundle
 import android.util.Log
@@ -43,6 +42,7 @@ import com.example.libraryapp.ui.theme.BookDetailsScreen
 import com.example.libraryapp.ui.theme.BookScreen
 import com.example.libraryapp.view.AutorScreen
 import com.example.libraryapp.viewModel.AuthorViewModel
+import com.example.libraryapp.viewModel.CartViewModel
 import com.example.libraryapp.viewModel.homeViewModel
 import com.example.libraryapp.viewModel.loginViewModel
 import com.google.android.gms.auth.api.identity.Identity
@@ -86,6 +86,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             val navController = rememberNavController()
             val homeViewModel : homeViewModel = hiltViewModel()
+
             NavHost(navController = navController, startDestination = "firstScreens"){
                 navigation(
                     startDestination = "login",
@@ -181,8 +182,8 @@ class MainActivity : ComponentActivity() {
                     }
 
                     composable("cartDestination") {
-                        val viewModel = viewModel<CartViewModel>()
                         // Contenido de la pantalla del carrito
+                        val cartViewModel : CartViewModel = hiltViewModel()
                         Scaffold(
                             bottomBar = { BottomBar(navController = navController) },
                             topBar = { TopBar(navController = navController) },
@@ -194,7 +195,7 @@ class MainActivity : ComponentActivity() {
                                 ) {
                                     // Resto de tu contenido aquí
                                     // Puedes agregar tus componentes, como Cart(navController, viewModel), dentro de este Column
-                                    Cart(navController, viewModel)
+                                    Cart(navController, cartViewModel)
                                 }
                             }
                         )
