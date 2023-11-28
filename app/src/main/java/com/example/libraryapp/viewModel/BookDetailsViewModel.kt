@@ -48,6 +48,7 @@ class BookDetailsViewModel: ViewModel() {
 
     fun closeDialog(){
         _bookUiState.update { currentState ->
+
             currentState.copy(
                 showDialog = false
             )

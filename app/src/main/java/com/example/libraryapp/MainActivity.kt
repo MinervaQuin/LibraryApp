@@ -87,7 +87,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             val navController = rememberNavController()
             val homeViewModel : homeViewModel = hiltViewModel()
-            NavHost(navController = navController, startDestination = "firstScreens"){
+            NavHost(navController = navController, startDestination = "seconScreens"){
                 navigation(
                     startDestination = "login",
                     route = "firstScreens"
