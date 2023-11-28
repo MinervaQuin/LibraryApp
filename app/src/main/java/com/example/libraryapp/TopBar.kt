@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Book
@@ -91,31 +93,31 @@ fun TopBar(navController: NavController) {
             title = "Imprescindibles",
             selectedIcon = Icons.Filled.Book,
             unselectedIcon = Icons.Outlined.Book,
-            route = "must"
+            route = "CategoryImprescindibles"
         ),
         NavigationItem(
             title = "Ficción",
             selectedIcon = Icons.Filled.Book,
             unselectedIcon = Icons.Outlined.Book,
-            route = "fiction"
+            route = "CategoryFiction"
         ),
         NavigationItem(
             title = "No Ficción",
             selectedIcon = Icons.Filled.Book,
             unselectedIcon = Icons.Outlined.Book,
-            route = "not_fiction"
+            route = "CategoryNoFiction"
         ),
         NavigationItem(
             title = "Infantil",
             selectedIcon = Icons.Filled.Book,
             unselectedIcon = Icons.Outlined.Book,
-            route = "kids"
+            route = "Categoryinfantil"
         ),
         NavigationItem(
             title = "Cómic y Manga",
             selectedIcon = Icons.Filled.Book,
             unselectedIcon = Icons.Outlined.Book,
-            route = "manga"
+            route = "CategoryCómic-Manga"
         ),
         NavigationItem(
             title = "Ofertas",
@@ -169,29 +171,41 @@ fun TopBar(navController: NavController) {
                     Text(text = "Nombre de Usuario", fontSize = 16.sp, color = gray)
                 }
                 Divider(modifier = Modifier.fillMaxWidth().padding(start = 30.dp, end = 30.dp), color = gray, thickness = 1.dp)
-                items.forEachIndexed { index, item ->
-                    NavigationDrawerItem(
-                        label = { Text(text = item.title) },
-                        selected = item == selectedItem,
-                        onClick = {
-                            navController.navigate(item.route)
-                            scope.launch {
-                                drawerState.close()
-                            }
-                        },
-                        icon = {
-                            Icon(
-                                imageVector = if (item == selectedItem) {
-                                    item.selectedIcon
-                                } else item.unselectedIcon,
-                                contentDescription = item.title,
-                                tint = gray
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(8.dp)
+                ) {
+                    items.forEachIndexed { index, item ->
+                        item {
+                            NavigationDrawerItem(
+                                label = { Text(text = item.title) },
+                                selected = item == selectedItem,
+                                onClick = {
+                                    navController.navigate(item.route)
+                                    scope.launch {
+                                        drawerState.close()
+                                    }
+                                },
+                                icon = {
+                                    Icon(
+                                        imageVector = if (item == selectedItem) {
+                                            item.selectedIcon
+                                        } else item.unselectedIcon,
+                                        contentDescription = item.title,
+                                        tint = gray
+                                    )
+                                },
+                                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                             )
-                        },
-                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
-                    )
-                    if (index == 1) {
-                        Divider(modifier = Modifier.fillMaxWidth().padding(start = 30.dp, end = 30.dp), color = gray, thickness = 1.dp)
+                            if (index == 1) {
+                                Divider(
+                                    modifier = Modifier.fillMaxWidth()
+                                        .padding(start = 30.dp, end = 30.dp),
+                                    color = gray,
+                                    thickness = 1.dp
+                                )
+                            }
+                        }
                     }
                 }
             }

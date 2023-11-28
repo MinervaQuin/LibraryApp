@@ -1,6 +1,7 @@
 package com.example.libraryapp.ui.theme
 
 
+import android.util.Log
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -26,6 +27,11 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -35,19 +41,32 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.example.libraryapp.R
+import com.example.libraryapp.model.resources.Book
 import com.example.libraryapp.theme.LibraryAppTheme
+import com.example.libraryapp.viewModel.SearchViewModel
 
 
 @Composable
 fun BookScreen(
-    names: List<String> = List(1000) { "$it" },
     modifier: Modifier = Modifier.padding(10.dp),
     navController: NavHostController,
     bookTitle: String = "Reina Roja"
 ){
+    val searchViewModel : SearchViewModel = hiltViewModel()
+    var books by remember { mutableStateOf<List<Book?>>(emptyList()) }
+
+    LaunchedEffect(searchViewModel) {
+        try {
+            books = searchViewModel.getBooksStringMatch()
+        } catch (e: Exception) {
+            Log.e("Firestore", "Error en BookScreen", e)
+        }
+    }
+
     val navController2 = navController
     Column {
         Spacer(modifier = Modifier.height(57.dp))
@@ -59,8 +78,11 @@ fun BookScreen(
             columns = GridCells.Adaptive(minSize = 180.dp),
             modifier = Modifier.padding(bottom = 10.dp, top = 10.dp)
         ){
-            items(items = names) {
-                BookItem(modifier = Modifier, navController)
+            items(items = books) {
+                BookItem(it, modifier = Modifier, navController)
+                if (it != null) {
+                    Log.d("Firestore", it.title)
+                }
             }
         }
         Spacer(modifier = Modifier.height(55.dp))
@@ -74,14 +96,15 @@ fun BookScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchAppBar() {
+    var searchString by remember { mutableStateOf("") }
     OutlinedTextField(
         modifier = Modifier
             .fillMaxWidth()
             .padding(15.dp)
-            .height(40.dp),
+            .height(50.dp),
 
-        value = "",
-        onValueChange = {},
+        value = searchString,
+        onValueChange = { searchString = it },
         leadingIcon = {
             Icon(
                 imageVector = Icons.Filled.Search,
@@ -111,7 +134,7 @@ fun SearchAppBar() {
 
 
 @Composable
-fun BookItem(modifier: Modifier, navController: NavHostController) {
+fun BookItem(book: Book?, modifier: Modifier, navController: NavHostController) {
     Column(
         modifier = Modifier
             .padding(bottom = 8.dp)
@@ -123,11 +146,7 @@ fun BookItem(modifier: Modifier, navController: NavHostController) {
         //ShowRectangle()
         LoadBookCover("https://m.media-amazon.com/images/I/41uWfObYYQL._SY445_SX342_.jpg")
 
-        //LoadBookCover(imageUrl = "http://books.google.com/books/content?id=8U2oAAAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api")
-
-        //LoadBookCover(imageUrl = "https://books.google.com/books/content?id=8U2oAAAAQBAJ&printsec=frontcover&img=1&zoom=1")
-
-        BookInfo()
+        BookInfo(book)
 
 
     }
@@ -152,9 +171,7 @@ fun LoadBookCover(imageUrl: String){
     }
 }
 @Composable
-fun BookInfo(bookTitle: String = "Reina Roja",
-             authorName: String = "Juan Gómez-Jurado",
-             bookPrice: Number = 12.5){
+fun BookInfo(book: Book?){
 
     Row(modifier = Modifier
         .width(180.dp)
@@ -164,11 +181,11 @@ fun BookInfo(bookTitle: String = "Reina Roja",
             .weight(0.7f),
             verticalArrangement = Arrangement.Center,
         ) {
-            Text(text = bookTitle)
-            Text(text = authorName)
+            book?.let { Text(text = it.title) }
+            book?.let { Text(text = it.author_name) }
         }
 
-        Text(text = bookPrice.toString() + "€", modifier = Modifier.padding(end=10.dp),
+        Text(text = book?.price.toString() + "€", modifier = Modifier.padding(end=10.dp),
             style = TextStyle(color = Color.DarkGray, fontWeight =FontWeight.Bold)
         )
     }

@@ -1,9 +1,9 @@
 package com.example.libraryapp.model.firebaseAuth
 
 import android.util.Log
+import com.example.libraryapp.model.FirestoreRepository
 import com.example.libraryapp.model.resources.Author
 import com.example.libraryapp.model.resources.Book
-import com.example.libraryapp.model.FirestoreRepository
 import com.example.libraryapp.model.resources.Collection
 import com.example.libraryapp.model.resources.Review
 import com.google.firebase.Timestamp
@@ -12,7 +12,10 @@ import kotlinx.coroutines.tasks.await
 import java.time.LocalDate
 import java.time.ZoneId
 import java.util.Date
+import java.util.regex.Matcher
+import java.util.regex.Pattern
 import javax.inject.Inject
+
 
 class FirestoreRepositoryImpl @Inject constructor(private val firebaseFirestore: FirebaseFirestore): FirestoreRepository {
     override val dataBase: FirebaseFirestore?
@@ -47,6 +50,60 @@ class FirestoreRepositoryImpl @Inject constructor(private val firebaseFirestore:
             emptyList()
         }
     }
+
+    override suspend fun getAllBooks2(): List<Book?> {
+        val bookArray: MutableList<Book?> = mutableListOf()
+        return try {
+            val querySnapshot = FirebaseFirestore.getInstance()
+                .collection("books") // Reemplaza con el nombre de tu colección en Firestore
+                .get()
+                .await()
+
+            for (document in querySnapshot.documents) {
+                document.getString("title")?.let { Log.d("Firestore", it) }
+                val book = document.toObject(Book::class.java)
+                bookArray.add(book)
+            }
+            Log.d("Firestore", bookArray.size.toString())
+            bookArray
+        } catch (e: Exception) {
+            Log.d("FirestoreRepository", "getAllBooks failed with ", e)
+            emptyList()
+        }
+    }
+
+
+    //conseguir una lista de id de libros a partir de una string
+    override suspend fun getAllIds(searchString: String): List<String?> {
+        val bookArray: MutableList<String?> = mutableListOf()
+        return try {
+            val regexPattern: String = "$searchString.*$"
+            val pattern: Pattern = Pattern.compile(regexPattern, Pattern.CASE_INSENSITIVE)
+
+            // Ahora puedes usar el objeto "pattern" para hacer coincidencias en Java
+            // Por ejemplo:
+
+            // Ahora puedes usar el objeto "pattern" para hacer coincidencias en Java
+            // Por ejemplo:
+
+
+
+            val input = "reina roj"
+            val matcher: Matcher = pattern.matcher(input)
+
+            if (matcher.find()) {
+                Log.d("FirestoreRepository","Coincidencia encontrada")
+            } else {
+                Log.d("FirestoreRepository","No se encontró coincidencia")
+            }
+
+            return bookArray
+        } catch (e: Exception) {
+            Log.d("FirestoreRepository", "getAllBooks failed with ", e)
+            emptyList()
+        }
+    }
+
 
     override suspend fun getAuthor(authorId: String): Author? {
 
