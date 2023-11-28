@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -37,6 +39,7 @@ import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
 import com.example.libraryapp.model.firebaseAuth.UserData
+import com.example.libraryapp.ui.theme.GreenAppOpacity
 import com.example.libraryapp.viewModel.homeViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 
@@ -48,13 +51,60 @@ fun HomeView(
     viewModel: homeViewModel
     ) {
     val colecionPrueba = Collection("Prueba", "Cositas bro", "https://m.media-amazon.com/images/I/6135vNR5sCL._AC_UF1000,1000_QL80_.jpg")
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(vertical = 90.dp), // Agregar padding vertical
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ){
+        item {
+            Row(){
+                CollectionBox(collection = colecionPrueba)
+                CollectionBox(collection = colecionPrueba)
+
+            }
+            Row(){
+                CollectionBox(collection = colecionPrueba)
+                CollectionBox(collection = colecionPrueba)
+
+            }
+            Row(){
+                CollectionBox(collection = colecionPrueba)
+                CollectionBox(collection = colecionPrueba)
+
+            }
+
+        }
+        item {
+            Button(onClick = onSignOut){
+                Text(text = "Cerrar Sesión")
+            }
+        }
+        item {
+            Button(onClick = {
+                //viewModel.getBookAndLog("B9svfDJglRgEPyN6wSAh")
+                //viewModel.getAuthorAndLog("Rkwq8a3v54TV6FSGw2n9")
+                //viewModel.getCollectionAndLog("oBMLVCnbNsPQJiPexKL7")
+                //viewModel.getReviewsAndLog("B9svfDJglRgEPyN6wSAh")
+                //viewModel.uploadReviewTest()
+
+            }) {
+                Text(text = "Probar el Coso")
+            }
+        }
+    }
+    /*
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ){
+        Row(){
+            CollectionBox(collection = colecionPrueba)
+            CollectionBox(collection = colecionPrueba)
+        }
 
-        CollectionBox(collection = colecionPrueba)
         Button(onClick = onSignOut){
             Text(text = "Cerrar Sesión")
         }
@@ -71,6 +121,8 @@ fun HomeView(
 
 
     }
+     */
+
 
 }
 data class Collection(
@@ -83,8 +135,8 @@ fun CollectionBox(collection: Collection) {
     Card(
         modifier = Modifier
             .padding(8.dp)
-            .height(200.dp)
-            .width(120.dp),
+            .height(250.dp)
+            .width(150.dp),
         elevation = CardDefaults.elevatedCardElevation(8.dp),
         shape = RectangleShape // Bordes rectos
     ) {
@@ -104,18 +156,18 @@ fun CollectionBox(collection: Collection) {
             }
             Box(
                 modifier = Modifier
-                    .weight(0.2f) // Toma una fracción más pequeña del espacio
+                    .weight(0.15f) // Toma una fracción más pequeña del espacio
                     .fillMaxWidth()
-                    .background(Color.Black) // Fondo negro para el texto
+                    .background(GreenAppOpacity) // Fondo negro para el texto
             ) {
                 Text(
                     text = collection.title.toUpperCase(),
                     color = Color.White,
-                    fontSize = 18.sp,
+                    fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier
                         .align(Alignment.Center) // Centra el texto en la caja más pequeña
-                        .padding(8.dp)
+                        .padding(2.dp)
                 )
             }
         }
