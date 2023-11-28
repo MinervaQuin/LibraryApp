@@ -31,6 +31,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
+import com.example.libraryapp.model.firebaseAuth.FirestoreRepositoryImpl
 import com.example.libraryapp.model.firebaseAuth.GoogleAuthUiClient
 import com.example.libraryapp.theme.LibraryAppTheme
 import com.example.libraryapp.ui.Cart
@@ -43,6 +44,7 @@ import com.example.libraryapp.ui.theme.BookScreen
 import com.example.libraryapp.view.AutorScreen
 import com.example.libraryapp.viewModel.AuthorViewModel
 import com.example.libraryapp.viewModel.CartViewModel
+import com.example.libraryapp.viewModel.ShoppingCart
 import com.example.libraryapp.viewModel.homeViewModel
 import com.example.libraryapp.viewModel.loginViewModel
 import com.google.android.gms.auth.api.identity.Identity
@@ -59,6 +61,7 @@ import kotlinx.coroutines.launch
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     val db = Firebase.firestore
+
     public val googleAuthUiClient by lazy {
         GoogleAuthUiClient(
             context = applicationContext,
@@ -83,6 +86,8 @@ class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        var firestoreRepository = FirestoreRepositoryImpl(FirebaseFirestore.getInstance())
+        ShoppingCart.init(firestoreRepository)
         setContent {
             val navController = rememberNavController()
             val homeViewModel : homeViewModel = hiltViewModel()
@@ -183,7 +188,7 @@ class MainActivity : ComponentActivity() {
 
                     composable("cartDestination") {
                         // Contenido de la pantalla del carrito
-                        val cartViewModel : CartViewModel = hiltViewModel()
+                        val cartViewModel : CartViewModel = ShoppingCart.getViewModelInstance()
                         Scaffold(
                             bottomBar = { BottomBar(navController = navController) },
                             topBar = { TopBar(navController = navController) },

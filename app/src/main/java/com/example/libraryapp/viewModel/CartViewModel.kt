@@ -30,12 +30,12 @@ class CartViewModel @Inject constructor(
         }
     }
     */
+
     companion object {
         // Cambiar el acceso a la instancia del CartViewModel mediante el Singleton
         val instance: CartViewModel
-            get() = ShoppingCart.getViewModel()
+            get() = ShoppingCart.getViewModelInstance()
     }
-
 
     suspend fun addBookToCartFromDatabase(isbn: String) {
         val book: Book? = firestoreRepository.getBook(isbn)

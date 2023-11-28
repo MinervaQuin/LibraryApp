@@ -4,16 +4,14 @@ import com.example.libraryapp.model.FirestoreRepository
 
 object ShoppingCart {
     private lateinit var firestoreRepository: FirestoreRepository
+    private lateinit var viewModel: CartViewModel
 
     fun init(firestoreRepository: FirestoreRepository) {
         this.firestoreRepository = firestoreRepository
+        viewModel = CartViewModel(firestoreRepository)
     }
 
-    private val viewModel: CartViewModel by lazy {
-        CartViewModel(firestoreRepository)
-    }
-
-    fun getViewModel(): CartViewModel {
+    fun getViewModelInstance(): CartViewModel {
         return viewModel
     }
 }
@@ -34,5 +32,5 @@ cartViewModel.cartItems.collect { cartItems ->
 }
 
 // Inicializar el objeto singleton con la instancia de FirestoreRepository
-ShoppingCart.init(FirestoreRepository())
+ShoppingCart.init(FirestoreRepository)
 */
