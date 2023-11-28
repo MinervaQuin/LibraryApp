@@ -2,10 +2,6 @@ package com.example.libraryapp.viewModel
 
 import com.example.libraryapp.model.FirestoreRepository
 
-// CartViewModelSingleton.kt
-
-// CartViewModelSingleton.kt
-
 object ShoppingCart {
     private lateinit var firestoreRepository: FirestoreRepository
 
