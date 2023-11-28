@@ -65,5 +65,9 @@ class homeViewModel @Inject constructor(
         }
 
     }
+    //porbar si añade libros al carrito
+    suspend fun getBook(isbn: String): Book? {
+        return firestoreRepository.getBook(isbn)
+    }
 }
 
