@@ -122,7 +122,7 @@ class FirestoreRepositoryImpl @Inject constructor(private val firebaseFirestore:
                 var bookArray = getAllBooks(documentSnapshot.get("works") as? List<String> ?: listOf())
                 author.name = documentSnapshot.getString("name") ?: "No se ha encontrado un nombre"
                 author.biography = documentSnapshot.getString("biography")?: "No se ha encontrado una Biografía"
-
+                author.cover= documentSnapshot.getString("cover")?: "Not found"
                 author.works = bookArray.toTypedArray()
                 author
             } else {

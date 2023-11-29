@@ -59,6 +59,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
 import com.example.libraryapp.ui.BookPreview
 
 @Composable
@@ -85,8 +86,8 @@ fun AutorScreen (navController: NavController, ViewModel: AuthorViewModel,id: St
                 .align(alignment = Alignment.CenterHorizontally)
                 .padding(30.dp)
         )
-        Image(
-            painter = painterResource(id = R.drawable.image_21),
+        AsyncImage(
+            model = autor.cover,
             contentDescription = "image description",
             contentScale = ContentScale.FillBounds,
             modifier = Modifier
