@@ -3,6 +3,7 @@ package com.example.libraryapp.model.resources
 class Author (
     var id: String = "",
     var name: String = "",
+    var cover: String = "",
     var biography: String = "",
     var works: Array<Book?> = arrayOf()
 )       {

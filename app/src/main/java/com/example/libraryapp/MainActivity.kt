@@ -248,25 +248,10 @@ class MainActivity : ComponentActivity() {
                                 modifier = Modifier
                                     .padding(padding),
                             )
-                            AutorScreen(navController,viewModel,"Rkwq8a3v54TV6FSGw2n9")
+                            AutorScreen(navController,viewModel,"4VIRMHxR4Xf2VjUADMRp")
                         }
                     )
                 }
-                /*composable("CategoryImprescindibles1") {
-                    val viewModel = viewModel<CategoryViewModel>()
-                    // Contenido de la pantalla del carrito
-                    Scaffold(
-                        bottomBar = { BottomBar(navController = navController) },
-                        topBar = { TopBar(navController = navController)},
-                        content = { padding ->
-                            Box(
-                                modifier = Modifier
-                                    .padding(padding),
-                            )
-                            CategoryView(navController,viewModel)
-                        }
-                    )
-                }*/
                 composable("SearchScreen"){
                     Scaffold(
                         bottomBar = { BottomBar(navController = navController) },

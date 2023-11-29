@@ -20,10 +20,10 @@ class CategoryViewModel @Inject constructor(
     val idcolecciones = mapOf(
         "Populares" to "oBMLVCnbNsPQJiPexKL7",
         "Imprescindibles" to "zUQSuupoSizxqCKsLQX8",
-        "Ficción" to "",
-        "No Ficción" to "",
-        "Infantil" to "",
-        "Cómic y Manga" to "",
+        "Ficción" to "ESLWeeZsPaU0fA0XR9nt",
+        "No Ficción" to "bgnmJtAVQ1uQFLjz3RO5",
+        "Infantil" to "5SVJKEbVOdy1jUD3YDYn",
+        "Cómic y Manga" to "p8KT9DM4yIbmdV5U8k4v",
     )
     var coleccion by mutableStateOf(Collection())
         private set
@@ -37,10 +37,10 @@ class CategoryViewModel @Inject constructor(
         private set
     init {
         // Inicializa la lista de libros con datos de prueba o desde algún origen de datos
-        categories = listOf("Populares","Imprescindibles","Ficción", "No Ficción", "Infantil", "Cómic y Manga")
+        categories = listOf("Imprescindibles","Ficción", "No Ficción", "Infantil", "Cómic y Manga","Populares")
     }
 
-    private fun getBookFiltrados(Categorias : String): Array<Book> {
+/*    private fun getBookFiltrados(Categorias : String): Array<Book> {
         if(Categorias == "Ficción"){
             return arrayOf(
                 Book(12, 15, "Stephen King", "Misery1", "hola hola", 3, "Tapa Dura", 35.0),
@@ -58,8 +58,8 @@ class CategoryViewModel @Inject constructor(
         )
 
     }
-
-    private fun getNovedadesNew(Categorias : String) {
+*/
+    private fun updatebooks(Categorias : String) {
         viewModelScope.launch {
             val colection: Collection? = firestoreRepository.getCollection(idcolecciones[Categorias]?:"")
             if (colection != null) {
@@ -69,6 +69,7 @@ class CategoryViewModel @Inject constructor(
                 coleccion= Collection()
             }
             novedades = coleccion.books.take(10).toTypedArray()
+            filtrados = coleccion.books as Array<Book>
         }
     }
     fun updateCategories(newCategories: List<String>) {
@@ -76,9 +77,7 @@ class CategoryViewModel @Inject constructor(
     }
     fun updateSelectedCategory(newCategory: String) {
         selectedCategory = newCategory
-        getNovedadesNew(selectedCategory)
-        filtrados = getBookFiltrados(selectedCategory)
-
+        updatebooks(selectedCategory)
     }
 
 }
