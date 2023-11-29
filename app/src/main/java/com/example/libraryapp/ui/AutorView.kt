@@ -62,8 +62,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.libraryapp.ui.BookPreview
 
 @Composable
-fun AutorScreen (navController: NavController, ViewModel: AuthorViewModel){
-    val autor = ViewModel.Autor
+fun AutorScreen (navController: NavController, ViewModel: AuthorViewModel,id: String){
+    ViewModel.updateAutor(id)
+    val autor = ViewModel.autor
     Column (
         modifier = Modifier
             .fillMaxWidth()

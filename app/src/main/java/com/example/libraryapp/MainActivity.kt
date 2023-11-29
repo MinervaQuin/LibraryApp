@@ -91,7 +91,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             val navController = rememberNavController()
             val homeViewModel : homeViewModel = hiltViewModel()
-            NavHost(navController = navController, startDestination = "SearchScreen"){
+            NavHost(navController = navController, startDestination = "AuthorDestination"){
 
                 navigation(
                     startDestination = "login",
@@ -318,7 +318,7 @@ class MainActivity : ComponentActivity() {
 
                 }
                 composable("AuthorDestination") {
-                    val viewModel = viewModel<AuthorViewModel>()
+                    val viewModel : AuthorViewModel = hiltViewModel()
                     // Contenido de la pantalla del carrito
                     Scaffold(
                         bottomBar = { BottomBar(navController = navController) },
@@ -328,7 +328,7 @@ class MainActivity : ComponentActivity() {
                                 modifier = Modifier
                                     .padding(padding),
                             )
-                            AutorScreen(navController,viewModel)
+                            AutorScreen(navController,viewModel,"Rkwq8a3v54TV6FSGw2n9")
                         }
                     )
                 }
