@@ -27,10 +27,12 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,6 +50,9 @@ import com.example.libraryapp.R
 import com.example.libraryapp.model.resources.Book
 import com.example.libraryapp.theme.LibraryAppTheme
 import com.example.libraryapp.viewModel.SearchViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 @Composable
@@ -61,7 +66,7 @@ fun BookScreen(
 
     LaunchedEffect(searchViewModel) {
         try {
-            books = searchViewModel.getBooksStringMatch()
+            books = searchViewModel.getAllBooks()
         } catch (e: Exception) {
             Log.e("Firestore", "Error en BookScreen", e)
         }
@@ -70,7 +75,9 @@ fun BookScreen(
     val navController2 = navController
     Column {
         Spacer(modifier = Modifier.height(57.dp))
-        SearchAppBar()
+        SearchAppBar(searchViewModel) { newValue ->
+            books = newValue
+        }
         Text(text = "Resultados para: " + bookTitle,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(start = 6.dp))
@@ -95,8 +102,10 @@ fun BookScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchAppBar() {
+fun SearchAppBar(searchViewModel: SearchViewModel, modifyState: (List<Book?>) -> Unit) {
     var searchString by remember { mutableStateOf("") }
+    val coroutineScope = rememberCoroutineScope()
+
     OutlinedTextField(
         modifier = Modifier
             .fillMaxWidth()
@@ -104,21 +113,35 @@ fun SearchAppBar() {
             .height(50.dp),
 
         value = searchString,
-        onValueChange = { searchString = it },
+        onValueChange = { searchString = it},
         leadingIcon = {
-            Icon(
-                imageVector = Icons.Filled.Search,
-                contentDescription = "Search Icon",
-                tint = Color(0xFF77CF7C)
-            )
-        },
-        trailingIcon = {
-
-            IconButton(onClick = { /*TODO*/ }) { // Ir a pagina de scan codigo de barras
+            IconButton(onClick = {
+            }) {
                 Icon(
                     painter = painterResource(id = R.drawable.upc_scan),
                     contentDescription = "Close Icon",
                     tint = GreenApp
+                )
+            }
+        },
+        trailingIcon = {
+
+            IconButton(onClick = {
+                coroutineScope.launch {
+                    try {
+                        // Use withContext to switch to the IO dispatcher if needed
+                        withContext(Dispatchers.IO) {
+                            modifyState(searchViewModel.getBooksStringMatch(searchString))
+                        }
+                    } catch (e: Exception) {
+                        Log.e("Firestore", "Error in SearchBar", e)
+                    }
+            }}) { // Ir a pagina de scan codigo de barras
+
+                Icon(
+                    imageVector = Icons.Filled.Search,
+                    contentDescription = "Search Icon",
+                    tint = Color(0xFF77CF7C)
                 )
             }
         },
@@ -209,7 +232,7 @@ fun ShowRectangle() {
 @Composable
 fun Greeting2Preview() {
     LibraryAppTheme {
-        SearchAppBar()
+//        SearchAppBar()
     }
 }
 

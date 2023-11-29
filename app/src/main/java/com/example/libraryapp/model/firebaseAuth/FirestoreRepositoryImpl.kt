@@ -72,30 +72,23 @@ class FirestoreRepositoryImpl @Inject constructor(private val firebaseFirestore:
         }
     }
 
+    override suspend fun searchAllBooks(allBooks: List<Book?>, searchString: String): List<Book?> {
+        val bookArray: MutableList<Book?> = mutableListOf()
 
-    //conseguir una lista de id de libros a partir de una string
-    override suspend fun getAllIds(searchString: String): List<String?> {
-        val bookArray: MutableList<String?> = mutableListOf()
         return try {
             val regexPattern: String = "$searchString.*$"
             val pattern: Pattern = Pattern.compile(regexPattern, Pattern.CASE_INSENSITIVE)
 
-            // Ahora puedes usar el objeto "pattern" para hacer coincidencias en Java
-            // Por ejemplo:
-
-            // Ahora puedes usar el objeto "pattern" para hacer coincidencias en Java
-            // Por ejemplo:
-
-
-
-            val input = "reina roj"
-            val matcher: Matcher = pattern.matcher(input)
-
-            if (matcher.find()) {
-                Log.d("FirestoreRepository","Coincidencia encontrada")
-            } else {
-                Log.d("FirestoreRepository","No se encontró coincidencia")
+            allBooks.forEach { book ->
+                if (isBookMatching(book, pattern)) {
+                    Log.d("FirestoreRepository", "Coincidencia encontrada")
+                    bookArray.add(book)
+                } else {
+                    Log.d("FirestoreRepository", "No se encontró coincidencia")
+                }
             }
+            bookArray
+
 
             return bookArray
         } catch (e: Exception) {
@@ -103,6 +96,18 @@ class FirestoreRepositoryImpl @Inject constructor(private val firebaseFirestore:
             emptyList()
         }
     }
+
+    private fun isBookMatching(book: Book?, pattern: Pattern): Boolean {
+        // Verifica si hay coincidencia en cualquier atributo del libro
+        if (book != null) {
+            return (book?.title?.let { pattern.matcher(it).find() } == true ||
+                    book.author_name?.let { pattern.matcher(it).find() } == true ||
+                    book.ISBN?.let { pattern.matcher(it.toString()).find() } == true)
+        }
+        return false
+    }
+
+
 
 
     override suspend fun getAuthor(authorId: String): Author? {

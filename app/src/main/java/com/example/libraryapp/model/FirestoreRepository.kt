@@ -14,7 +14,8 @@ interface FirestoreRepository {
     suspend fun getAllBooks(booksIds: List<String>): List<Book?>
     suspend fun getAllBooks2(): List<Book?>
 
-    suspend fun getAllIds(searchString: String): List<String?>
+    suspend fun searchAllBooks(allBooks: List<Book?>, searchString: String): List<Book?>
+
     suspend fun getAuthor(authorId: String) : Author?
     suspend fun getCollection(collectionId: String) : Collection?
     suspend fun getReviews(bookId: String): List<Review?>
