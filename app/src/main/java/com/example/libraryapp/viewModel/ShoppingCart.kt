@@ -3,13 +3,11 @@ package com.example.libraryapp.viewModel
 import com.example.libraryapp.model.FirestoreRepository
 
 object ShoppingCart {
-    private lateinit var firestoreRepository: FirestoreRepository
     private lateinit var viewModel: CartViewModel
     private var categorySelected: String = ""
 
-    fun init(firestoreRepository: FirestoreRepository) {
-        this.firestoreRepository = firestoreRepository
-        viewModel = CartViewModel(firestoreRepository)
+    fun init() {
+        viewModel = CartViewModel()
     }
 
     fun getViewModelInstance(): CartViewModel {

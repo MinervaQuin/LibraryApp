@@ -86,8 +86,7 @@ class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        var firestoreRepository = FirestoreRepositoryImpl(FirebaseFirestore.getInstance())
-        ShoppingCart.init(firestoreRepository)
+        ShoppingCart.init()
         setContent {
             val navController = rememberNavController()
             val homeViewModel : homeViewModel = hiltViewModel()

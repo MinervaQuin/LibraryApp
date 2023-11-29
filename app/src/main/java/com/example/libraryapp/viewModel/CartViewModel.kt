@@ -13,7 +13,6 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CartViewModel @Inject constructor(
-    private val firestoreRepository: FirestoreRepository
 ) : ViewModel() {
 
     private val _cartItems = mutableMapOf<Book, Int>()
@@ -35,18 +34,6 @@ class CartViewModel @Inject constructor(
         // Cambiar el acceso a la instancia del CartViewModel mediante el Singleton
         val instance: CartViewModel
             get() = ShoppingCart.getViewModelInstance()
-    }
-
-    suspend fun addBookToCartFromDatabase(isbn: String) {
-        val book: Book? = firestoreRepository.getBook(isbn)
-
-        if (book != null) {
-            val existingQuantity = _cartItems[book] ?: 0
-            _cartItems[book] = existingQuantity + 1
-
-            recalculateCart()
-            updateCartItems()
-        }
     }
 
     fun addBookToCart(book: Book) {
