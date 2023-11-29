@@ -136,7 +136,7 @@ class FirestoreRepositoryImpl @Inject constructor(private val firebaseFirestore:
     }
     override suspend fun getCollection(collectionId: String) : Collection?{
         return try {
-            val documentSnapshot = firebaseFirestore.collection("collections").document("oBMLVCnbNsPQJiPexKL7").get().await()
+            val documentSnapshot = firebaseFirestore.collection("collections").document(collectionId).get().await()
 
             if (documentSnapshot.exists()){
                 var collection = Collection()

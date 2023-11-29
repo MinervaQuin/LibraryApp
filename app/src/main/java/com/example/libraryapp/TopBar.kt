@@ -57,6 +57,8 @@ import com.example.libraryapp.theme.green
 import kotlinx.coroutines.launch
 import coil.compose.AsyncImage
 import com.example.libraryapp.theme.white
+import com.example.libraryapp.viewModel.CartViewModel
+import com.example.libraryapp.viewModel.ShoppingCart
 
 
 data class NavigationItem(
@@ -87,37 +89,37 @@ fun TopBar(navController: NavController) {
             title = "Cesta",
             selectedIcon = Icons.Filled.ShoppingCart,
             unselectedIcon = Icons.Outlined.ShoppingCart,
-            route = "cartDestination"
+            route = "cartDestination",
         ),
         NavigationItem(
             title = "Imprescindibles",
             selectedIcon = Icons.Filled.Book,
             unselectedIcon = Icons.Outlined.Book,
-            route = "CategoryImprescindibles"
+            route = "Category",
         ),
         NavigationItem(
             title = "Ficción",
             selectedIcon = Icons.Filled.Book,
             unselectedIcon = Icons.Outlined.Book,
-            route = "CategoryFiction"
+            route = "Category"
         ),
         NavigationItem(
             title = "No Ficción",
             selectedIcon = Icons.Filled.Book,
             unselectedIcon = Icons.Outlined.Book,
-            route = "CategoryNoFiction"
+            route = "Category"
         ),
         NavigationItem(
             title = "Infantil",
             selectedIcon = Icons.Filled.Book,
             unselectedIcon = Icons.Outlined.Book,
-            route = "Categoryinfantil"
+            route = "Category"
         ),
         NavigationItem(
             title = "Cómic y Manga",
             selectedIcon = Icons.Filled.Book,
             unselectedIcon = Icons.Outlined.Book,
-            route = "CategoryCómic-Manga"
+            route = "Category"
         ),
         NavigationItem(
             title = "Ofertas",
@@ -129,12 +131,12 @@ fun TopBar(navController: NavController) {
             title = "Ayuda",
             selectedIcon = Icons.Filled.Info,
             unselectedIcon = Icons.Outlined.Info,
-            route = "ayuda"
+            route = "ayuda",
         )
     )
     DisposableEffect(navController) {
         val listener = NavController.OnDestinationChangedListener { _, destination, _ ->
-            selectedItem = items.find { it.route == destination.route }
+            //selectedItem = items.find { it.route == destination.route }
             isOnCartScreen = destination.route == "cartDestination"
         }
         navController.addOnDestinationChangedListener(listener)
@@ -181,6 +183,9 @@ fun TopBar(navController: NavController) {
                                 label = { Text(text = item.title) },
                                 selected = item == selectedItem,
                                 onClick = {
+                                    if(item.title != "Perfil" && item.title != "Cesta" && item.title != "Ayuda"){
+                                        ShoppingCart.setSelectedCategory(item.title)
+                                    }
                                     navController.navigate(item.route)
                                     scope.launch {
                                         drawerState.close()

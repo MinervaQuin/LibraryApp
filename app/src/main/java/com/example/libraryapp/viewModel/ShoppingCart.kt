@@ -5,6 +5,7 @@ import com.example.libraryapp.model.FirestoreRepository
 object ShoppingCart {
     private lateinit var firestoreRepository: FirestoreRepository
     private lateinit var viewModel: CartViewModel
+    private var categorySelected: String = ""
 
     fun init(firestoreRepository: FirestoreRepository) {
         this.firestoreRepository = firestoreRepository
@@ -13,6 +14,12 @@ object ShoppingCart {
 
     fun getViewModelInstance(): CartViewModel {
         return viewModel
+    }
+    fun setSelectedCategory(new: String){
+        this.categorySelected= new
+    }
+    fun getSelectedCategory(): String{
+        return this.categorySelected
     }
 }
 

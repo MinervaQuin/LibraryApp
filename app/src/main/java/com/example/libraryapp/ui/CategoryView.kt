@@ -48,8 +48,6 @@ fun CategoryView (navController: NavController, ViewModel: CategoryViewModel,cat
     val executedOnce = remember { mutableSetOf<Boolean>() }
 
     if (executedOnce.add(true)) {
-        // La siguiente línea de código se ejecutará solo la primera vez que se llame al composable
-        println("Esta línea se ejecutará solo una vez")
         ViewModel.updateSelectedCategory(categoria)
     }
 
