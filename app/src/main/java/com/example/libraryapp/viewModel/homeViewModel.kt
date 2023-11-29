@@ -1,6 +1,7 @@
 package com.example.libraryapp.viewModel
 
 import android.util.Log
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.libraryapp.model.resources.Author
@@ -8,7 +9,9 @@ import com.example.libraryapp.model.resources.Book
 import com.example.libraryapp.model.FirestoreRepository
 import com.example.libraryapp.model.resources.Collection
 import com.example.libraryapp.model.resources.Review
+import com.example.libraryapp.ui.theme.GreenAppOpacity
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import javax.inject.Inject
@@ -17,6 +20,22 @@ import javax.inject.Inject
 class homeViewModel @Inject constructor(
     private val firestoreRepository: FirestoreRepository
 ): ViewModel(){
+    data class CollectionSamples(
+        val title: String,
+        val color: Color,
+        val imageUrl: String,
+        val route: String
+    )
+    var collectionArray = MutableStateFlow<List<CollectionSamples>>(
+        listOf(
+            CollectionSamples("Prueba 1", GreenAppOpacity, "https://m.media-amazon.com/images/I/6135vNR5sCL._AC_UF1000,1000_QL80_.jpg","1"),
+            CollectionSamples("Prueba 2", GreenAppOpacity, "https://m.media-amazon.com/images/I/6135vNR5sCL._AC_UF1000,1000_QL80_.jpg","2"),
+            CollectionSamples("Prueba 3", GreenAppOpacity, "https://m.media-amazon.com/images/I/6135vNR5sCL._AC_UF1000,1000_QL80_.jpg","3"),
+            CollectionSamples("Prueba 4", GreenAppOpacity, "https://m.media-amazon.com/images/I/6135vNR5sCL._AC_UF1000,1000_QL80_.jpg","4"),
+            CollectionSamples("Prueba 5", GreenAppOpacity, "https://m.media-amazon.com/images/I/6135vNR5sCL._AC_UF1000,1000_QL80_.jpg","5"),
+            CollectionSamples("Prueba 6", GreenAppOpacity, "https://m.media-amazon.com/images/I/6135vNR5sCL._AC_UF1000,1000_QL80_.jpg","6"),
+        )
+    )
     fun getBookAndLog(bookId: String) {
         viewModelScope.launch {
             val book: Book? = firestoreRepository.getBook(bookId)

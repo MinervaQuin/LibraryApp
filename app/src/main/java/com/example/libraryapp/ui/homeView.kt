@@ -1,8 +1,10 @@
 package com.example.libraryapp.ui
 
 import CartViewModel
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,9 +25,12 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
@@ -42,6 +47,7 @@ import com.example.libraryapp.model.firebaseAuth.UserData
 import com.example.libraryapp.ui.theme.GreenAppOpacity
 import com.example.libraryapp.viewModel.homeViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import androidx.compose.foundation.clickable
 
 
 @Composable
@@ -50,6 +56,8 @@ fun HomeView(
     onSignOut: () -> Unit,
     viewModel: homeViewModel
     ) {
+
+    val collectionsArray by viewModel.collectionArray.collectAsState()
     val colecionPrueba = Collection("Prueba", "Cositas bro", "https://m.media-amazon.com/images/I/6135vNR5sCL._AC_UF1000,1000_QL80_.jpg")
     LazyColumn(
         modifier = Modifier
@@ -58,23 +66,17 @@ fun HomeView(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ){
-        item {
-            Row(){
-                CollectionBox(collection = colecionPrueba)
-                CollectionBox(collection = colecionPrueba)
+        val chunkedCollections = collectionsArray.chunked(2)
+        chunkedCollections.forEach { pair ->
+            item {
+                Row(
 
+                ) {
+                    pair.forEach { CollectionSamples ->
+                        CollectionBox(collection = CollectionSamples)
+                    }
+                }
             }
-            Row(){
-                CollectionBox(collection = colecionPrueba)
-                CollectionBox(collection = colecionPrueba)
-
-            }
-            Row(){
-                CollectionBox(collection = colecionPrueba)
-                CollectionBox(collection = colecionPrueba)
-
-            }
-
         }
         item {
             Button(onClick = onSignOut){
@@ -131,12 +133,16 @@ data class Collection(
     val imageUrl: String
 )
 @Composable
-fun CollectionBox(collection: Collection) {
+fun CollectionBox(collection: homeViewModel.CollectionSamples) {
     Card(
         modifier = Modifier
             .padding(8.dp)
             .height(250.dp)
-            .width(150.dp),
+            .width(150.dp)
+            .border(2.dp, Color.Black, shape = RectangleShape)
+            .clickable{
+                Log.d("CollectionBoxClick", "Route: ${collection.route}")
+            },
         elevation = CardDefaults.elevatedCardElevation(8.dp),
         shape = RectangleShape // Bordes rectos
     ) {
@@ -174,12 +180,41 @@ fun CollectionBox(collection: Collection) {
     }
 }
 
-
+@Composable
+fun LargeCollectionBox(collection: homeViewModel.CollectionSamples) {
+    Card(
+        modifier = Modifier
+            .padding(8.dp)
+            .height(50.dp) // Ajusta la altura según sea necesario
+            .fillMaxWidth() // Se extiende al ancho máximo disponible
+            .clickable{
+                Log.d("CollectionBoxClick", "Route: ${collection.route}")
+            },
+            elevation = CardDefaults.elevatedCardElevation(8.dp), // Ajusta la elevación según sea necesario
+        shape = RoundedCornerShape(12.dp) // Esquinas redondeadas como en la imagen
+    ) {
+        Box(
+            modifier = Modifier
+                .background(Brush.horizontalGradient(listOf(Color.Yellow, Color.Red))) // Un gradiente horizontal similar al de la imagen
+                .fillMaxSize()
+        ) {
+            Text(
+                text = collection.title.toUpperCase(), // Usa el nombre de la categoría en mayúsculas
+                color = Color.White,
+                fontSize = 18.sp, // Ajusta el tamaño de fuente según sea necesario
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier
+                    .align(Alignment.Center) // Centra el texto en la caja
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+            )
+        }
+    }
+}
 
 @Preview(showBackground = true)
 @Composable
 fun PreviewhomeView() {
     val colecionPrueba = Collection("Prueba", "Cositas bro", "https://m.media-amazon.com/images/I/6135vNR5sCL._AC_UF1000,1000_QL80_.jpg")
-    CollectionBox(colecionPrueba)
+    //CollectionBox(homeViewModel.CollectionSamples)
 
 }
