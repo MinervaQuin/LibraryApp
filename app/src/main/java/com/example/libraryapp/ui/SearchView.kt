@@ -85,12 +85,12 @@ fun BookScreen(
                 stringSearched = newSearchString
             }
         )
-        Text(text = "Resultados para: " + stringSearched,
+        Text(text = if (stringSearched.length != 0) "Resultados para: " + stringSearched else "",
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(start = 6.dp))
+            modifier = if (stringSearched.length != 0) Modifier.padding(start = 6.dp, top=8.dp, bottom = 8.dp) else Modifier.padding(start = 0.dp))
         LazyVerticalGrid(
             columns = GridCells.Adaptive(minSize = 180.dp),
-            modifier = Modifier.padding(bottom = 60.dp, top = 10.dp)
+            modifier = Modifier.padding(bottom = 60.dp, top = 0.dp)
         ){
             items(items = books) {
                 BookItem(it, modifier = Modifier, navController)
@@ -119,7 +119,7 @@ fun SearchAppBar(searchViewModel: SearchViewModel,
     OutlinedTextField(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(15.dp)
+            .padding(top = 15.dp, start = 10.dp, end = 10.dp)
             .height(50.dp),
 
         value = searchString,
