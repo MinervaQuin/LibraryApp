@@ -90,7 +90,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             val navController = rememberNavController()
             val homeViewModel : homeViewModel = hiltViewModel()
-            NavHost(navController = navController, startDestination = "firstScreens"){
+            NavHost(navController = navController, startDestination = "secondScreens"){
 
                 navigation(
                     startDestination = "login",
@@ -103,7 +103,7 @@ class MainActivity : ComponentActivity() {
 
                         LaunchedEffect(key1 = Unit){
                             if(googleAuthUiClient.getSignedInUser() != null){
-                                navController.navigate("seconScreens")
+                                navController.navigate("secondScreens")
                             }
                         }
 
@@ -129,7 +129,7 @@ class MainActivity : ComponentActivity() {
                                     Toast.LENGTH_LONG
                                 ).show()
 
-                                navController.navigate("seconScreens")
+                                navController.navigate("secondScreens")
                                 viewModel.resetState()
                             }
                         }
@@ -156,7 +156,7 @@ class MainActivity : ComponentActivity() {
 
                 navigation(
                     startDestination = "homePage",
-                    route = "seconScreens"
+                    route = "secondScreens"
                 ){
                     composable("homePage"){
                         Scaffold(
