@@ -195,12 +195,6 @@ fun TopBar(navController: NavController) {
     }
 
 
-
-
-
-
-
-
     DismissibleNavigationDrawer(drawerContent = {
         Box(
             modifier = Modifier
