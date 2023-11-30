@@ -3,6 +3,7 @@ package com.example.libraryapp.model.firebaseAuth
 import android.util.Log
 import com.example.libraryapp.model.FirestoreRepository
 import com.example.libraryapp.model.resources.Author
+import com.example.libraryapp.model.resources.AuthorFb
 import com.example.libraryapp.model.resources.Book
 import com.example.libraryapp.model.resources.Collection
 import com.example.libraryapp.model.resources.Review
@@ -12,7 +13,6 @@ import kotlinx.coroutines.tasks.await
 import java.time.LocalDate
 import java.time.ZoneId
 import java.util.Date
-import java.util.regex.Matcher
 import java.util.regex.Pattern
 import javax.inject.Inject
 
@@ -123,7 +123,7 @@ class FirestoreRepositoryImpl @Inject constructor(private val firebaseFirestore:
                 author.name = documentSnapshot.getString("name") ?: "No se ha encontrado un nombre"
                 author.biography = documentSnapshot.getString("biography")?: "No se ha encontrado una Biografía"
 
-                author.works = bookArray.toTypedArray()
+//                author.works = bookArray.toTypedArray()
                 author
             } else {
                 null
@@ -227,5 +227,64 @@ class FirestoreRepositoryImpl @Inject constructor(private val firebaseFirestore:
             Log.d("FirestoreRepository", "upLoadReview failed with ", e)
         }
     }
+
+    override suspend fun uploadBookToFirestore() {
+        val newBook = Book(
+            author_id = 9,
+            title = "El arte de la guerra",
+            author_name = "Sun Tzu",
+            ISBN = 9788420691206,
+            sinopsis = "Oculta con su familia y otra familia judía (los Van Daan), en una buhardilla de unos almacenes de Ámsterdam durante la ocupación nazi de Holanda.  Ana Frankcon trece años, cuenta en su diario, al que llamó «Kitty», la vida del grupo. Ayudados por varios empleados de la oficina, permanecieron durante más de dos años en el achterhuis (conocido como «el anexo secreto») hasta que, finalmente, fueron delatados y detenidos. Ana escribió un diario entre el 12 de junio de 1942 y el 1 de agosto de 1944. El 4 de agosto de 1944, unos vecinos (se desconocen los nombres) delatan a los ocho escondidos en \"la casa de atrás\". Además del Diario escribió varios cuentos que han sido publicados paulatinamente desde 1960. Su hermana, Margot Frank también escribió un diario, pero nunca se encontró ningún rastro de éste." ,
+            score = 2,
+            cover = "https://books.google.com/books/content?id=_-nnoQEACAAJ&printsec=frontcover&img=1&zoom=1",
+            price = 10.93,
+            ref = ""
+        )
+        val newAuthor = AuthorFb(
+            id = 9,
+            name = "Sun Tzu",
+            biography = "t",
+            works = listOf<String>()
+
+
+        )
+        try {
+            val firestore = FirebaseFirestore.getInstance()
+            firestore.collection("books")
+                .add(newBook)
+
+                .addOnSuccessListener { documentReference ->
+                    // En este punto, el libro se ha subido exitosamente a Firestore
+                    // Puedes imprimir el ID del documento si es necesario
+                    println("DocumentSnapshot added with ID: ${documentReference.id}")
+                }
+                .addOnFailureListener { e ->
+                    // Maneja los errores aquí
+                    println("Error adding document: $e")
+                }
+        } catch (e: Exception) {
+            Log.d("FirestoreRepository", "uploadBook failed with ", e)
+        }
+
+        try {
+            val firestore = FirebaseFirestore.getInstance()
+            firestore.collection("authors")
+                .add(newAuthor)
+
+                .addOnSuccessListener { documentReference ->
+                    // En este punto, el libro se ha subido exitosamente a Firestore
+                    // Puedes imprimir el ID del documento si es necesario
+                    println("DocumentSnapshot added with ID: ${documentReference.id}")
+                }
+                .addOnFailureListener { e ->
+                    // Maneja los errores aquí
+                    println("Error adding document: $e")
+                }
+        } catch (e: Exception) {
+            Log.d("FirestoreRepository", "uploadAuthor failed with ", e)
+        }
+    }
+
+
 
 }

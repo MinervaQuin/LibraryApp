@@ -87,6 +87,7 @@ fun BookScreen(
         ){
             items(items = books) {
                 BookItem(it, modifier = Modifier, navController)
+
                 if (it != null) {
                     Log.d("Firestore", it.title)
                 }
@@ -166,9 +167,9 @@ fun BookItem(book: Book?, modifier: Modifier, navController: NavHostController) 
         horizontalAlignment = Alignment.CenterHorizontally
 
     ) {
-        //ShowRectangle()
-        LoadBookCover("https://m.media-amazon.com/images/I/41uWfObYYQL._SY445_SX342_.jpg")
-
+        if (book != null) {
+            LoadBookCover(imageUrl = book.cover)
+        }
         BookInfo(book)
 
 
@@ -214,19 +215,6 @@ fun BookInfo(book: Book?){
     }
 }
 
-@Composable
-fun ShowRectangle() {
-
-    Canvas(modifier = Modifier
-        .size(180.dp, 250.dp)) {
-
-        drawRect(
-            color = GreenApp
-        )
-    }
-
-
-}
 
 @Preview(showBackground = true)
 @Composable

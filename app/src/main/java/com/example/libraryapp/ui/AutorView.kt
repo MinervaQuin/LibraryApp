@@ -59,11 +59,13 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
 import com.example.libraryapp.ui.BookPreview
 
 @Composable
-fun AutorScreen (navController: NavController, ViewModel: AuthorViewModel){
-    val autor = ViewModel.Autor
+fun AutorScreen (navController: NavController, ViewModel: AuthorViewModel,id: String){
+    ViewModel.updateAutor(id)
+    val autor = ViewModel.autor
     Column (
         modifier = Modifier
             .fillMaxWidth()
@@ -84,8 +86,8 @@ fun AutorScreen (navController: NavController, ViewModel: AuthorViewModel){
                 .align(alignment = Alignment.CenterHorizontally)
                 .padding(30.dp)
         )
-        Image(
-            painter = painterResource(id = R.drawable.image_21),
+        AsyncImage(
+            model = autor.cover,
             contentDescription = "image description",
             contentScale = ContentScale.FillBounds,
             modifier = Modifier
@@ -169,7 +171,7 @@ fun AutorScreen (navController: NavController, ViewModel: AuthorViewModel){
         LazyRow(){
             items(1){
                 for (i in 0 until autor.works.size){
-                    BookPreview(autor.works[i])
+                    autor.works[i]?.let { it1 -> BookPreview(it1) }
                 }
             }
         }
@@ -177,4 +179,3 @@ fun AutorScreen (navController: NavController, ViewModel: AuthorViewModel){
 
     }
 }
-

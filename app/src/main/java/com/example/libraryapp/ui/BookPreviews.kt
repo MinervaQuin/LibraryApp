@@ -1,6 +1,5 @@
 package com.example.libraryapp.ui
 
-import android.widget.RatingBar
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -27,14 +26,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.compose.rememberNavController
 import com.example.libraryapp.R
 import com.example.libraryapp.model.resources.Book
 import com.example.libraryapp.ui.theme.RatingBar
-import com.example.libraryapp.viewModel.CategoryViewModel
 
 @Composable
-fun BookPreview (obra : Book?){
+fun BookPreview (obra: Book){
     Box(modifier = Modifier
         .padding(10.dp)
         .width(180.dp)

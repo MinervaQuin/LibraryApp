@@ -328,7 +328,7 @@ class MainActivity : ComponentActivity() {
                                 modifier = Modifier
                                     .padding(padding),
                             )
-                            AutorScreen(navController,viewModel)
+                            AutorScreen(navController,viewModel,"4VIRMHxR4Xf2VjUADMRp")
                         }
                     )
                 }

@@ -28,4 +28,6 @@ interface FirestoreRepository {
      */
     suspend fun timestampToLocalDate(timestamp: Timestamp): LocalDate
     suspend fun localDateToTimestamp(date: LocalDate?): Timestamp?
+
+    suspend fun uploadBookToFirestore()
 }
