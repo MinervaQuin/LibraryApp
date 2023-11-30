@@ -141,7 +141,11 @@ fun SearchAppBar(searchViewModel: SearchViewModel,
                     try {
                         // Use withContext to switch to the IO dispatcher if needed
                         withContext(Dispatchers.IO) {
-                            modifyState(searchViewModel.getBooksStringMatch(searchString))
+                            if (searchString.length == 0){
+                                modifyState(searchViewModel.getAllBooks())
+                            }else {
+                                modifyState(searchViewModel.getBooksStringMatch(searchString))
+                            }
                             updateSearchString(searchString)
                         }
                     } catch (e: Exception) {
