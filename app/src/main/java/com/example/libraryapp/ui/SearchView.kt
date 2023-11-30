@@ -50,6 +50,7 @@ import com.example.libraryapp.R
 import com.example.libraryapp.model.resources.Book
 import com.example.libraryapp.theme.LibraryAppTheme
 import com.example.libraryapp.viewModel.SearchViewModel
+import com.example.libraryapp.viewModel.ShoppingCart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -176,7 +177,11 @@ fun BookItem(book: Book?, modifier: Modifier, navController: NavHostController) 
     Column(
         modifier = Modifier
             .padding(bottom = 8.dp)
-            .clickable { navController.navigate("BookDetailsView") } //BookDetail(
+            .clickable {
+                if (book != null) {
+                    ShoppingCart.setBookSelected(book)
+                }
+                navController.navigate("BookDetailsView") } //BookDetail(
         ,verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
 

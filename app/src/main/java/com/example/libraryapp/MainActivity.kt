@@ -90,7 +90,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             val navController = rememberNavController()
             val homeViewModel : homeViewModel = hiltViewModel()
-            NavHost(navController = navController, startDestination = "firstScreens"){
+            NavHost(navController = navController, startDestination = "SearchScreen"){
 
                 navigation(
                     startDestination = "login",
@@ -227,7 +227,7 @@ class MainActivity : ComponentActivity() {
                 //composable("signUp") { signUpView(navController = navController)}
 
                     composable("bookDetailsView"){
-                        BookDetailsScreen(navController = navController)
+                        BookDetailsScreen(navController = navController, book = ShoppingCart.getBookSelected())
                     }
                     composable("addReviewView"){
     //                    AddReview(navController= navController)

@@ -58,13 +58,13 @@ class homeViewModel @Inject constructor(
         }
     }
 
-    fun uploadReviewTest(){
-        viewModelScope.launch {
-            val reviewTest = Review(userId="prueba", score = 5.4, description = "Esto es una mera prueba", date = LocalDate.now())
-            firestoreRepository.upLoadReview("B9svfDJglRgEPyN6wSAh", reviewTest)
-        }
-
-    }
+//    fun uploadReviewTest(){
+//        viewModelScope.launch {
+//            val reviewTest = Review(userId="prueba", score = 5.4, description = "Esto es una mera prueba", date = LocalDate.now())
+//            firestoreRepository.upLoadReview("B9svfDJglRgEPyN6wSAh", reviewTest)
+//        }
+//
+//    }
     //porbar si añade libros al carrito
     suspend fun getBook(isbn: String): Book? {
         return firestoreRepository.getBook(isbn)

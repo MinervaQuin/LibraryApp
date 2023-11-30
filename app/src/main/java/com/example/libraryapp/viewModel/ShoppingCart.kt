@@ -1,10 +1,12 @@
 package com.example.libraryapp.viewModel
 
 import com.example.libraryapp.model.FirestoreRepository
+import com.example.libraryapp.model.resources.Book
 
 object ShoppingCart {
     private lateinit var viewModel: CartViewModel
     private var categorySelected: String = ""
+    private lateinit var bookSelected: Book
 
     fun init() {
         viewModel = CartViewModel()
@@ -18,6 +20,13 @@ object ShoppingCart {
     }
     fun getSelectedCategory(): String{
         return this.categorySelected
+    }
+
+    fun setBookSelected(book: Book){
+        this.bookSelected= book
+    }
+    fun getBookSelected(): Book{
+        return this.bookSelected
     }
 }
 

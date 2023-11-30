@@ -24,7 +24,7 @@ class SearchViewModel @Inject constructor(
                  allBooks = firestoreRepository.getAllBooks2()
 
              }
-                firestoreRepository.uploadBookToFirestore()
+//                firestoreRepository.addASecondCollection()
                  return firestoreRepository.searchAllBooks(allBooks, searchString)
 
          } catch (e: Exception) {

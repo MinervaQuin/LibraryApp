@@ -30,4 +30,9 @@ interface FirestoreRepository {
     suspend fun localDateToTimestamp(date: LocalDate?): Timestamp?
 
     suspend fun uploadBookToFirestore()
+    suspend fun addNewAttribute()
+    suspend fun addASecondCollection()
+    suspend fun deleteReviews()
+
+    suspend fun getReviewsFromABook(bookId: String): List<Review?>
 }
