@@ -46,8 +46,6 @@ fun CategoryView (navController: NavController, ViewModel: CategoryViewModel,cat
     val executedOnce = remember { mutableSetOf<Boolean>() }
 
     if (executedOnce.add(true)) {
-        // La siguiente línea de código se ejecutará solo la primera vez que se llame al composable
-        println("Esta línea se ejecutará solo una vez")
         ViewModel.updateSelectedCategory(categoria)
     }
 
@@ -100,7 +98,7 @@ fun CategoryView (navController: NavController, ViewModel: CategoryViewModel,cat
         LazyRow(){
             items(1){
                 for (i in 0 until ViewModel.novedades.size){
-                    BookPreview(ViewModel.novedades[i])
+                    ViewModel.novedades[i]?.let { it1 -> BookPreview(it1) }
                 }
             }
         }
