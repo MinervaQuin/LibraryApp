@@ -1,5 +1,6 @@
 package com.example.libraryapp.ui.theme
 
+import android.util.Log
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -33,6 +34,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -56,47 +58,54 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.libraryapp.model.BookDetailsUiState
+import com.example.libraryapp.model.resources.Book
+import com.example.libraryapp.model.resources.Review
 import com.example.libraryapp.theme.LibraryAppTheme
 import com.example.libraryapp.viewModel.BookDetailsViewModel
-import java.util.Date
-import androidx.compose.material3.Card
-import androidx.compose.ui.draw.shadow
-import java.time.LocalDateTime
-import java.time.Month
 import java.time.format.DateTimeFormatter
 
 
 @Composable
 fun BookDetailsScreen(
-    reviews: List<String> = List(5) { "$it" },
-    dates: List<LocalDateTime> = listOf(
-        LocalDateTime.of(2023, Month.NOVEMBER, 14, 12, 30, 0),
-        LocalDateTime.of(2023, Month.NOVEMBER, 13, 12, 30, 0),
-        LocalDateTime.of(2023, Month.NOVEMBER, 5, 12, 30, 0),
-        LocalDateTime.of(2023, Month.NOVEMBER, 14, 10, 40, 0),
-        LocalDateTime.of(2023, Month.JULY, 14, 12, 30, 0)
-    ),
+
     navController: NavHostController,
-    bookDetailsViewModel: BookDetailsViewModel = viewModel()
+    bookDetailsViewModel: BookDetailsViewModel = hiltViewModel(),
+    book: Book
 ){
     val offset = remember { mutableStateOf(0f) }
     val bookUiState by bookDetailsViewModel.bookUiState.collectAsState()
 
+    var reviews by remember { mutableStateOf<List<Review?>>(emptyList()) }
+
+    LaunchedEffect(bookDetailsViewModel) {
+        try {
+            reviews = bookDetailsViewModel.getReviews(book.ref)
+        } catch (e: Exception) {
+            Log.e("Firestore", "Error en BookScreen", e)
+        }
+    }
+
     Column (modifier = Modifier.verticalScroll(rememberScrollState())
     ){
 
-        BookInitialInfo()
-        BookSinopsis()
-        FactSheet()
-        ReviewBook("Reina Roja", bookDetailsViewModel, bookUiState)
+        BookInitialInfo(book)
+        BookSinopsis(book.sinopsis)
+        FactSheet(book)
+        ReviewBook(book.title, bookDetailsViewModel, bookUiState)
         Divider()
-        ResumeOfReviews()
-        Column {
-            for (i in dates) {
-                UserReview(reviewDate = i, bookDetailsViewModel = bookDetailsViewModel)
+        ResumeOfReviews(book)
+        Column (
+            modifier = Modifier.height(400.dp)
+                .verticalScroll(rememberScrollState())
+        ) {
+            for (review in reviews) {
+                if (review != null) {
+                    Log.d("Reviews","Review añadida")
+                    UserReview(review, bookDetailsViewModel = bookDetailsViewModel)
+                }
             }
         }
     }
@@ -106,8 +115,9 @@ fun BookDetailsScreen(
 
 @Composable
 fun ResumeOfReviews(
-    mediaScore: Number = 4.5,
-    rateScore: Int = 4,
+    book: Book,
+    mediaScore: Double = 4.5,
+    rateScore: Double = 4.0,
     num_opi: Int = 124,
 ){
     Row (modifier = Modifier.padding(top=20.dp, bottom = 10.dp, start = 15.dp)){
@@ -152,15 +162,12 @@ fun createCircle(){
 
 @Composable
 fun UserReview(
-    userName: String = "Tobias",
-    rate: Int = 4,
-    reviewDate: LocalDateTime,
-    comment: String = "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
+    review: Review,
     bookDetailsViewModel: BookDetailsViewModel
 ){
     var expanded by remember {mutableStateOf(false)}
     val formatter = DateTimeFormatter.ofPattern("dd/MM/yy")
-    val formattedDate = bookDetailsViewModel.getFormattedTimeAgo(reviewDate)
+    val formattedDate = bookDetailsViewModel.getFormattedTimeAgo(review.date)
 
     Column(modifier = Modifier.padding(10.dp)) {
         Row {
@@ -175,17 +182,19 @@ fun UserReview(
                 .height(50.dp)
             ) {
                 Row {
-                    Text(text = userName )
-                    Text(text = formattedDate,
+                    Text(text = review.userName )
+                    Text(
+                        text = formattedDate,
                         modifier = Modifier.padding(start = 8.dp),
                         style = TextStyle(color = Color.Gray),
-                        )
+                    )
                 }
-                RatingBar(currentRating = rate)
+                val intValue = review.score
+                RatingBar(currentRating = intValue)
             }
 
         }
-        Text(text = comment,
+        Text(text = review.description,
             maxLines = if (expanded) Int.MAX_VALUE else 3,
             overflow = TextOverflow.Ellipsis,
             textAlign = TextAlign.Justify,
@@ -247,6 +256,7 @@ fun ReviewBook(
                 updateRating = { bookDetailsViewModel.updateRating( it ) },
                 bookUiState= bookUiState,
                 bookDetailsViewModel = bookDetailsViewModel,
+                bookTitle = bookTitle
             )
         }
     }
@@ -255,7 +265,7 @@ fun ReviewBook(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddReview(
-    bookTitle: String = "Reina Roja",
+    bookTitle: String,
     showDialog: Boolean,
     sendComment: (String) -> Unit,
     updateRating: (Int) -> Unit,
@@ -294,7 +304,7 @@ fun AddReview(
                 ) {
                     Text(
                         "¿Has leído " + bookTitle + "?",
-                        style = TextStyle(fontSize = 25.sp, fontWeight = FontWeight.Bold,),
+                        style = TextStyle(fontSize = 25.sp, fontWeight = FontWeight.Bold),
                         color = Color.Black
                     )
                     Text(
@@ -353,16 +363,16 @@ fun AddReview(
 
 
 @Composable
-fun BookInitialInfo() {
+fun BookInitialInfo(book: Book) {
     Row(
         modifier = Modifier.padding(top=10.dp, bottom = 10.dp)
     ) {
-        LoadBookCover("https://m.media-amazon.com/images/I/41uWfObYYQL._SY445_SX342_.jpg")
+        LoadBookCover(book.cover)
         Column(
             horizontalAlignment = Alignment.Start,
             modifier = Modifier.padding(start = 10.dp)
         ) {
-            BookLittleInfo()
+            BookLittleInfo(book)
             Button(onClick = { /**/ }) {//Ir a la pagina de la cesta
                 Text(text = "Añadir a la cesta")
             }
@@ -374,22 +384,19 @@ fun BookInitialInfo() {
 }
 
 @Composable
-fun BookLittleInfo(authorName: String = "Juán Gómez-Jurando",
-                   bookTitle: String = "Reina Roja",
-                   editorial: String = "DEBOLSILLO",
-                   isbn: Number = 9788466335362,
-                   bookPrice: Number = 12.5){
+fun BookLittleInfo(book: Book){
     Row(modifier = Modifier
         .fillMaxWidth()
         .padding(10.dp)
     ) {
-        Column(modifier = Modifier
-            .weight(0.7f),
+        Column(
+            modifier = Modifier
+                .weight(0.7f),
             verticalArrangement = Arrangement.Center,
         ) {
-            Text(text = bookTitle)
+            Text(text = book.title)
             ClickableText(
-                text= AnnotatedString(authorName),
+                text= AnnotatedString(book.author_name),
                 onClick = {}, //pantalla información autor
 
                 style = TextStyle(color = Color.DarkGray, fontWeight =FontWeight.Bold),
@@ -398,13 +405,16 @@ fun BookLittleInfo(authorName: String = "Juán Gómez-Jurando",
                     .fillMaxWidth()
 
             )
-            Text(text = editorial)
-            Text(text = isbn.toString())
-            RatingBar(currentRating = 4)
+            Text(text = book.editorial)
+            Text(text = book.isbn.toString())
+            RatingBar(currentRating = 4.0)
 
-            Text(text = bookPrice.toString() + "€", modifier = Modifier.padding(end=10.dp),
-                style = TextStyle(color = Color.DarkGray, fontWeight =FontWeight.Bold,
-                    fontSize = 20.sp),
+            Text(
+                text = book.price.toString() + "€", modifier = Modifier.padding(end = 10.dp),
+                style = TextStyle(
+                    color = Color.DarkGray, fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp
+                ),
             )
         }
 
@@ -415,11 +425,7 @@ fun BookLittleInfo(authorName: String = "Juán Gómez-Jurando",
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BookSinopsis(sinopsis: String = "Antonia Scott es una mujer muy especial. Tiene un don que es al mismo tiempo una maldición: una extraordinaria inteligencia. Gracias a ella ha salvado decenas de vidas, pero también lo ha perdido todo. Hoy se parapeta contra el mundo en su piso casi vacío de Lavapiés, del que no piensa volver a salir. Ya no queda nada ahí fuera que le interese lo más mínimo.\n" +
-        "\n" +
-        "El inspector Jon Gutiérrez está acusado de corrupción, suspendido de empleo y sueldo. Es un buen policía metido en un asunto muy feo, y ya no tiene mucho que perder. Por eso acepta la propuesta de un misterioso desconocido: ir a buscar a Antonia y sacarla de su encierro, conseguir que vuelva a hacer lo que fuera que hiciera antes, y el desconocido le ayudará a limpiar su nombre. Un encargo extraño aunque aparentemente fácil.\n" +
-        "\n" +
-        "Pero Jon se dará cuenta en seguida de que con Antonia nada es fácil."){
+fun BookSinopsis( sinopsis: String ){
     var expanded by remember { mutableStateOf(false) }
 
     Column() {
@@ -453,14 +459,7 @@ fun BookSinopsis(sinopsis: String = "Antonia Scott es una mujer muy especial. Ti
 
 
 @Composable
-fun FactSheet(
-    num_pag: Int = 304,
-    editorial: String = "DEBOLSILLO",
-    idioma: String = "Castellano",
-    encuadernacion: String = "Tapa blanda",
-    isbn: Number = 9788466335362,
-    publicationDate: Number = 2011
-){
+fun FactSheet( book: Book ){
     Column() {
         Text(
             text = "Detalles del Libro",
@@ -474,7 +473,7 @@ fun FactSheet(
                 withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                     append("Número de páginas: ")
                 }
-                append(num_pag.toString())
+                append(book.num_pag.toString())
             },
             Modifier
                 .padding(8.dp)
@@ -484,7 +483,7 @@ fun FactSheet(
                 withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                     append("Editorial: ")
                 }
-                append(editorial)
+                append(book.editorial)
             },
             Modifier
                 .padding(8.dp)
@@ -494,7 +493,7 @@ fun FactSheet(
                 withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                     append("Idioma: ")
                 }
-                append(idioma)
+                append(book.language)
             },
             Modifier
                 .padding(8.dp)
@@ -504,7 +503,7 @@ fun FactSheet(
                 withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                     append("Encuadernación: ")
                 }
-                append(encuadernacion.toString())
+                append(book.encuadernacion)
             },
             Modifier
                 .padding(8.dp)
@@ -514,7 +513,7 @@ fun FactSheet(
                 withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                     append("ISBN: ")
                 }
-                append(isbn.toString())
+                append(book.isbn.toString())
             },
             Modifier
                 .padding(8.dp)
@@ -524,7 +523,7 @@ fun FactSheet(
                 withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                     append("Fecha de publicación: ")
                 }
-                append(publicationDate.toString())
+                append(book.publicationDate)
             },
             Modifier
                 .padding(8.dp)
@@ -541,12 +540,12 @@ fun FactSheet(
 
 @Composable
 fun RatingBar(
-    maxRating: Int = 5,
-    currentRating: Int,
+    maxRating: Double = 5.0,
+    currentRating: Double,
     starsColor: Color = Color(0xFFF7D850)
 ){
     Row {
-        for (i in 1..maxRating) {
+        for (i in 1..maxRating.toInt()) {
             Icon(
                 imageVector = if (i <= currentRating) Icons.Filled.Star
                 else Icons.Outlined.Star,
@@ -589,7 +588,7 @@ fun AnimatedRatingBar(
 @Composable
 fun Greeting4Preview() {
     LibraryAppTheme {
-        BookInitialInfo()
+//        BookInitialInfo(book)
     }
 }
 

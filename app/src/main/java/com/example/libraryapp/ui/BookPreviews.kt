@@ -1,13 +1,11 @@
 package com.example.libraryapp.ui
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -99,7 +97,7 @@ fun BookPreview (obra: Book){
             Row {
                 val rate = obra.score.toDouble()
                 val fillStars = Math.floor(rate / 2)
-                RatingBar (currentRating = fillStars.toInt())
+                RatingBar (currentRating = fillStars)
 
 /*                val rate = obra.score.toDouble()
                 val fillStars = Math.floor (rate / 2)
@@ -183,7 +181,7 @@ fun BookPreviewWide (obra : Book) {
                 Row {
                     val rate = obra.score.toDouble()
                     val fillStars = Math.floor(rate / 2)
-                    RatingBar (currentRating = fillStars.toInt())
+                    RatingBar (currentRating = fillStars)
 /*                    val halfStars = rate % 2
                     val unfilledStars = 5 - (fillStars + halfStars)
                     iconpainter(R.drawable.openmoji_star, fillStars.toInt())
