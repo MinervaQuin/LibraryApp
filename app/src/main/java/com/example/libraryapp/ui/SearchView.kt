@@ -63,6 +63,8 @@ fun BookScreen(
 ){
     val searchViewModel : SearchViewModel = hiltViewModel()
     var books by remember { mutableStateOf<List<Book?>>(emptyList()) }
+    var stringSearched by remember { mutableStateOf<String>("") }
+
 
     LaunchedEffect(searchViewModel) {
         try {
@@ -71,19 +73,24 @@ fun BookScreen(
             Log.e("Firestore", "Error en BookScreen", e)
         }
     }
-
     val navController2 = navController
     Column {
         Spacer(modifier = Modifier.height(57.dp))
-        SearchAppBar(searchViewModel) { newValue ->
-            books = newValue
-        }
-        Text(text = "Resultados para: " + bookTitle,
+        SearchAppBar(
+            searchViewModel = searchViewModel,
+            modifyState = { newValue ->
+                books = newValue
+            },
+            updateSearchString = { newSearchString ->
+                stringSearched = newSearchString
+            }
+        )
+        Text(text = "Resultados para: " + stringSearched,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(start = 6.dp))
         LazyVerticalGrid(
             columns = GridCells.Adaptive(minSize = 180.dp),
-            modifier = Modifier.padding(bottom = 10.dp, top = 10.dp)
+            modifier = Modifier.padding(bottom = 60.dp, top = 10.dp)
         ){
             items(items = books) {
                 BookItem(it, modifier = Modifier, navController)
@@ -103,7 +110,9 @@ fun BookScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchAppBar(searchViewModel: SearchViewModel, modifyState: (List<Book?>) -> Unit) {
+fun SearchAppBar(searchViewModel: SearchViewModel,
+                 modifyState: (List<Book?>) -> Unit,
+                 updateSearchString: (String) -> Unit) {
     var searchString by remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
 
@@ -133,6 +142,7 @@ fun SearchAppBar(searchViewModel: SearchViewModel, modifyState: (List<Book?>) ->
                         // Use withContext to switch to the IO dispatcher if needed
                         withContext(Dispatchers.IO) {
                             modifyState(searchViewModel.getBooksStringMatch(searchString))
+                            updateSearchString(searchString)
                         }
                     } catch (e: Exception) {
                         Log.e("Firestore", "Error in SearchBar", e)
