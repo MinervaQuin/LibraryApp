@@ -24,6 +24,7 @@ class CategoryViewModel @Inject constructor(
         "No Ficción" to "bgnmJtAVQ1uQFLjz3RO5",
         "Infantil" to "5SVJKEbVOdy1jUD3YDYn",
         "Cómic y Manga" to "p8KT9DM4yIbmdV5U8k4v",
+        "Misterio" to "aSN9cOFkRzmA7QtxIx6i9+"
     )
     var coleccion by mutableStateOf(Collection())
         private set
@@ -37,7 +38,7 @@ class CategoryViewModel @Inject constructor(
         private set
     init {
         // Inicializa la lista de libros con datos de prueba o desde algún origen de datos
-        categories = listOf("Imprescindibles","Ficción", "No Ficción", "Infantil", "Cómic y Manga","Populares")
+        categories = listOf("Imprescindibles","Ficción", "No Ficción", "Infantil","Misterio", "Cómic y Manga","Populares")
     }
 
 /*    private fun getBookFiltrados(Categorias : String): Array<Book> {

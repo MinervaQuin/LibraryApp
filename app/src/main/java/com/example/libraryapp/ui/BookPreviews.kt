@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,14 +29,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import com.example.libraryapp.R
 import com.example.libraryapp.model.resources.Book
 import com.example.libraryapp.ui.theme.RatingBar
+import com.example.libraryapp.viewModel.CartViewModel
+import com.example.libraryapp.viewModel.ShoppingCart
+import kotlinx.coroutines.launch
 
 @Composable
 fun BookPreview (obra: Book){
+    val cartViewModel: CartViewModel = ShoppingCart.getViewModelInstance()
     Box(modifier = Modifier
         .padding(10.dp)
         .width(180.dp)
@@ -68,7 +75,7 @@ fun BookPreview (obra: Book){
             Text(
                 text = obra.title,
                 style = TextStyle(
-                    fontSize = 8.sp,
+                    fontSize = 14.sp,
                     fontWeight = FontWeight(700),
                     color = Color(0xFF000000),
                 )
@@ -76,7 +83,7 @@ fun BookPreview (obra: Book){
             Text(
                 text = obra.author_name,
                 style = TextStyle(
-                    fontSize = 8.sp,
+                    fontSize = 10.sp,
                     fontWeight = FontWeight(400),
                     color = Color(0xFF000000),
                 )
@@ -84,7 +91,7 @@ fun BookPreview (obra: Book){
             Text(
                 text = "${obra.price} €",
                 style = TextStyle(
-                    fontSize = 8.sp,
+                    fontSize = 12.sp,
                     fontWeight = FontWeight(400),
                     color = Color(0xFF841F0B)
                 )
@@ -103,11 +110,24 @@ fun BookPreview (obra: Book){
                 iconpainter(R.drawable.openmoji_black_star,unfilledStars.toInt())*/
             }
         }
+        Button(
+            onClick = { cartViewModel.addBookToCart(obra) },
+            colors= ButtonDefaults.buttonColors(
+                containerColor=Color(0xBFFC5F5F)
+            ),
+            modifier= Modifier
+                .fillMaxWidth()
+                .align(Alignment.BottomCenter)
+                .padding(16.dp)
+        ){
+            Text(text = "Añadir al carrito")
+        }
     }
 }
 
 @Composable
 fun BookPreviewWide (obra : Book) {
+    val cartViewModel: CartViewModel = ShoppingCart.getViewModelInstance()
     Box(modifier = Modifier
         .padding(10.dp)
         .fillMaxWidth()
@@ -139,7 +159,7 @@ fun BookPreviewWide (obra : Book) {
                 Text(
                     text = obra.title,
                     style = TextStyle(
-                        fontSize = 12.sp,
+                        fontSize = 14.sp,
                         fontWeight = FontWeight(700),
                         color = Color(0xFF000000),
 
@@ -154,7 +174,7 @@ fun BookPreviewWide (obra : Book) {
                 Text(
                     text = obra.author_name,
                     style = TextStyle(
-                        fontSize = 10.sp,
+                        fontSize = 12.sp,
                         fontWeight = FontWeight(400),
                         color = Color(0xFF000000),
 
@@ -170,28 +190,37 @@ fun BookPreviewWide (obra : Book) {
                     iconpainter(R.drawable.openmoji_half_star, halfStars.toInt())
                     iconpainter(R.drawable.openmoji_black_star, unfilledStars.toInt())*/
                 }
-                Text(
-                    text = obra.cover,
-                    style = TextStyle(
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight(400),
-                        color = Color(0xFF000000),
-                        )
-                )
             }
 
         }
-        Text(
-            text = "${obra.price} €",
-            style = TextStyle(
-                fontSize = 16.sp,
-                fontWeight = FontWeight(700),
-                color = Color(0xFF841F0B),
-            ),
+        Column(
             modifier= Modifier
-                .align(Alignment.BottomEnd)
-                .padding(16.dp)
-        )
+                .fillMaxWidth()
+                .align(Alignment.BottomCenter)
+        ){
+            Text(
+                text = "${obra.price} €",
+                style = TextStyle(
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight(700),
+                    color = Color(0xFF841F0B),
+                ),
+                modifier = Modifier
+                    .align(Alignment.End)
+                    .padding(5.dp)
+            )
+            Button(
+                onClick = { cartViewModel.addBookToCart(obra) },
+                colors= ButtonDefaults.buttonColors(
+                containerColor=Color(0xBFFC5F5F)
+            ),
+                modifier= Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ){
+                Text(text = "Añadir al carrito")
+            }
+        }
     }
 }
 
