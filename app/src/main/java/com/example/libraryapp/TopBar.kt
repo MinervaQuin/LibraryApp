@@ -1,6 +1,5 @@
 package com.example.libraryapp
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -40,11 +39,14 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -57,7 +59,6 @@ import com.example.libraryapp.theme.green
 import kotlinx.coroutines.launch
 import coil.compose.AsyncImage
 import com.example.libraryapp.theme.white
-import com.example.libraryapp.viewModel.CartViewModel
 import com.example.libraryapp.viewModel.ShoppingCart
 
 
@@ -134,9 +135,22 @@ fun TopBar(navController: NavController) {
             route = "ayuda",
         )
     )
+
+
     DisposableEffect(navController) {
         val listener = NavController.OnDestinationChangedListener { _, destination, _ ->
-            //selectedItem = items.find { it.route == destination.route }
+            selectedItem = when {
+                destination.route == "Category" -> {
+                    val currentCategory = ShoppingCart.getSelectedCategory()
+                    items.find { it.title == currentCategory }
+                }
+
+                items.any { it.route == destination.route } -> {
+                    items.find { it.route == destination.route }
+                }
+
+                else -> null
+            }
             isOnCartScreen = destination.route == "cartDestination"
         }
         navController.addOnDestinationChangedListener(listener)
@@ -145,6 +159,48 @@ fun TopBar(navController: NavController) {
             navController.removeOnDestinationChangedListener(listener)
         }
     }
+
+    LaunchedEffect(ShoppingCart.getSelectedCategory(), navController) {
+        snapshotFlow { navController.currentBackStackEntry?.destination?.route }
+            .collect { currentRoute ->
+                selectedItem = when {
+                    items.any { it.route == currentRoute } -> {
+                        items.find { it.route == currentRoute }
+                    }
+
+                    currentRoute == "Category" -> {
+                        val currentCategory = ShoppingCart.getSelectedCategory()
+                        items.find { it.title == currentCategory }
+                    }
+
+                    else -> null
+                }
+                isOnCartScreen = currentRoute == "cartDestination"
+            }
+
+        // Añade un paso adicional para limpiar selectedItem si no estamos en una ruta de item
+        if (!items.any { it.route == navController.currentBackStackEntry?.destination?.route }) {
+            selectedItem = null
+        }
+    }
+
+    LaunchedEffect(ShoppingCart.getSelectedCategory()) {
+        snapshotFlow { ShoppingCart.getSelectedCategory() }
+            .collect { newCategory ->
+                // Opcional: Si deseas actualizar selectedItem basado en la categoría después de verificar la ruta.
+                if (navController.currentBackStackEntry?.destination?.route == "Category") {
+                    selectedItem = items.find { it.title == newCategory }
+                }
+            }
+    }
+
+
+
+
+
+
+
+
     DismissibleNavigationDrawer(drawerContent = {
         Box(
             modifier = Modifier

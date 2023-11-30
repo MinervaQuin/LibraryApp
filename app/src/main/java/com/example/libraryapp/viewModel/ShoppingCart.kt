@@ -1,10 +1,10 @@
 package com.example.libraryapp.viewModel
 
-import com.example.libraryapp.model.FirestoreRepository
+import kotlinx.coroutines.flow.MutableStateFlow
 
 object ShoppingCart {
     private lateinit var viewModel: CartViewModel
-    private var categorySelected: String = ""
+    private var _categorySelected = MutableStateFlow("")
 
     fun init() {
         viewModel = CartViewModel()
@@ -14,10 +14,10 @@ object ShoppingCart {
         return viewModel
     }
     fun setSelectedCategory(new: String){
-        this.categorySelected= new
+        _categorySelected.value = new
     }
     fun getSelectedCategory(): String{
-        return this.categorySelected
+        return _categorySelected.value
     }
 }
 
