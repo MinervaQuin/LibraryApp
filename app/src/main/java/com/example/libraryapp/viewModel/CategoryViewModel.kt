@@ -24,7 +24,7 @@ class CategoryViewModel @Inject constructor(
         "No Ficción" to "bgnmJtAVQ1uQFLjz3RO5",
         "Infantil" to "5SVJKEbVOdy1jUD3YDYn",
         "Cómic y Manga" to "p8KT9DM4yIbmdV5U8k4v",
-        "Misterio" to "aSN9cOFkRzmA7QtxIx6i9+"
+        "Misterio" to "aSN9cOFkRzmA7QtxIx6i"
     )
     var coleccion by mutableStateOf(Collection())
         private set

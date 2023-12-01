@@ -227,7 +227,19 @@ class MainActivity : ComponentActivity() {
                 //composable("signUp") { signUpView(navController = navController)}
 
                     composable("bookDetailsView"){
-                        BookDetailsScreen(navController = navController, book = ShoppingCart.getBookSelected())
+                        Scaffold(
+                            bottomBar = { BottomBar(navController = navController) },
+                            topBar = { TopBar(navController = navController)},
+                            content = { paddingValues ->
+                                Column(
+                                    modifier = Modifier
+                                        .padding(paddingValues)
+                                        .fillMaxSize()
+                                ) {
+                                    BookDetailsScreen(navController = navController, book = ShoppingCart.getBookSelected())
+                                }
+                            }
+                        )
                     }
                     composable("addReviewView"){
     //                    AddReview(navController= navController)

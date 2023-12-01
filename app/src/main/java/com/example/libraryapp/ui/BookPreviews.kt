@@ -28,6 +28,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import com.example.libraryapp.R
@@ -38,7 +40,7 @@ import com.example.libraryapp.viewModel.ShoppingCart
 import kotlinx.coroutines.launch
 
 @Composable
-fun BookPreview (obra: Book){
+fun BookPreview (obra: Book, navController: NavController){
     val cartViewModel: CartViewModel = ShoppingCart.getViewModelInstance()
     Box(modifier = Modifier
         .padding(10.dp)
@@ -47,6 +49,8 @@ fun BookPreview (obra: Book){
         .shadow(elevation = 4.dp, spotColor = Color(0x40000000), ambientColor = Color(0x40000000))
         .border(width = 1.dp, color = Color(0xFF000000))
         .clickable {
+            ShoppingCart.setBookSelected(obra)
+            navController.navigate("BookDetailsView")
         }
     )
     {
@@ -124,7 +128,7 @@ fun BookPreview (obra: Book){
 }
 
 @Composable
-fun BookPreviewWide (obra : Book) {
+fun BookPreviewWide (obra : Book, navController: NavController) {
     val cartViewModel: CartViewModel = ShoppingCart.getViewModelInstance()
     Box(modifier = Modifier
         .padding(10.dp)
@@ -137,6 +141,8 @@ fun BookPreviewWide (obra : Book) {
         )
         .border(width = 1.dp, color = Color(0xFF000000))
         .clickable {
+            ShoppingCart.setBookSelected(obra)
+            navController.navigate("BookDetailsView")
         }
     ) {
         Row {
@@ -216,7 +222,7 @@ fun BookPreviewWide (obra : Book) {
                     .fillMaxWidth()
                     .padding(16.dp)
             ){
-                Text(text = "Añadir al carrito")
+                Text(text = "Añadir a la cesta")
             }
         }
     }
@@ -237,8 +243,8 @@ fun iconpainter (id : Int, rep: Int){
     }
 }
 
-@Preview(showBackground = true)
+/*@Preview(showBackground = true)
 @Composable
 fun Previewview() {
     BookPreviewWide(Book(1, 10, "Arturo Pérez Reverte", "Linea de fuego", "hola hola", 3, "Tapa Dura", 20.0))
-}
+}*/
