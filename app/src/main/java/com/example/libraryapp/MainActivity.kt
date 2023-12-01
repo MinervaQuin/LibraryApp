@@ -90,7 +90,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             val navController = rememberNavController()
             val homeViewModel : homeViewModel = hiltViewModel()
-            NavHost(navController = navController, startDestination = "SearchScreen"){
+            NavHost(navController = navController, startDestination = "firstScreens"){
 
                 navigation(
                     startDestination = "login",
@@ -162,26 +162,30 @@ class MainActivity : ComponentActivity() {
                         Scaffold(
                             bottomBar = { BottomBar(navController = navController) },
                             topBar = { TopBar(navController = navController) },
-                            content = { padding ->
-                                Box(
+                            content = { paddingValues ->
+                                Column(
                                     modifier = Modifier
-                                        .padding(padding),
-                                )
-                                HomeView(
-                                    userData = googleAuthUiClient.getSignedInUser(),
-                                    onSignOut = {
-                                        lifecycleScope.launch {
-                                            googleAuthUiClient.signOut()
-                                            Toast.makeText(
-                                                applicationContext,
-                                                "Sesión Cerrada",
-                                                Toast.LENGTH_LONG
-                                            ).show()
-                                            navController.popBackStack()
-                                        }
-                                    },
-                                    viewModel = homeViewModel
-                                ) }
+                                        .padding(paddingValues)
+                                        .fillMaxSize()
+                                ){
+                                    HomeView(
+                                        userData = googleAuthUiClient.getSignedInUser(),
+                                        onSignOut = {
+                                            lifecycleScope.launch {
+                                                googleAuthUiClient.signOut()
+                                                Toast.makeText(
+                                                    applicationContext,
+                                                    "Sesión Cerrada",
+                                                    Toast.LENGTH_LONG
+                                                ).show()
+                                                navController.popBackStack()
+                                            }
+                                        },
+                                        viewModel = homeViewModel,
+                                        navController = navController
+                                    )
+                                }
+                            }
                         )
                     }
 

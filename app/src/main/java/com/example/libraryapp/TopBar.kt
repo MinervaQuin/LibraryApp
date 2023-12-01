@@ -56,6 +56,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.libraryapp.theme.gray
 import com.example.libraryapp.theme.green
+import com.example.libraryapp.ui.theme.GreenAppOpacity
 import kotlinx.coroutines.launch
 import coil.compose.AsyncImage
 import com.example.libraryapp.theme.white
@@ -199,7 +200,7 @@ fun TopBar(navController: NavController) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .border(1.dp, color = green)
+                .border(1.dp, color =GreenAppOpacity )
         ) {
             DismissibleDrawerSheet {
                 Spacer(modifier = Modifier.height(55.dp))
@@ -268,12 +269,12 @@ fun TopBar(navController: NavController) {
     },
         drawerState = drawerState,
         gesturesEnabled = drawerState.isOpen,
-        modifier = Modifier.width(250.dp).border(5.dp, green)
+        modifier = Modifier.width(250.dp).border(5.dp, GreenAppOpacity)
     ) {
 
     }
     TopAppBar(
-        colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = green),
+        colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = GreenAppOpacity),
         title = {
             Text(
                 text = "Palabras en Papel",

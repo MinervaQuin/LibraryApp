@@ -1,6 +1,10 @@
 package com.example.libraryapp.ui
 
 
+import android.util.Log
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -56,8 +60,11 @@ import kotlinx.coroutines.launch
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.ui.res.painterResource
+import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import com.example.libraryapp.R
+import com.example.libraryapp.model.resources.CollectionSamples
+import com.example.libraryapp.model.resources.LongCollectionSamples
 import com.example.libraryapp.ui.theme.rojoSangre
 
 
@@ -65,7 +72,8 @@ import com.example.libraryapp.ui.theme.rojoSangre
 fun HomeView(
     userData: UserData?, //TODO esto hay que ponerlo en el viewModel
     onSignOut: () -> Unit,
-    viewModel: homeViewModel
+    viewModel: homeViewModel,
+    navController: NavController
     ) {
     val cartViewModel: CartViewModel = ShoppingCart.getViewModelInstance()
 
@@ -75,23 +83,22 @@ fun HomeView(
 
     LazyColumn(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(vertical = 90.dp), // Agregar padding vertical
+            .fillMaxSize(), // Agregar padding vertical
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ){
         val chunkedCollections = collectionsArray.drop(2).chunked(2)
         item {
             Row(){
-                CollectionBox(collection = collectionsArray[0])
-                CollectionBox(collection = collectionsArray[1])
+                CollectionBox(collection = collectionsArray[0], navController)
+                CollectionBox(collection = collectionsArray[1], navController)
             }
         }
         chunkedCollections.forEachIndexed { index, pair ->
             item {
                 Row {
                     pair.forEach { collectionSample ->
-                        CollectionBox(collection = collectionSample)
+                        CollectionBox(collection = collectionSample, navController)
                     }
                 }
             }
@@ -100,7 +107,7 @@ fun HomeView(
             val largeCollectionIndex = index // O cualquier lógica que desees aplicar aquí
             if (largeCollectionIndex < largeCollectionSamplesArray.size) {
                 item {
-                    LargeCollectionBox(collection = largeCollectionSamplesArray[largeCollectionIndex])
+                    LargeCollectionBox(collection = largeCollectionSamplesArray[largeCollectionIndex], navController)
                 }
             }
         }
@@ -124,41 +131,12 @@ fun HomeView(
         }
     }
 
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ){
-        Row(){
-            CollectionBox(collection = colecionPrueba)
-            CollectionBox(collection = colecionPrueba)
-        }
-
-        Button(onClick = onSignOut){
-            Text(text = "Cerrar Sesión")
-        }
-        Button(onClick = {
-            //viewModel.getBookAndLog("B9svfDJglRgEPyN6wSAh")
-            //viewModel.getAuthorAndLog("Rkwq8a3v54TV6FSGw2n9")
-            //viewModel.getCollectionAndLog("oBMLVCnbNsPQJiPexKL7")
-            //viewModel.getReviewsAndLog("B9svfDJglRgEPyN6wSAh")
-            //viewModel.uploadReviewTest()
-
-            //viewModel.uploadReviewTest()
-
-        }) {
-            Text(text = "Probar el Coso")
-        }
-
-
-    }
-
 
 
 }
 
 @Composable
-fun CollectionBox(collection: homeViewModel.CollectionSamples) {
+fun CollectionBox(collection: CollectionSamples, navController: NavController) {
     Card(
         modifier = Modifier
             .padding(8.dp)
@@ -166,7 +144,8 @@ fun CollectionBox(collection: homeViewModel.CollectionSamples) {
             .width(150.dp)
             .border(2.dp, Color.Black, shape = RectangleShape)
             .clickable {
-                Log.d("CollectionBoxClick", "Route: ${collection.route}")
+                ShoppingCart.setSelectedCategory(collection.route)
+                navController.navigate("category")
             },
         elevation = CardDefaults.elevatedCardElevation(8.dp),
         shape = RectangleShape // Bordes rectos
@@ -189,7 +168,7 @@ fun CollectionBox(collection: homeViewModel.CollectionSamples) {
                 modifier = Modifier
                     .weight(0.15f) // Toma una fracción más pequeña del espacio
                     .fillMaxWidth()
-                    .background(GreenAppOpacity) // Fondo negro para el texto
+                    .background(collection.color) // Fondo negro para el texto
             ) {
                 Text(
                     text = collection.title.toUpperCase(),
@@ -206,7 +185,7 @@ fun CollectionBox(collection: homeViewModel.CollectionSamples) {
 }
 
 @Composable
-fun LargeCollectionBox(collection: homeViewModel.LongCollectionSamples) {
+fun LargeCollectionBox(collection: LongCollectionSamples, navController: NavController) {
     val collectionBoxWidth = 150.dp
     val padding = 8.dp
     val spacing = 4.dp
@@ -219,7 +198,10 @@ fun LargeCollectionBox(collection: homeViewModel.LongCollectionSamples) {
                 .width(totalWidth)
                 .height(75.dp)
                 .fillMaxWidth()
-                .clickable { Log.d("CollectionBoxClick", "Route: ${collection.route}") },
+                .clickable {
+                    ShoppingCart.setSelectedCategory(collection.route)
+                    navController.navigate("category")
+                           },
             elevation = CardDefaults.elevatedCardElevation(8.dp),
             shape = RoundedCornerShape(12.dp)
         ) {
@@ -253,7 +235,8 @@ fun LargeCollectionBox(collection: homeViewModel.LongCollectionSamples) {
                 .height(75.dp)
                 .fillMaxWidth()
                 .clickable {
-                    Log.d("CollectionBoxClick", "Route: ${collection.route}")
+                    ShoppingCart.setSelectedCategory(collection.route)
+                    navController.navigate("category")
                 }, // Se extiende al ancho máximo disponible
 
             elevation = CardDefaults.elevatedCardElevation(8.dp), // Ajusta la elevación según sea necesario
