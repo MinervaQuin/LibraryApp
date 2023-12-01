@@ -1,5 +1,6 @@
 package com.example.libraryapp.ui
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -21,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -42,6 +44,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun BookPreview (obra: Book, navController: NavController){
     val cartViewModel: CartViewModel = ShoppingCart.getViewModelInstance()
+    val context = LocalContext.current
     Box(modifier = Modifier
         .padding(10.dp)
         .width(180.dp)
@@ -113,7 +116,10 @@ fun BookPreview (obra: Book, navController: NavController){
             }
         }
         Button(
-            onClick = { cartViewModel.addBookToCart(obra) },
+            onClick = {
+                cartViewModel.addBookToCart(obra)
+                Toast.makeText(context,"Libro Añadido", Toast.LENGTH_SHORT).show()
+                      },
             colors= ButtonDefaults.buttonColors(
                 containerColor=Color(0xBFFC5F5F)
             ),
@@ -130,6 +136,7 @@ fun BookPreview (obra: Book, navController: NavController){
 @Composable
 fun BookPreviewWide (obra : Book, navController: NavController) {
     val cartViewModel: CartViewModel = ShoppingCart.getViewModelInstance()
+    val context = LocalContext.current
     Box(modifier = Modifier
         .padding(10.dp)
         .fillMaxWidth()
@@ -214,7 +221,9 @@ fun BookPreviewWide (obra : Book, navController: NavController) {
                     .padding(5.dp)
             )
             Button(
-                onClick = { cartViewModel.addBookToCart(obra) },
+                onClick = { cartViewModel.addBookToCart(obra)
+                    Toast.makeText(context,"Libro Añadido", Toast.LENGTH_SHORT).show()
+                          },
                 colors= ButtonDefaults.buttonColors(
                 containerColor=Color(0xBFFC5F5F)
             ),
