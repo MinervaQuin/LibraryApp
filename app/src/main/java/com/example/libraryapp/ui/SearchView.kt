@@ -2,7 +2,6 @@ package com.example.libraryapp.ui.theme
 
 
 import android.util.Log
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -27,7 +25,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -38,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -46,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
+import com.example.libraryapp.MainActivity
 import com.example.libraryapp.R
 import com.example.libraryapp.model.resources.Book
 import com.example.libraryapp.theme.LibraryAppTheme
@@ -116,6 +115,8 @@ fun SearchAppBar(searchViewModel: SearchViewModel,
                  updateSearchString: (String) -> Unit) {
     var searchString by remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
+    //val scanner : Scanner = Scanner()
 
     OutlinedTextField(
         modifier = Modifier
@@ -127,6 +128,7 @@ fun SearchAppBar(searchViewModel: SearchViewModel,
         onValueChange = { searchString = it},
         leadingIcon = {
             IconButton(onClick = {
+                MainActivity.initScanner(context)
             }) {
                 Icon(
                     painter = painterResource(id = R.drawable.upc_scan),
@@ -171,7 +173,6 @@ fun SearchAppBar(searchViewModel: SearchViewModel,
     )
 }
 
-
 @Composable
 fun BookItem(book: Book?, modifier: Modifier, navController: NavHostController) {
     Column(
@@ -181,7 +182,8 @@ fun BookItem(book: Book?, modifier: Modifier, navController: NavHostController) 
                 if (book != null) {
                     ShoppingCart.setBookSelected(book)
                 }
-                navController.navigate("BookDetailsView") } //BookDetail(
+                navController.navigate("BookDetailsView")
+            } //BookDetail(
         ,verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
 
@@ -220,8 +222,9 @@ fun BookInfo(book: Book?){
         .width(180.dp)
         .padding(start = 5.dp)
     ) {
-        Column(modifier = Modifier
-            .weight(0.7f),
+        Column(
+            modifier = Modifier
+                .weight(0.7f),
             verticalArrangement = Arrangement.Center,
         ) {
             book?.let { Text(text = it.title) }
@@ -233,7 +236,6 @@ fun BookInfo(book: Book?){
         )
     }
 }
-
 
 @Preview(showBackground = true)
 @Composable
