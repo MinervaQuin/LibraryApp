@@ -1,11 +1,10 @@
 package com.example.libraryapp.model.resources
 
-class Author (
-    var id: String = "",
+class AuthorFb(
+    var id: Int = 0,
     var name: String = "",
-    var cover: String = "",
     var biography: String = "",
-    var works: Array<Book?> = arrayOf()
+    var works: List<String> = emptyList()
 )       {
     override fun toString(): String {
         val worksString = works.joinToString(separator = ", ", transform = { book ->

@@ -33,11 +33,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.example.libraryapp.ui.theme.GreenApp
 import com.example.libraryapp.viewModel.CategoryViewModel
 
@@ -48,8 +46,6 @@ fun CategoryView (navController: NavController, ViewModel: CategoryViewModel,cat
     val executedOnce = remember { mutableSetOf<Boolean>() }
 
     if (executedOnce.add(true)) {
-        // La siguiente línea de código se ejecutará solo la primera vez que se llame al composable
-        println("Esta línea se ejecutará solo una vez")
         ViewModel.updateSelectedCategory(categoria)
     }
 
@@ -102,7 +98,7 @@ fun CategoryView (navController: NavController, ViewModel: CategoryViewModel,cat
         LazyRow(){
             items(1){
                 for (i in 0 until ViewModel.novedades.size){
-                    BookPreview(ViewModel.novedades[i])
+                    ViewModel.novedades[i]?.let { it1 -> BookPreview(it1,navController) }
                 }
             }
         }
@@ -114,7 +110,7 @@ fun CategoryView (navController: NavController, ViewModel: CategoryViewModel,cat
             }
         )
         for (i in 0 until ViewModel.filtrados.size){
-            BookPreviewWide(ViewModel.filtrados[i])
+            BookPreviewWide(ViewModel.filtrados[i],navController)
         }
     }
 }

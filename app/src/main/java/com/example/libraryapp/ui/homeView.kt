@@ -1,10 +1,6 @@
 package com.example.libraryapp.ui
 
-import CartViewModel
-import android.util.Log
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,6 +21,11 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -39,14 +40,19 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
 import com.example.libraryapp.model.firebaseAuth.UserData
+import com.example.libraryapp.model.resources.Book
+import com.example.libraryapp.viewModel.CartViewModel
+import com.example.libraryapp.viewModel.ShoppingCart
 import com.example.libraryapp.ui.theme.GreenAppOpacity
 import com.example.libraryapp.viewModel.homeViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.ui.res.painterResource
@@ -61,6 +67,8 @@ fun HomeView(
     onSignOut: () -> Unit,
     viewModel: homeViewModel
     ) {
+    val cartViewModel: CartViewModel = ShoppingCart.getViewModelInstance()
+
 
     val collectionsArray by viewModel.collectionArray.collectAsState()
     val largeCollectionSamplesArray by viewModel.largeCollectionSamplesArray.collectAsState()
@@ -115,7 +123,7 @@ fun HomeView(
             }
         }
     }
-    /*
+
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
@@ -136,13 +144,15 @@ fun HomeView(
             //viewModel.getReviewsAndLog("B9svfDJglRgEPyN6wSAh")
             //viewModel.uploadReviewTest()
 
+            //viewModel.uploadReviewTest()
+
         }) {
             Text(text = "Probar el Coso")
         }
 
 
     }
-     */
+
 
 
 }

@@ -1,7 +1,6 @@
 package com.example.libraryapp
 
 import com.example.libraryapp.viewModel.CategoryViewModel
-import CartViewModel
 import android.content.ContentValues
 import android.os.Bundle
 import android.util.Log
@@ -32,6 +31,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
+import com.example.libraryapp.model.firebaseAuth.FirestoreRepositoryImpl
 import com.example.libraryapp.model.firebaseAuth.GoogleAuthUiClient
 import com.example.libraryapp.theme.LibraryAppTheme
 import com.example.libraryapp.ui.Cart
@@ -43,6 +43,8 @@ import com.example.libraryapp.ui.theme.BookDetailsScreen
 import com.example.libraryapp.ui.theme.BookScreen
 import com.example.libraryapp.view.AutorScreen
 import com.example.libraryapp.viewModel.AuthorViewModel
+import com.example.libraryapp.viewModel.CartViewModel
+import com.example.libraryapp.viewModel.ShoppingCart
 import com.example.libraryapp.viewModel.homeViewModel
 import com.example.libraryapp.viewModel.loginViewModel
 import com.google.android.gms.auth.api.identity.Identity
@@ -59,6 +61,7 @@ import kotlinx.coroutines.launch
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     val db = Firebase.firestore
+
     public val googleAuthUiClient by lazy {
         GoogleAuthUiClient(
             context = applicationContext,
@@ -83,10 +86,12 @@ class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        ShoppingCart.init()
         setContent {
             val navController = rememberNavController()
             val homeViewModel : homeViewModel = hiltViewModel()
-            NavHost(navController = navController, startDestination = "firstScreens"){
+            NavHost(navController = navController, startDestination = "SearchScreen"){
+
                 navigation(
                     startDestination = "login",
                     route = "firstScreens"
@@ -98,7 +103,7 @@ class MainActivity : ComponentActivity() {
 
                         LaunchedEffect(key1 = Unit){
                             if(googleAuthUiClient.getSignedInUser() != null){
-                                navController.navigate("seconScreens")
+                                navController.navigate("secondScreens")
                             }
                         }
 
@@ -124,7 +129,7 @@ class MainActivity : ComponentActivity() {
                                     Toast.LENGTH_LONG
                                 ).show()
 
-                                navController.navigate("seconScreens")
+                                navController.navigate("secondScreens")
                                 viewModel.resetState()
                             }
                         }
@@ -151,7 +156,7 @@ class MainActivity : ComponentActivity() {
 
                 navigation(
                     startDestination = "homePage",
-                    route = "seconScreens"
+                    route = "secondScreens"
                 ){
                     composable("homePage"){
                         Scaffold(
@@ -181,8 +186,8 @@ class MainActivity : ComponentActivity() {
                     }
 
                     composable("cartDestination") {
-                        val viewModel = viewModel<CartViewModel>()
                         // Contenido de la pantalla del carrito
+                        val cartViewModel : CartViewModel = ShoppingCart.getViewModelInstance()
                         Scaffold(
                             bottomBar = { BottomBar(navController = navController) },
                             topBar = { TopBar(navController = navController) },
@@ -194,13 +199,13 @@ class MainActivity : ComponentActivity() {
                                 ) {
                                     // Resto de tu contenido aquí
                                     // Puedes agregar tus componentes, como Cart(navController, viewModel), dentro de este Column
-                                    Cart(navController, viewModel)
+                                    Cart(navController, cartViewModel)
                                 }
                             }
                         )
                     }
-                    composable("CategoryImprescindibles") {
-                        val viewModel = viewModel<CategoryViewModel>()
+                    composable("Category") {
+                        val viewModel : CategoryViewModel = hiltViewModel()
                         // Contenido de la pantalla del carrito
                         Scaffold(
                             bottomBar = { BottomBar(navController = navController) },
@@ -211,97 +216,30 @@ class MainActivity : ComponentActivity() {
                                         .padding(paddingValues)
                                         .fillMaxSize()
                                 ) {
-                                    // Resto de tu contenido aquí
-                                    // Puedes agregar tus componentes, como Cart(navController, viewModel), dentro de este Column
-                                    CategoryView(navController,viewModel,"Imprescindibles")
+                                    CategoryView(navController,viewModel,ShoppingCart.getSelectedCategory())
                                 }
                             }
                         )
                     }
 
-                    composable("CategoryFiction") {
-                        val viewModel = viewModel<CategoryViewModel>()
-                        // Contenido de la pantalla del carrito
-                        Scaffold(
-                            bottomBar = { BottomBar(navController = navController) },
-                            topBar = { TopBar(navController = navController)},
-                            content = { paddingValues ->
-                                Column(
-                                    modifier = Modifier
-                                        .padding(paddingValues)
-                                        .fillMaxSize()
-                                ) {
-                                    // Resto de tu contenido aquí
-                                    // Puedes agregar tus componentes, como Cart(navController, viewModel), dentro de este Column
-                                    CategoryView(navController,viewModel,"Ficción")
-                                }
-                            }
-                        )
-                    }
-                    composable("CategoryNoFiction") {
-                        val viewModel = viewModel<CategoryViewModel>()
-                        // Contenido de la pantalla del carrito
-                        Scaffold(
-                            bottomBar = { BottomBar(navController = navController) },
-                            topBar = { TopBar(navController = navController)},
-                            content = { paddingValues ->
-                                Column(
-                                    modifier = Modifier
-                                        .padding(paddingValues)
-                                        .fillMaxSize()
-                                ) {
-                                    // Resto de tu contenido aquí
-                                    // Puedes agregar tus componentes, como Cart(navController, viewModel), dentro de este Column
-                                    CategoryView(navController,viewModel,"No Ficción")
-                                }
-                            }
-                        )
-                    }
-                    composable("Categoryinfantil") {
-                        val viewModel = viewModel<CategoryViewModel>()
-                        // Contenido de la pantalla del carrito
-                        Scaffold(
-                            bottomBar = { BottomBar(navController = navController) },
-                            topBar = { TopBar(navController = navController)},
-                            content = { paddingValues ->
-                                Column(
-                                    modifier = Modifier
-                                        .padding(paddingValues)
-                                        .fillMaxSize()
-                                ) {
-                                    // Resto de tu contenido aquí
-                                    // Puedes agregar tus componentes, como Cart(navController, viewModel), dentro de este Column
-                                    CategoryView(navController,viewModel,"Infantil")
-                                }
-                            }
-                        )
-                    }
-                    composable("CategoryCómic-Manga") {
-                        val viewModel = viewModel<CategoryViewModel>()
-                        // Contenido de la pantalla del carrito
-                        Scaffold(
-                            bottomBar = { BottomBar(navController = navController) },
-                            topBar = { TopBar(navController = navController)},
-                            content = { paddingValues ->
-                                Column(
-                                    modifier = Modifier
-                                        .padding(paddingValues)
-                                        .fillMaxSize()
-                                ) {
-                                    // Resto de tu contenido aquí
-                                    // Puedes agregar tus componentes, como Cart(navController, viewModel), dentro de este Column
-                                    CategoryView(navController,viewModel, "Cómic y Manga")
-                                }
-                            }
-
-                        )
-                    }
 
 
                 //composable("signUp") { signUpView(navController = navController)}
 
                     composable("bookDetailsView"){
-                        BookDetailsScreen(navController = navController)
+                        Scaffold(
+                            bottomBar = { BottomBar(navController = navController) },
+                            topBar = { TopBar(navController = navController)},
+                            content = { paddingValues ->
+                                Column(
+                                    modifier = Modifier
+                                        .padding(paddingValues)
+                                        .fillMaxSize()
+                                ) {
+                                    BookDetailsScreen(navController = navController, book = ShoppingCart.getBookSelected())
+                                }
+                            }
+                        )
                     }
                     composable("addReviewView"){
     //                    AddReview(navController= navController)
@@ -312,7 +250,7 @@ class MainActivity : ComponentActivity() {
 
                 }
                 composable("AuthorDestination") {
-                    val viewModel = viewModel<AuthorViewModel>()
+                    val viewModel : AuthorViewModel = hiltViewModel()
                     // Contenido de la pantalla del carrito
                     Scaffold(
                         bottomBar = { BottomBar(navController = navController) },
@@ -322,25 +260,10 @@ class MainActivity : ComponentActivity() {
                                 modifier = Modifier
                                     .padding(padding),
                             )
-                            AutorScreen(navController,viewModel)
+                            AutorScreen(navController,viewModel,"4VIRMHxR4Xf2VjUADMRp")
                         }
                     )
                 }
-                /*composable("CategoryImprescindibles1") {
-                    val viewModel = viewModel<CategoryViewModel>()
-                    // Contenido de la pantalla del carrito
-                    Scaffold(
-                        bottomBar = { BottomBar(navController = navController) },
-                        topBar = { TopBar(navController = navController)},
-                        content = { padding ->
-                            Box(
-                                modifier = Modifier
-                                    .padding(padding),
-                            )
-                            CategoryView(navController,viewModel)
-                        }
-                    )
-                }*/
                 composable("SearchScreen"){
                     Scaffold(
                         bottomBar = { BottomBar(navController = navController) },
