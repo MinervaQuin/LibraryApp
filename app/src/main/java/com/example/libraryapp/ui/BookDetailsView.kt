@@ -1,6 +1,7 @@
 package com.example.libraryapp.ui.theme
 
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -44,6 +45,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
@@ -65,6 +67,7 @@ import com.example.libraryapp.model.resources.Book
 import com.example.libraryapp.model.resources.Review
 import com.example.libraryapp.theme.LibraryAppTheme
 import com.example.libraryapp.viewModel.BookDetailsViewModel
+import com.example.libraryapp.viewModel.ShoppingCart
 import java.time.format.DateTimeFormatter
 
 
@@ -91,7 +94,7 @@ fun BookDetailsScreen(
     Column (modifier = Modifier.verticalScroll(rememberScrollState())
     ){
 
-        BookInitialInfo(book)
+        BookInitialInfo(book, navController)
         BookSinopsis(book.sinopsis)
         FactSheet(book)
         ReviewBook(book.title, bookDetailsViewModel, bookUiState)
@@ -363,7 +366,8 @@ fun AddReview(
 
 
 @Composable
-fun BookInitialInfo(book: Book) {
+fun BookInitialInfo(book: Book, navController: NavHostController) {
+    val context = LocalContext.current
     Row(
         modifier = Modifier.padding(top=10.dp, bottom = 10.dp)
     ) {
@@ -373,7 +377,8 @@ fun BookInitialInfo(book: Book) {
             modifier = Modifier.padding(start = 10.dp)
         ) {
             BookLittleInfo(book)
-            Button(onClick = { /**/ }) {//Ir a la pagina de la cesta
+            Button(onClick = { ShoppingCart.getViewModelInstance().addBookToCart(book)
+                Toast.makeText(context, "Se ha añadido el libro a tu cesta", Toast.LENGTH_SHORT).show()}) {//Ir a la pagina de la cesta
                 Text(text = "Añadir a la cesta")
             }
         }
@@ -382,6 +387,7 @@ fun BookInitialInfo(book: Book) {
 
     }
 }
+
 
 @Composable
 fun BookLittleInfo(book: Book){
