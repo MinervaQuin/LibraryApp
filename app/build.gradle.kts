@@ -122,6 +122,7 @@ dependencies {
     implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.6")
 
 
+    implementation ("com.google.accompanist:accompanist-pager:0.32.0")
 
 }
 

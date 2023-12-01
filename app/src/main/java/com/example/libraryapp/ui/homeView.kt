@@ -2,6 +2,7 @@ package com.example.libraryapp.ui
 
 
 import android.util.Log
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -58,14 +59,21 @@ import com.example.libraryapp.viewModel.homeViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material3.AlertDialog
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.res.painterResource
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import com.example.libraryapp.R
 import com.example.libraryapp.model.resources.CollectionSamples
 import com.example.libraryapp.model.resources.LongCollectionSamples
+import com.example.libraryapp.model.resources.carouselImage
 import com.example.libraryapp.ui.theme.rojoSangre
+import kotlinx.coroutines.delay
 
 
 @Composable
@@ -80,6 +88,8 @@ fun HomeView(
 
     val collectionsArray by viewModel.collectionArray.collectAsState()
     val largeCollectionSamplesArray by viewModel.largeCollectionSamplesArray.collectAsState()
+    val carouselImageArray by viewModel.carouselImageArray.collectAsState()
+
 
     LazyColumn(
         modifier = Modifier
@@ -87,6 +97,10 @@ fun HomeView(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ){
+        item {
+            MiCarruselConAutoScroll(carouselImageArray)
+        }
+
         val chunkedCollections = collectionsArray.drop(2).chunked(2)
         item {
             Row(){
@@ -134,6 +148,70 @@ fun HomeView(
 
 
 }
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun MiCarruselConAutoScroll(carouselImageArray: List<carouselImage>) {
+    val collectionBoxWidth = 150.dp
+    val padding = 8.dp
+    val spacing = 4.dp
+    val totalWidth = (collectionBoxWidth * 2) + (padding * 2) + spacing
+
+    val showAlertDialog = remember { mutableStateOf(false) }
+
+    val pagerState = rememberPagerState(
+        pageCount = { carouselImageArray.size }
+    )
+    val coroutineScope = rememberCoroutineScope()
+
+    LaunchedEffect(Unit) {
+        coroutineScope.launch {
+            while (true) {
+                delay(3000)
+                val siguientePagina = (pagerState.currentPage + 1) % carouselImageArray.size
+                pagerState.animateScrollToPage(siguientePagina)
+            }
+        }
+    }
+    if (showAlertDialog.value) {
+        AlertDialog(
+            onDismissRequest = { showAlertDialog.value = false },
+            title = { Text("A donde vas, cachonda?!") },
+            text = { Text("Mira no sé si tiene que ser sheila, andrew, o tú, minerva, pero aquí faltan vistas!!") },
+            confirmButton = {
+                Button(onClick = { showAlertDialog.value = false }) {
+                    Text("Aceptar")
+                }
+            }
+        )
+    }
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier
+                .width(totalWidth)
+                .height(200.dp)
+        ) { page ->
+            Image(
+                painter = painterResource(id = carouselImageArray[page].imagen),
+                contentDescription = "Imagen Carrusel",
+                contentScale = ContentScale.Fit,
+                modifier = Modifier
+                    .height(150.dp)
+                    .width(totalWidth)
+                    .border(2.dp, Color.Black)
+                    .clickable {
+                        // Aquí va la lógica al hacer clic en la imagen, por ejemplo:
+                        showAlertDialog.value = true
+                    }
+            )
+        }
+    }
+}
+
 
 @Composable
 fun CollectionBox(collection: CollectionSamples, navController: NavController) {
@@ -201,7 +279,7 @@ fun LargeCollectionBox(collection: LongCollectionSamples, navController: NavCont
                 .clickable {
                     ShoppingCart.setSelectedCategory(collection.route)
                     navController.navigate("category")
-                           },
+                },
             elevation = CardDefaults.elevatedCardElevation(8.dp),
             shape = RoundedCornerShape(12.dp)
         ) {
