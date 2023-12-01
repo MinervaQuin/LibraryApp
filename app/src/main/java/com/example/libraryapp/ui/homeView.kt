@@ -48,6 +48,11 @@ import com.example.libraryapp.ui.theme.GreenAppOpacity
 import com.example.libraryapp.viewModel.homeViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.ui.res.painterResource
+import coil.compose.rememberImagePainter
+import com.example.libraryapp.R
+import com.example.libraryapp.ui.theme.rojoSangre
 
 
 @Composable
@@ -58,7 +63,8 @@ fun HomeView(
     ) {
 
     val collectionsArray by viewModel.collectionArray.collectAsState()
-    val colecionPrueba = Collection("Prueba", "Cositas bro", "https://m.media-amazon.com/images/I/6135vNR5sCL._AC_UF1000,1000_QL80_.jpg")
+    val largeCollectionSamplesArray by viewModel.largeCollectionSamplesArray.collectAsState()
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -67,17 +73,24 @@ fun HomeView(
         horizontalAlignment = Alignment.CenterHorizontally
     ){
         val chunkedCollections = collectionsArray.chunked(2)
-        chunkedCollections.forEach { pair ->
+        chunkedCollections.forEachIndexed { index, pair ->
             item {
-                Row(
-
-                ) {
-                    pair.forEach { CollectionSamples ->
-                        CollectionBox(collection = CollectionSamples)
+                Row {
+                    pair.forEach { collectionSample ->
+                        CollectionBox(collection = collectionSample)
                     }
                 }
             }
+
+            // Usa el índice del chunk para seleccionar el LargeCollectionBox
+            val largeCollectionIndex = index // O cualquier lógica que desees aplicar aquí
+            if (largeCollectionIndex < largeCollectionSamplesArray.size) {
+                item {
+                    LargeCollectionBox(collection = largeCollectionSamplesArray[largeCollectionIndex])
+                }
+            }
         }
+
         item {
             Button(onClick = onSignOut){
                 Text(text = "Cerrar Sesión")
@@ -127,11 +140,7 @@ fun HomeView(
 
 
 }
-data class Collection(
-    val title: String,
-    val subtitle: String,
-    val imageUrl: String
-)
+
 @Composable
 fun CollectionBox(collection: homeViewModel.CollectionSamples) {
     Card(
@@ -140,7 +149,7 @@ fun CollectionBox(collection: homeViewModel.CollectionSamples) {
             .height(250.dp)
             .width(150.dp)
             .border(2.dp, Color.Black, shape = RectangleShape)
-            .clickable{
+            .clickable {
                 Log.d("CollectionBoxClick", "Route: ${collection.route}")
             },
         elevation = CardDefaults.elevatedCardElevation(8.dp),
@@ -181,40 +190,93 @@ fun CollectionBox(collection: homeViewModel.CollectionSamples) {
 }
 
 @Composable
-fun LargeCollectionBox(collection: homeViewModel.CollectionSamples) {
-    Card(
-        modifier = Modifier
-            .padding(8.dp)
-            .height(50.dp) // Ajusta la altura según sea necesario
-            .fillMaxWidth() // Se extiende al ancho máximo disponible
-            .clickable{
-                Log.d("CollectionBoxClick", "Route: ${collection.route}")
-            },
-            elevation = CardDefaults.elevatedCardElevation(8.dp), // Ajusta la elevación según sea necesario
-        shape = RoundedCornerShape(12.dp) // Esquinas redondeadas como en la imagen
-    ) {
-        Box(
+fun LargeCollectionBox(collection: homeViewModel.LongCollectionSamples) {
+    val collectionBoxWidth = 150.dp
+    val padding = 8.dp
+    val spacing = 4.dp
+    val totalWidth = (collectionBoxWidth * 2) + (padding * 2) + spacing
+
+    if(collection.isComplete){
+        Card(
             modifier = Modifier
-                .background(Brush.horizontalGradient(listOf(Color.Yellow, Color.Red))) // Un gradiente horizontal similar al de la imagen
-                .fillMaxSize()
+                .padding(8.dp)
+                .width(totalWidth)
+                .height(75.dp)
+                .fillMaxWidth()
+                .clickable { Log.d("CollectionBoxClick", "Route: ${collection.route}") },
+            elevation = CardDefaults.elevatedCardElevation(8.dp),
+            shape = RoundedCornerShape(12.dp)
         ) {
-            Text(
-                text = collection.title.toUpperCase(), // Usa el nombre de la categoría en mayúsculas
-                color = Color.White,
-                fontSize = 18.sp, // Ajusta el tamaño de fuente según sea necesario
-                fontWeight = FontWeight.Bold,
+            Box(
                 modifier = Modifier
-                    .align(Alignment.Center) // Centra el texto en la caja
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-            )
+                    .fillMaxSize()
+            ) {
+                Image(
+                    painter = painterResource(id = collection.imageRes), // Imagen de fondo
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop, // Asegúrate de que la imagen se ajuste correctamente
+                    modifier = Modifier.fillMaxSize()
+                )
+                Text(
+                    text = collection.title.toUpperCase(), // Texto en mayúsculas
+                    color = Color.White,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier
+                        .align(Alignment.Center) // Centra el texto
+                        .padding(8.dp)
+                )
+            }
         }
     }
+    else{
+        Card(
+            modifier = Modifier
+                .padding(8.dp)
+                .width(totalWidth)
+                .height(75.dp)
+                .fillMaxWidth()
+                .clickable {
+                    Log.d("CollectionBoxClick", "Route: ${collection.route}")
+                }, // Se extiende al ancho máximo disponible
+
+            elevation = CardDefaults.elevatedCardElevation(8.dp), // Ajusta la elevación según sea necesario
+            shape = RoundedCornerShape(12.dp) // Esquinas redondeadas
+        ) {
+            Row( // Distribución horizontal
+                modifier = Modifier
+                    .background(collection.color)
+                    // Gradiente horizontal
+                    .fillMaxSize()
+            ) {
+                Text(
+                    text = collection.title.toUpperCase(), // Texto en mayúsculas
+                    color = Color.White,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .weight(1f)
+                )
+                Image(
+                    painter = painterResource(id = collection.imageRes),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .weight(1f)
+                        .fillMaxHeight() // Hace que la imagen llene la altura disponible
+                )
+            }
+        }
+    }
+
 }
 
 @Preview(showBackground = true)
 @Composable
 fun PreviewhomeView() {
-    val colecionPrueba = Collection("Prueba", "Cositas bro", "https://m.media-amazon.com/images/I/6135vNR5sCL._AC_UF1000,1000_QL80_.jpg")
+    //val colecionPrueba = Collection("Prueba", "Cositas bro", "https://m.media-amazon.com/images/I/6135vNR5sCL._AC_UF1000,1000_QL80_.jpg")
     //CollectionBox(homeViewModel.CollectionSamples)
 
 }

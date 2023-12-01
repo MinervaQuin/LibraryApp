@@ -13,3 +13,4 @@ val Pink40 = Color(0xFF7D5260)
 
 val GreenApp = Color(0xFF77CF7C)
 val GreenAppOpacity = Color(0xB377CF7C)
+val rojoSangre = Color(0xFF841F0B)
