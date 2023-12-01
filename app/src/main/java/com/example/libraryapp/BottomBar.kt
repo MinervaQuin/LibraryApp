@@ -21,6 +21,7 @@ import com.example.libraryapp.theme.gray
 import com.example.libraryapp.theme.green
 import androidx.navigation.NavController
 import com.example.libraryapp.theme.white
+import com.example.libraryapp.ui.theme.GreenAppOpacity
 
 
 @Composable
@@ -37,7 +38,7 @@ fun BottomBar(navController: NavController){
         }
     }
     BottomAppBar(
-        containerColor = green,
+        containerColor = GreenAppOpacity,
         modifier = Modifier
             .fillMaxWidth()
             .height(65.dp),
