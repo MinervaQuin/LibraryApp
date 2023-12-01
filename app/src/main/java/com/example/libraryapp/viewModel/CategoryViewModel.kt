@@ -79,6 +79,7 @@ class CategoryViewModel @Inject constructor(
     fun updateSelectedCategory(newCategory: String) {
         selectedCategory = newCategory
         updatebooks(selectedCategory)
+        ShoppingCart.setSelectedCategory(newCategory)
     }
 
 }
