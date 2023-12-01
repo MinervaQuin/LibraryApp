@@ -128,7 +128,7 @@ fun SearchAppBar(searchViewModel: SearchViewModel,
         onValueChange = { searchString = it},
         leadingIcon = {
             IconButton(onClick = {
-                MainActivity.initScanner(context)
+//                MainActivity.initScanner(context)
             }) {
                 Icon(
                     painter = painterResource(id = R.drawable.upc_scan),

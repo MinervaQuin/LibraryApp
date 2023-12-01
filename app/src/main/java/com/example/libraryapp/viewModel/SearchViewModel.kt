@@ -6,7 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.lifecycle.ViewModel
 import com.example.libraryapp.model.FirestoreRepository
 import com.example.libraryapp.model.resources.Book
-import com.google.zxing.integration.android.IntentIntegrator
+//import com.google.zxing.integration.android.IntentIntegrator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
