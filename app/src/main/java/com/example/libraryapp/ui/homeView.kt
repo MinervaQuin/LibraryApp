@@ -72,7 +72,13 @@ fun HomeView(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ){
-        val chunkedCollections = collectionsArray.chunked(2)
+        val chunkedCollections = collectionsArray.drop(2).chunked(2)
+        item {
+            Row(){
+                CollectionBox(collection = collectionsArray[0])
+                CollectionBox(collection = collectionsArray[1])
+            }
+        }
         chunkedCollections.forEachIndexed { index, pair ->
             item {
                 Row {
