@@ -57,6 +57,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.firestore
+import com.google.zxing.integration.android.IntentIntegrator
 //import com.google.zxing.integration.android.IntentIntegrator
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -287,29 +288,29 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-//    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-//        var result = IntentIntegrator.parseActivityResult(requestCode,resultCode,data)
-//        if (result != null){
-//            if(result.contents == null) {
-//                Toast.makeText(this,"Cancelado", Toast.LENGTH_SHORT).show()
-//            }
-//            else{
-//                Toast.makeText(this,"El valor escaneado es= ${result.contents}",Toast.LENGTH_SHORT).show()
-//            }
-//
-//        }else{
-//            super.onActivityResult(requestCode, resultCode, data)
-//        }
-//    }
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        var result = IntentIntegrator.parseActivityResult(requestCode,resultCode,data)
+        if (result != null){
+            if(result.contents == null) {
+                Toast.makeText(this,"Cancelado", Toast.LENGTH_SHORT).show()
+            }
+            else{
+                Toast.makeText(this,"El valor escaneado es= ${result.contents}",Toast.LENGTH_SHORT).show()
+            }
 
-//    companion object {
-//        fun initScanner(context: Context) {
-//            var integrator = IntentIntegrator(context as ComponentActivity)
-//            integrator.setPrompt("Escanea el codigo de barras")
-//            integrator.setBeepEnabled(false)
-//            integrator.initiateScan()
-//        }
-//    }
+        }else{
+            super.onActivityResult(requestCode, resultCode, data)
+        }
+    }
+
+    companion object {
+        fun initScanner(context: Context) {
+            var integrator = IntentIntegrator(context as ComponentActivity)
+            integrator.setPrompt("Escanea el codigo de barras")
+            integrator.setBeepEnabled(false)
+            integrator.initiateScan()
+        }
+    }
 }
 
 @Composable

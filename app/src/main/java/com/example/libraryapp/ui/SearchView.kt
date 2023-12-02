@@ -116,7 +116,6 @@ fun SearchAppBar(searchViewModel: SearchViewModel,
     var searchString by remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
-    //val scanner : Scanner = Scanner()
 
     OutlinedTextField(
         modifier = Modifier
@@ -128,7 +127,7 @@ fun SearchAppBar(searchViewModel: SearchViewModel,
         onValueChange = { searchString = it},
         leadingIcon = {
             IconButton(onClick = {
-//                MainActivity.initScanner(context)
+                MainActivity.initScanner(context)
             }) {
                 Icon(
                     painter = painterResource(id = R.drawable.upc_scan),
