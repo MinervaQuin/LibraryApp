@@ -107,8 +107,8 @@ dependencies {
     // CALENDAR
     implementation ("com.maxkeppeler.sheets-compose-dialogs:calendar:1.0.2")
     //LECTOR BARRAS
-    implementation ("com.journeyapps:zxing-android-embedded:4.1.0")
-    //implementation ("com.journeyapps:zxing-android-embedded:4.3.0")
+    //implementation ("com.journeyapps:zxing-android-embedded:4.1.0")
+    implementation ("com.journeyapps:zxing-android-embedded:4.3.0")
 
     /*
     #####FIN DEPENDENCIAS DE TERCEROS####
