@@ -30,21 +30,3 @@ object ShoppingCart {
     }
 }
 
-/* acceder al carrito desde otra vista
-val shoppingCart: CartViewModel = ShoppingCart.getViewModel()
-
-#añadir libros desde pero con la base de datos
-viewModelScope.launch {
-    shoppingCart.addBookToCartFromDatabase("B9svfDJglRgEPyN6wSAh")
-}
-
-#o si ya tienes el objeto libro añadirlo directamente
-val bookToAdd = shoppingCart.addBookToCart(bookToAdd)
-
-#por si una vista necesita visualizar el carrito actualizado
-cartViewModel.cartItems.collect { cartItems ->
-}
-
-// Inicializar el objeto singleton con la instancia de FirestoreRepository
-ShoppingCart.init(FirestoreRepository)
-*/

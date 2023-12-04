@@ -18,7 +18,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.libraryapp.theme.gray
-import com.example.libraryapp.theme.green
 import androidx.navigation.NavController
 import com.example.libraryapp.theme.white
 import com.example.libraryapp.ui.theme.GreenAppOpacity
@@ -69,9 +68,9 @@ fun BottomBar(navController: NavController){
                 icon = {
                     Icon(Icons.Default.LocationOn,
                         contentDescription = "location",
-                        tint = if (currentRoute == "map") white else gray,
+                        tint = if (currentRoute == "maps") white else gray,
                         modifier = Modifier.size(32.dp)) },
-                selected = navController.currentDestination?.route == "map",
+                selected = navController.currentDestination?.route == "maps",
                 onClick = {
                     navController.navigate("maps")
                 }

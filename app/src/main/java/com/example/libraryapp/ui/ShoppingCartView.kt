@@ -275,7 +275,7 @@ fun ActionButton(cartState: CartViewModel.CartState, navController: NavControlle
         onClick = {
             if (cartState.deliveryOption == CartViewModel.DeliveryOption.PICK_UP) {
                 // Navegar a la pantalla de selección de tienda (no implementada)
-                navController.navigate("map")
+                navController.navigate("maps")
             } else {
                 // Navegar a la pantalla de compra (no implementada)
                 navController.navigate("payment")
