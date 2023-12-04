@@ -42,6 +42,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Observer
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.example.libraryapp.MainActivity
@@ -83,7 +84,8 @@ fun BookScreen(
             },
             updateSearchString = { newSearchString ->
                 stringSearched = newSearchString
-            }
+            },
+            navController
         )
         Text(text = if (stringSearched.length != 0) "Resultados para: " + stringSearched else "",
             fontWeight = FontWeight.Bold,
@@ -112,7 +114,8 @@ fun BookScreen(
 @Composable
 fun SearchAppBar(searchViewModel: SearchViewModel,
                  modifyState: (List<Book?>) -> Unit,
-                 updateSearchString: (String) -> Unit) {
+                 updateSearchString: (String) -> Unit,
+                 navController: NavHostController) {
     var searchString by remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -127,7 +130,14 @@ fun SearchAppBar(searchViewModel: SearchViewModel,
         onValueChange = { searchString = it},
         leadingIcon = {
             IconButton(onClick = {
-                MainActivity.initScanner(context)
+
+                //MainActivity.initScanner(context)
+                searchViewModel.initiateScan(context)
+                val result = searchViewModel.book.value
+                result?.let { book ->
+                    ShoppingCart.setBookSelected(result)
+                    navController.navigate("BookDetailsView")
+                }
             }) {
                 Icon(
                     painter = painterResource(id = R.drawable.upc_scan),

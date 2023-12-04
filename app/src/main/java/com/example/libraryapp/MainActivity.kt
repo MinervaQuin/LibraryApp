@@ -12,6 +12,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,21 +21,24 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Observer
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
+import com.example.libraryapp.model.FirestoreRepository
 import com.example.libraryapp.model.firebaseAuth.FirestoreRepositoryImpl
 import com.example.libraryapp.model.firebaseAuth.GoogleAuthUiClient
+import com.example.libraryapp.model.resources.Author
+import com.example.libraryapp.model.resources.Book
 import com.example.libraryapp.theme.LibraryAppTheme
 import com.example.libraryapp.ui.Cart
 import com.example.libraryapp.ui.CategoryView
@@ -47,6 +51,7 @@ import com.example.libraryapp.ui.theme.BookScreen
 import com.example.libraryapp.view.AutorScreen
 import com.example.libraryapp.viewModel.AuthorViewModel
 import com.example.libraryapp.viewModel.CartViewModel
+import com.example.libraryapp.viewModel.SearchViewModel
 import com.example.libraryapp.viewModel.ShoppingCart
 import com.example.libraryapp.viewModel.homeViewModel
 import com.example.libraryapp.viewModel.loginViewModel
@@ -62,6 +67,7 @@ import com.google.zxing.integration.android.IntentIntegrator
 //import com.google.zxing.integration.android.IntentIntegrator
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -310,8 +316,38 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+
+
+
+
+
+
+
+        /*fun initScanner(context: Context) {
+            searchViewModel.initiateScan(this)
+        }*/
     }
+    val searchViewModel: SearchViewModel by viewModels()
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        var result = IntentIntegrator.parseActivityResult(requestCode,resultCode,data)
+        if (result != null){
+            if(result.contents == null) {
+                Toast.makeText(this,"Cancelado", Toast.LENGTH_SHORT).show()
+            }
+            else{
+                Toast.makeText(this,"El valor escaneado es= ${result.contents}",Toast.LENGTH_SHORT).show()
+                searchViewModel.handleScanResult(result.contents)
+            }
+
+        }else{
+            super.onActivityResult(requestCode, resultCode, data)
+        }
+    }
+}
+
+   /* override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+
+
         var result = IntentIntegrator.parseActivityResult(requestCode,resultCode,data)
         if (result != null){
             if(result.contents == null) {
@@ -326,16 +362,18 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    companion object {
-        fun initScanner(context: Context) {
-            var integrator = IntentIntegrator(context as ComponentActivity)
-            integrator.setPrompt("Escanea el codigo de barras")
-            integrator.setBeepEnabled(false)
-            integrator.initiateScan()
-        }
-    }
-}
+    */
 
+/*@Composable
+fun searchByIsbn(isbn: String): Book?{
+    var book by remember { mutableStateOf(listOf<Book?>()) }
+    val searchViewModel : SearchViewModel = hiltViewModel()
+    LaunchedEffect(isbn) {
+        book = searchViewModel.getBooksStringMatch(isbn)
+    }
+    return book[0]
+}
+*/
 @Composable
 fun Greeting() {
     val db = FirebaseFirestore.getInstance()
