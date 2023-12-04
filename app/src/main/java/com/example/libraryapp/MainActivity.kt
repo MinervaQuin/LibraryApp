@@ -40,6 +40,7 @@ import com.example.libraryapp.ui.Cart
 import com.example.libraryapp.ui.CategoryView
 import com.example.libraryapp.ui.HomeView
 import com.example.libraryapp.ui.LoginView
+import com.example.libraryapp.ui.MapScreen
 import com.example.libraryapp.ui.signUpView
 import com.example.libraryapp.ui.theme.BookDetailsScreen
 import com.example.libraryapp.ui.theme.BookScreen
@@ -230,6 +231,22 @@ class MainActivity : ComponentActivity() {
                         )
                     }
 
+                    composable("maps"){
+                        Scaffold(
+                            bottomBar = { BottomBar(navController = navController) },
+                            topBar = { TopBar(navController = navController)},
+                            content = { paddingValues ->
+                                Column(
+                                    modifier = Modifier
+                                        .padding(paddingValues)
+                                        .fillMaxSize()
+                                ) {
+                                    MapScreen()
+                                }
+                            }
+                        )
+                    }
+
 
 
                 //composable("signUp") { signUpView(navController = navController)}
@@ -257,18 +274,22 @@ class MainActivity : ComponentActivity() {
                     }
 
                 }
+
+                //fuera del grafo
                 composable("AuthorDestination") {
                     val viewModel : AuthorViewModel = hiltViewModel()
                     // Contenido de la pantalla del carrito
                     Scaffold(
                         bottomBar = { BottomBar(navController = navController) },
                         topBar = { TopBar(navController = navController)},
-                        content = { padding ->
-                            Box(
+                        content = { paddingValues ->
+                            Column(
                                 modifier = Modifier
-                                    .padding(padding),
-                            )
-                            AutorScreen(navController,viewModel,"4VIRMHxR4Xf2VjUADMRp")
+                                    .padding(paddingValues)
+                                    .fillMaxSize()
+                            ) {
+                                AutorScreen(navController, viewModel, "4VIRMHxR4Xf2VjUADMRp")
+                            }
                         }
                     )
                 }
@@ -276,12 +297,14 @@ class MainActivity : ComponentActivity() {
                     Scaffold(
                         bottomBar = { BottomBar(navController = navController) },
                         topBar = { TopBar(navController = navController)},
-                        content = { padding ->
-                            Box(
+                        content = { paddingValues ->
+                            Column(
                                 modifier = Modifier
-                                    .padding(padding),
-                            )
-                            BookScreen(navController= navController)
+                                    .padding(paddingValues)
+                                    .fillMaxSize()
+                            ) {
+                                BookScreen(navController = navController)
+                            }
                         }
                     )
                 }

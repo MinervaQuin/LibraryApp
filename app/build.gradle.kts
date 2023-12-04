@@ -130,6 +130,16 @@ dependencies {
 
     implementation ("com.google.accompanist:accompanist-pager:0.32.0")
 
+    //Google Services & Maps
+    implementation ("com.google.android.gms:play-services-location:21.0.1")
+    implementation ("com.google.maps.android:maps-compose:2.9.0")
+    implementation ("com.google.android.gms:play-services-maps:18.1.0")
+
+
+    //Accompanist (Permission)
+    implementation ("com.google.accompanist:accompanist-permissions:0.31.3-beta")
+
+
 }
 
 kapt {

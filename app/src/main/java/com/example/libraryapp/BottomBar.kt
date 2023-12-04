@@ -73,7 +73,7 @@ fun BottomBar(navController: NavController){
                         modifier = Modifier.size(32.dp)) },
                 selected = navController.currentDestination?.route == "map",
                 onClick = {
-                    navController.navigate("map")
+                    navController.navigate("maps")
                 }
             )
         }

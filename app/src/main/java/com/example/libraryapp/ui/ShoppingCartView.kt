@@ -15,6 +15,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -48,6 +49,7 @@ fun BookItem(
             modifier = Modifier
                 .width(75.dp)
                 .height(100.dp)
+                .border(width = 1.dp, color = Color.Black)
         ) {
             AsyncImage(
                 model = book.cover,
@@ -73,21 +75,6 @@ fun BookItem(
         // Columna 3: Información del libro
         Column {
             Row {
-                // Botón de agregar
-                IconButton(
-                    onClick = { onAddClick() },
-                    modifier = Modifier.size(30.dp),
-                    colors = IconButtonDefaults.iconButtonColors(contentColor = green),
-                ) {
-                    Icon(Icons.Default.Add, contentDescription = "Agregar")
-                }
-                Spacer(modifier = Modifier.width(8.dp))
-
-
-                Text(text = quantity.toString(), fontSize = 18.sp)
-
-                Spacer(modifier = Modifier.width(8.dp))
-
                 // Botón de quitar
                 IconButton(
                     onClick = { onSubtractClick() },
@@ -95,6 +82,21 @@ fun BookItem(
                     colors = IconButtonDefaults.iconButtonColors(contentColor = green),
                 ) {
                     Icon(Icons.Default.Remove, contentDescription = "Agregar")
+                }
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Text(text = quantity.toString(), fontSize = 18.sp)
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                // Botón de agregar
+                IconButton(
+                    onClick = { onAddClick() },
+                    modifier = Modifier.size(30.dp),
+                    colors = IconButtonDefaults.iconButtonColors(contentColor = green),
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = "Agregar")
                 }
             }
 
