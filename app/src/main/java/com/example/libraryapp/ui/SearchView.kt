@@ -75,7 +75,6 @@ fun BookScreen(
     }
     val navController2 = navController
     Column {
-        Spacer(modifier = Modifier.height(57.dp))
         SearchAppBar(
             searchViewModel = searchViewModel,
             modifyState = { newValue ->
@@ -90,7 +89,7 @@ fun BookScreen(
             modifier = if (stringSearched.length != 0) Modifier.padding(start = 6.dp, top=8.dp, bottom = 8.dp) else Modifier.padding(start = 0.dp))
         LazyVerticalGrid(
             columns = GridCells.Adaptive(minSize = 180.dp),
-            modifier = Modifier.padding(bottom = 60.dp, top = 0.dp)
+            //modifier = Modifier.padding(bottom = 60.dp, top = 0.dp)
         ){
             items(items = books) {
                 BookItem(it, modifier = Modifier, navController)
