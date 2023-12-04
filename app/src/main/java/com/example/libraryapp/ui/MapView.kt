@@ -1,6 +1,5 @@
 package com.example.libraryapp.ui
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -17,7 +16,7 @@ fun MapScreen() {
     val uni = LatLng(28.07337573999047, -15.451748844763351)
     val marker = MarkerState(position = uni)
     val cameraPositionState = rememberCameraPositionState{
-        position = CameraPosition.fromLatLngZoom(uni,10f)
+        position = CameraPosition.fromLatLngZoom(uni,15f)
     }
     GoogleMap (
         modifier = Modifier.fillMaxSize(),
@@ -28,4 +27,5 @@ fun MapScreen() {
             title = "Escuela de Ingeniería Informática"
         )
     }
+
 }

@@ -1,10 +1,10 @@
 package com.example.libraryapp
 
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Box
+
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -44,23 +44,25 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.rememberUpdatedState
+
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.libraryapp.theme.gray
-import com.example.libraryapp.theme.green
+
 import com.example.libraryapp.ui.theme.GreenAppOpacity
 import kotlinx.coroutines.launch
 import coil.compose.AsyncImage
 import com.example.libraryapp.theme.white
 import com.example.libraryapp.viewModel.ShoppingCart
+
 
 
 data class NavigationItem(
@@ -134,7 +136,7 @@ fun TopBar(navController: NavController) {
             selectedIcon = Icons.Filled.Info,
             unselectedIcon = Icons.Outlined.Info,
             route = "ayuda",
-        )
+        ),
     )
 
 
@@ -197,11 +199,6 @@ fun TopBar(navController: NavController) {
 
 
     DismissibleNavigationDrawer(drawerContent = {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .border(1.dp, color =GreenAppOpacity )
-        ) {
             DismissibleDrawerSheet {
                 Spacer(modifier = Modifier.height(55.dp))
                 Column(
@@ -225,8 +222,8 @@ fun TopBar(navController: NavController) {
                 }
                 Divider(modifier = Modifier.fillMaxWidth().padding(start = 30.dp, end = 30.dp), color = gray, thickness = 1.dp)
                 LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(8.dp)
+                    modifier = Modifier.fillMaxSize().padding(bottom = 65.dp),
+                    contentPadding = PaddingValues(3.dp)
                 ) {
                     items.forEachIndexed { index, item ->
                         item {
@@ -265,13 +262,11 @@ fun TopBar(navController: NavController) {
                     }
                 }
             }
-        }
     },
         drawerState = drawerState,
         gesturesEnabled = drawerState.isOpen,
-        modifier = Modifier.width(250.dp).border(5.dp, GreenAppOpacity)
+        modifier = Modifier.width(250.dp)
     ) {
-
     }
     TopAppBar(
         colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = GreenAppOpacity),
