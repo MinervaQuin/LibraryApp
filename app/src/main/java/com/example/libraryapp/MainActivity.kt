@@ -316,37 +316,9 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-
-
-
-
-
-
-
-        /*fun initScanner(context: Context) {
-            searchViewModel.initiateScan(this)
-        }*/
     }
     val searchViewModel: SearchViewModel by viewModels()
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        var result = IntentIntegrator.parseActivityResult(requestCode,resultCode,data)
-        if (result != null){
-            if(result.contents == null) {
-                Toast.makeText(this,"Cancelado", Toast.LENGTH_SHORT).show()
-            }
-            else{
-                Toast.makeText(this,"El valor escaneado es= ${result.contents}",Toast.LENGTH_SHORT).show()
-                searchViewModel.handleScanResult(result.contents)
-            }
-
-        }else{
-            super.onActivityResult(requestCode, resultCode, data)
-        }
-    }
-}
-
-   /* override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-
 
         var result = IntentIntegrator.parseActivityResult(requestCode,resultCode,data)
         if (result != null){
@@ -354,26 +326,22 @@ class MainActivity : ComponentActivity() {
                 Toast.makeText(this,"Cancelado", Toast.LENGTH_SHORT).show()
             }
             else{
-                Toast.makeText(this,"El valor escaneado es= ${result.contents}",Toast.LENGTH_SHORT).show()
+                lifecycleScope.launch{
+                    searchViewModel.handleScanResult(result.contents)
+                }
+                searchViewModel.isFallo.observe(this, Observer { isFallo ->
+                    if (isFallo) {
+                        Toast.makeText(this,"No se ha encontrado el libro", Toast.LENGTH_SHORT).show()
+                    }
+                })
+
             }
 
         }else{
             super.onActivityResult(requestCode, resultCode, data)
         }
     }
-
-    */
-
-/*@Composable
-fun searchByIsbn(isbn: String): Book?{
-    var book by remember { mutableStateOf(listOf<Book?>()) }
-    val searchViewModel : SearchViewModel = hiltViewModel()
-    LaunchedEffect(isbn) {
-        book = searchViewModel.getBooksStringMatch(isbn)
-    }
-    return book[0]
 }
-*/
 @Composable
 fun Greeting() {
     val db = FirebaseFirestore.getInstance()

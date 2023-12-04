@@ -4,10 +4,14 @@ import android.content.Context
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.libraryapp.MainActivity
 import com.example.libraryapp.model.FirestoreRepository
 import com.example.libraryapp.model.resources.Author
 import com.example.libraryapp.model.resources.Book
@@ -22,11 +26,8 @@ class SearchViewModel @Inject constructor(
     private val firestoreRepository: FirestoreRepository
 
 ): ViewModel(){
-    private val _scanResult = MutableLiveData<String>()
-    val scanResult: LiveData<String> get() = _scanResult
-    private val _book= MutableLiveData<Book>()
-    val book: LiveData<Book> get() = _book
-
+    private val _isFallo = MutableLiveData<Boolean>()
+    val isFallo get() = _isFallo
     private var allBooks: List<Book?> = emptyList()
     private var searchedBooks : List<Book?> = emptyList()
 
@@ -39,14 +40,17 @@ class SearchViewModel @Inject constructor(
         }
     }
 
-    fun handleScanResult(result: String?) {
-        result?.let {
-            _scanResult.value = it
-            viewModelScope.launch {
-                val books = getBooksStringMatch(it)
-                if (books.isNotEmpty()){
-                    _book.value = books[0] as Book
-                }
+    suspend fun handleScanResult(result: String) {
+        viewModelScope.launch {
+            val books = getBooksStringMatch(result)
+            if (books.isNotEmpty()){
+                val book = books[0] as Book
+                ShoppingCart.setBookSelected(book)
+                ShoppingCart.getNavController().navigate("BookDetailsView")
+                _isFallo.value = false
+            }
+            else{
+                _isFallo.value = true
             }
         }
     }

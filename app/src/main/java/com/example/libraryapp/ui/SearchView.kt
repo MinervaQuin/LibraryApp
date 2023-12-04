@@ -2,6 +2,7 @@ package com.example.libraryapp.ui.theme
 
 
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -76,7 +77,6 @@ fun BookScreen(
     }
     val navController2 = navController
     Column {
-        Spacer(modifier = Modifier.height(57.dp))
         SearchAppBar(
             searchViewModel = searchViewModel,
             modifyState = { newValue ->
@@ -92,7 +92,7 @@ fun BookScreen(
             modifier = if (stringSearched.length != 0) Modifier.padding(start = 6.dp, top=8.dp, bottom = 8.dp) else Modifier.padding(start = 0.dp))
         LazyVerticalGrid(
             columns = GridCells.Adaptive(minSize = 180.dp),
-            modifier = Modifier.padding(bottom = 60.dp, top = 0.dp)
+            //modifier = Modifier.padding(bottom = 60.dp, top = 0.dp)
         ){
             items(items = books) {
                 BookItem(it, modifier = Modifier, navController)
@@ -130,14 +130,8 @@ fun SearchAppBar(searchViewModel: SearchViewModel,
         onValueChange = { searchString = it},
         leadingIcon = {
             IconButton(onClick = {
-
-                //MainActivity.initScanner(context)
+                ShoppingCart.setNavController(navController)
                 searchViewModel.initiateScan(context)
-                val result = searchViewModel.book.value
-                result?.let { book ->
-                    ShoppingCart.setBookSelected(result)
-                    navController.navigate("BookDetailsView")
-                }
             }) {
                 Icon(
                     painter = painterResource(id = R.drawable.upc_scan),
