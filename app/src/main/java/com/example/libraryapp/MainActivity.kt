@@ -41,6 +41,7 @@ import com.example.libraryapp.ui.CategoryView
 import com.example.libraryapp.ui.HomeView
 import com.example.libraryapp.ui.LoginView
 import com.example.libraryapp.ui.MapScreen
+import com.example.libraryapp.ui.ProfileScreen
 import com.example.libraryapp.ui.signUpView
 import com.example.libraryapp.ui.theme.BookDetailsScreen
 import com.example.libraryapp.ui.theme.BookScreen
@@ -242,6 +243,22 @@ class MainActivity : ComponentActivity() {
                                         .fillMaxSize()
                                 ) {
                                     MapScreen()
+                                }
+                            }
+                        )
+                    }
+
+                    composable("profile"){
+                        Scaffold(
+                            bottomBar = { BottomBar(navController = navController) },
+                            topBar = { TopBar(navController = navController)},
+                            content = { paddingValues ->
+                                Column(
+                                    modifier = Modifier
+                                        .padding(paddingValues)
+                                        .fillMaxSize()
+                                ) {
+                                    ProfileScreen()
                                 }
                             }
                         )

@@ -27,5 +27,4 @@ fun MapScreen() {
             title = "Escuela de Ingeniería Informática"
         )
     }
-
 }
