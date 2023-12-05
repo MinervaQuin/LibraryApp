@@ -101,7 +101,7 @@ fun BookDetailsScreen(
         FactSheet(book)
         ReviewBook(book.title, bookDetailsViewModel, bookUiState)
         Divider()
-        ResumeOfReviews(book)
+        ResumeOfReviews(num_opi = reviews.size, rateScore = book.score.toDouble())
         Column (
             modifier = Modifier.height(400.dp)
                 .verticalScroll(rememberScrollState())
@@ -120,17 +120,15 @@ fun BookDetailsScreen(
 
 @Composable
 fun ResumeOfReviews(
-    book: Book,
-    mediaScore: Double = 4.5,
-    rateScore: Double = 4.0,
-    num_opi: Int = 124,
+    rateScore: Double,
+    num_opi: Int,
 ){
     Row (modifier = Modifier.padding(top=20.dp, bottom = 10.dp, start = 15.dp)){
         Box (modifier = Modifier.weight(0.2f),
             contentAlignment = Alignment.Center
             ) {
             createCircle()
-            Text(text = mediaScore.toString(),
+            Text(text = rateScore.toString(),
                 style = TextStyle(
                     fontSize = 20.sp,
                     fontWeight = FontWeight(700),
@@ -299,7 +297,6 @@ fun AddReview(
                     .fillMaxWidth()
                     .height(400.dp)
                     .padding(16.dp)
-
                     .shadow(8.dp),
                 colors = CardDefaults.cardColors(
                     containerColor = Color.White,
