@@ -576,7 +576,7 @@ fun RatingBar(
                 else Icons.Outlined.Star,
                 contentDescription = null,
                 tint = if (i <= currentRating) starsColor
-                else Color.Unspecified,
+                else Color.LightGray,
 
                 )
         }
@@ -597,7 +597,7 @@ fun AnimatedRatingBar(
                 else Icons.Outlined.Star,
                 contentDescription = null,
                 tint = if (i <= currentRating) starsColor
-                else Color.Unspecified,
+                else Color.LightGray,
                 modifier = Modifier
                     .clickable { onRatingChanged(i) }
                     .padding(4.dp)
