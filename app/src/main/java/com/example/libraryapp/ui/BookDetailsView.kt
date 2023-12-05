@@ -588,7 +588,7 @@ fun AnimatedRatingBar(
     maxRating: Int = 5,
     currentRating: Int,
     onRatingChanged: (Int) -> Unit,
-    starsColor: Color = Color.Yellow
+    starsColor: Color = Color(0xFFF7D850)
 ) {
     Row {
         for (i in 1..maxRating) {
