@@ -2,6 +2,7 @@ package com.example.libraryapp.ui.theme
 
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -280,11 +281,19 @@ fun AddReview(
 {
     var comentarioTexto by remember { mutableStateOf("") }
 
+
+
     // Dialog composable
     if (showDialog) {
+
         Dialog(
-            onDismissRequest = {}
+            onDismissRequest = {
+                bookDetailsViewModel.closeDialog()
+            }
         ) {
+            BackHandler {
+                bookDetailsViewModel.closeDialog()
+            }
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -295,21 +304,26 @@ fun AddReview(
                 colors = CardDefaults.cardColors(
                     containerColor = Color.White,
                 ),
-                shape = RoundedCornerShape(16.dp),
+                shape = RoundedCornerShape(10.dp),
 
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 10.dp)
+                        .padding(10.dp)
+
                         //.background(color = Color.White)
                             ,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
                         "¿Has leído " + bookTitle + "?",
-                        style = TextStyle(fontSize = 25.sp, fontWeight = FontWeight.Bold),
+                        style = TextStyle(
+                            fontSize = 25.sp,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center),
                         color = Color.Black
+
                     )
                     Text(
                         "Deja tu opinión para ayudar a otros lectores",
@@ -354,6 +368,7 @@ fun AddReview(
                             comentarioTexto = ""
                         },
                         colors = ButtonDefaults.buttonColors(GreenApp)
+
                     ) {
                         Text("Enviar") //conectar con la pantalla
                     }
@@ -392,6 +407,9 @@ fun BookInitialInfo(book: Book, navController: NavHostController) {
 
 @Composable
 fun BookLittleInfo(book: Book,navController: NavController){
+
+
+
     Row(modifier = Modifier
         .fillMaxWidth()
         .padding(10.dp)
@@ -405,7 +423,7 @@ fun BookLittleInfo(book: Book,navController: NavController){
             ClickableText(
                 text= AnnotatedString(book.author_name),
                 onClick = {
-                    ShoppingCart.setautorId(book.author_id)
+                    ShoppingCart.setautorId(book.author_id.toString())
                     navController.navigate("AuthorDestination")
                 }, //pantalla información autor
 

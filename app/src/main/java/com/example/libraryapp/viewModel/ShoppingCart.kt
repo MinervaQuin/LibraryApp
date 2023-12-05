@@ -32,6 +32,7 @@ object ShoppingCart {
     fun getautorId(): String{
         return this.autorId
     }
+
     fun setNavController(new: NavHostController){
         this.navController = new
     }
