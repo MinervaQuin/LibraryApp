@@ -25,6 +25,16 @@ class CategoryViewModel @Inject constructor(
         "Infantil" to "5SVJKEbVOdy1jUD3YDYn",
         "Cómic y Manga" to "p8KT9DM4yIbmdV5U8k4v",
         "Misterio" to "aSN9cOFkRzmA7QtxIx6i",
+        "Recomendados" to "95VaOY3DjRHtWocgCm9H",
+        "Promociones" to "irEC8DDKxtesuSH7ip3g",
+        "Blog" to "szbh1qqLATTVLcur2p7j",
+        "Premiados" to "9kPXIbFOl8qG0rwGHnAq",
+        "eBooks" to "U5SRP9P3KPzxCIGeX5hV",
+        "Novedades" to "aFWNP6mASVxgPwt8wS0c",
+        "Autores" to "",
+        "Romance" to "BvTWsslTbG94qnQ36fmI"
+
+
 
     )
     var coleccion by mutableStateOf(Collection())
@@ -39,9 +49,9 @@ class CategoryViewModel @Inject constructor(
         private set
     init {
         // Inicializa la lista de libros con datos de prueba o desde algún origen de datos
-        categories = listOf("Imprescindibles","Ficción", "No Ficción", "Infantil","Misterio",
-            "Cómic y Manga","Populares", "Recomendaos", "Promociones", "Blog", "Premiados",
-            "eBooks", "Autores", "Todas Las Categorias", "Novedades" )
+        categories = listOf("Todas Las Categorias","Imprescindibles","Ficción", "No Ficción", "Infantil","Misterio", "Romance",
+            "Cómic y Manga","Populares", "Recomendados", "Promociones", "Blog", "Premiados",
+            "eBooks", "Autores", "Novedades" )
     }
 
 /*    private fun getBookFiltrados(Categorias : String): Array<Book> {
@@ -64,16 +74,25 @@ class CategoryViewModel @Inject constructor(
     }
 */
     private fun updatebooks(Categorias : String) {
+
         viewModelScope.launch {
-            val colection: Collection? = firestoreRepository.getCollection(idcolecciones[Categorias]?:"")
-            if (colection != null) {
-                coleccion=colection
+            if(Categorias == "Todas Las Categorias"){
+                novedades = firestoreRepository.getAllBooks2().toTypedArray()
+                val listaLibros: List<Book> = novedades.filterNotNull()
+                filtrados= listaLibros.toTypedArray()
+                novedades= novedades.take(10).toTypedArray()
             }
             else{
-                coleccion= Collection()
+                val colection: Collection? = firestoreRepository.getCollection(idcolecciones[Categorias]?:"")
+                if (colection != null) {
+                    coleccion=colection
+                }
+                else{
+                    coleccion= Collection()
+                }
+                novedades = coleccion.books.take(10).toTypedArray()
+                filtrados = coleccion.books as Array<Book>
             }
-            novedades = coleccion.books.take(10).toTypedArray()
-            filtrados = coleccion.books as Array<Book>
         }
     }
     fun updateCategories(newCategories: List<String>) {
