@@ -29,7 +29,7 @@
         </activity>
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyAPa22lgtp86A5WJOEwreZd40bV2N5EsX0" />
+            android:value="@string/Api_key" />
         <activity
             android:name="com.journeyapps.barcodescanner.CaptureActivity"
             android:screenOrientation="portrait"
