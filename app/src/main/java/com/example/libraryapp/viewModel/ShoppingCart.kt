@@ -10,6 +10,7 @@ object ShoppingCart {
     private var _categorySelected = MutableStateFlow("")
     private lateinit var bookSelected: Book
     private lateinit var navController: NavHostController
+    private lateinit var autorId: String
 
 
     fun init() {
@@ -24,6 +25,12 @@ object ShoppingCart {
     }
     fun getSelectedCategory(): String{
         return _categorySelected.value
+    }
+    fun setautorId(new: String){
+        this.autorId = new
+    }
+    fun getautorId(): String{
+        return this.autorId
     }
     fun setNavController(new: NavHostController){
         this.navController = new

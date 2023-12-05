@@ -311,7 +311,7 @@ class MainActivity : ComponentActivity() {
                                     .padding(paddingValues)
                                     .fillMaxSize()
                             ) {
-                                AutorScreen(navController, viewModel, "4VIRMHxR4Xf2VjUADMRp")
+                                AutorScreen(navController, viewModel, ShoppingCart.getautorId())
                             }
                         }
                     )

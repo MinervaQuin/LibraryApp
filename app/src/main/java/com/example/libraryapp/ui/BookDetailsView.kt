@@ -61,6 +61,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.example.libraryapp.model.BookDetailsUiState
 import com.example.libraryapp.model.resources.Book
@@ -376,7 +377,7 @@ fun BookInitialInfo(book: Book, navController: NavHostController) {
             horizontalAlignment = Alignment.Start,
             modifier = Modifier.padding(start = 10.dp)
         ) {
-            BookLittleInfo(book)
+            BookLittleInfo(book, navController)
             Button(onClick = { ShoppingCart.getViewModelInstance().addBookToCart(book)
                 Toast.makeText(context, "Se ha añadido el libro a tu cesta", Toast.LENGTH_SHORT).show()}) {//Ir a la pagina de la cesta
                 Text(text = "Añadir a la cesta")
@@ -390,7 +391,7 @@ fun BookInitialInfo(book: Book, navController: NavHostController) {
 
 
 @Composable
-fun BookLittleInfo(book: Book){
+fun BookLittleInfo(book: Book,navController: NavController){
     Row(modifier = Modifier
         .fillMaxWidth()
         .padding(10.dp)
@@ -403,7 +404,10 @@ fun BookLittleInfo(book: Book){
             Text(text = book.title)
             ClickableText(
                 text= AnnotatedString(book.author_name),
-                onClick = {}, //pantalla información autor
+                onClick = {
+                    ShoppingCart.setautorId(book.author_id)
+                    navController.navigate("AuthorDestination")
+                }, //pantalla información autor
 
                 style = TextStyle(color = Color.DarkGray, fontWeight =FontWeight.Bold),
                 modifier = Modifier

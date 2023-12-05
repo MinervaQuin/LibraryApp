@@ -2,7 +2,7 @@ package com.example.libraryapp.model.resources
 
 class Book (
     val isbn: Long = 0L, // Suponiendo que ISBN es un número largo
-    val author_id: Long = 0L, // Suponiendo que author_id es un número largo
+    val author_id: String = "", // Suponiendo que author_id es un número largo
     val author_name: String = "",
     val title: String = "",
     val sinopsis: String = "",

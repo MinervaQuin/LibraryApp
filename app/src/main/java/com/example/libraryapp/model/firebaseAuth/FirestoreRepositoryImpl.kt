@@ -234,7 +234,7 @@ class FirestoreRepositoryImpl @Inject constructor(private val firebaseFirestore:
 
     override suspend fun uploadBookToFirestore() {
         val newBook = Book(
-            author_id = 9,
+            author_id = "9",
             title = "El arte de la guerra",
             author_name = "Sun Tzu",
             isbn = 9788420691206,
