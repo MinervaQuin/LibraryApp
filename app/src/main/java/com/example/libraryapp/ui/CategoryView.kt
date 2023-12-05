@@ -146,7 +146,10 @@ fun BookCategoriesDropdown(
         DropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
-            modifier = Modifier.background(MaterialTheme.colorScheme.background)
+            modifier = Modifier
+                .background(MaterialTheme.colorScheme.background)
+                .verticalScroll(rememberScrollState())
+                .height(400.dp)
         ) {
             categories.forEach { category ->
                 DropdownMenuItem(
