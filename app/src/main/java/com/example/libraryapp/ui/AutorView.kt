@@ -73,7 +73,6 @@ fun AutorScreen (navController: NavController, ViewModel: AuthorViewModel,id: St
         verticalArrangement = Arrangement.Center,
     )
     {
-        Spacer(modifier = Modifier.height(55.dp))
         Text(
             text = autor.name,
             style = TextStyle(
@@ -175,7 +174,5 @@ fun AutorScreen (navController: NavController, ViewModel: AuthorViewModel,id: St
                 }
             }
         }
-        Spacer(modifier = Modifier.height(55.dp))
-
     }
 }
