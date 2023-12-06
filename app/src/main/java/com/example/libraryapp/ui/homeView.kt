@@ -138,7 +138,7 @@ fun HomeView(
                 //viewModel.getCollectionAndLog("oBMLVCnbNsPQJiPexKL7")
                 //viewModel.getReviewsAndLog("B9svfDJglRgEPyN6wSAh")
                 //viewModel.uploadReviewTest()
-
+                viewModel.getUserDataAndLog()
             }) {
                 Text(text = "Probar el Coso")
             }

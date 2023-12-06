@@ -8,6 +8,7 @@ import com.example.libraryapp.model.resources.Book
 import com.example.libraryapp.model.resources.Collection
 import com.example.libraryapp.model.resources.Review
 import com.google.firebase.Timestamp
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 import java.time.LocalDate
@@ -20,10 +21,15 @@ import kotlin.coroutines.suspendCoroutine
 import kotlin.random.Random
 
 
-class FirestoreRepositoryImpl @Inject constructor(private val firebaseFirestore: FirebaseFirestore): FirestoreRepository {
+class FirestoreRepositoryImpl @Inject constructor(
+    private val firebaseFirestore: FirebaseFirestore,
+    private val auth: FirebaseAuth // Inyectado o asignado de alguna manera
+) : FirestoreRepository {
     override val dataBase: FirebaseFirestore?
         get() = firebaseFirestore
 
+    override val authConection: FirebaseAuth?
+        get() = auth
     override suspend fun getBook(bookId: String): Book? {
         return try {
             val document = firebaseFirestore.collection("books").document(bookId).get().await()
@@ -603,6 +609,15 @@ class FirestoreRepositoryImpl @Inject constructor(private val firebaseFirestore:
 
     }
 
+    override suspend fun getuser(): UserData? {
+        return auth.currentUser?.run {
+            UserData(
+                userId = uid,
+                userName = displayName,
+                profilePictureUrl = photoUrl?.toString()
+            )
+        }
+    }
 
 
 //    override suspend fun deleteReviews(){

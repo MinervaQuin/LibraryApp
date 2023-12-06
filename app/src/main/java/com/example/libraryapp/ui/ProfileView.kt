@@ -16,6 +16,8 @@ import androidx.compose.material.Text
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -25,9 +27,14 @@ import coil.compose.AsyncImage
 import com.example.libraryapp.theme.green
 import com.example.libraryapp.theme.red
 import com.example.libraryapp.theme.white
+import com.example.libraryapp.viewModel.profileViewModel
 
 @Composable
-fun ProfileScreen(){
+fun ProfileScreen(
+    viewModel: profileViewModel
+){
+    val userData by viewModel.userData.collectAsState()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -36,19 +43,19 @@ fun ProfileScreen(){
     ) {
         // Profile Image
         AsyncImage(
-            model = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png",
+            model = userData?.profilePictureUrl ?: "url_de_imagen_predeterminada",
             contentDescription = "Profile Picture",
-
             modifier = Modifier
                 .size(250.dp)
                 .clip(CircleShape)
                 .border(width = 2.dp, color = Color.Black, CircleShape)
-                .clickable { // TODO: clickar en la imagen
-                    },
-            )
+                .clickable {
+                    // TODO: Acciones al hacer clic en la imagen
+                },
+        )
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text("Nombre usuario")
+        Text(text = userData?.userName ?: "Error")
 
         Spacer(modifier = Modifier.height(35.dp))
 

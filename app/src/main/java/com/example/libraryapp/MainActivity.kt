@@ -56,6 +56,7 @@ import com.example.libraryapp.viewModel.SearchViewModel
 import com.example.libraryapp.viewModel.ShoppingCart
 import com.example.libraryapp.viewModel.homeViewModel
 import com.example.libraryapp.viewModel.loginViewModel
+import com.example.libraryapp.viewModel.profileViewModel
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
@@ -81,19 +82,6 @@ class MainActivity : ComponentActivity() {
         )
     }
 
-    /*
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            LibraryAppTheme {
-                // Use a Surface container using the 'background' color from the theme
-                Surface(color = MaterialTheme.colorScheme.background) {
-                    LoginView() // Aquí colocamos nuestro composable de inicio de sesión
-                }
-            }
-        }
-    }*/
-
 
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -102,7 +90,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             val navController = rememberNavController()
             val homeViewModel : homeViewModel = hiltViewModel()
-            NavHost(navController = navController, startDestination = "SearchScreen"){
+            NavHost(navController = navController, startDestination = "firstScreens"){
 
                 navigation(
                     startDestination = "login",
@@ -255,6 +243,7 @@ class MainActivity : ComponentActivity() {
                     }
 
                     composable("profile"){
+                        val viewModel : profileViewModel = hiltViewModel()
                         Scaffold(
                             bottomBar = { BottomBar(navController = navController) },
                             topBar = { TopBar(navController = navController)},
@@ -264,7 +253,7 @@ class MainActivity : ComponentActivity() {
                                         .padding(paddingValues)
                                         .fillMaxSize()
                                 ) {
-                                    ProfileScreen()
+                                    ProfileScreen(viewModel)
                                 }
                             }
                         )

@@ -8,6 +8,7 @@ import com.example.libraryapp.R
 import com.example.libraryapp.model.resources.Author
 import com.example.libraryapp.model.resources.Book
 import com.example.libraryapp.model.FirestoreRepository
+import com.example.libraryapp.model.firebaseAuth.UserData
 import com.example.libraryapp.model.resources.Collection
 import com.example.libraryapp.model.resources.CollectionSamples
 import com.example.libraryapp.model.resources.LongCollectionSamples
@@ -100,7 +101,20 @@ class homeViewModel @Inject constructor(
         }
     }
 
-//    fun uploadReviewTest(){
+    fun getUserDataAndLog() {
+        viewModelScope.launch {
+            val userData: UserData? = firestoreRepository.getuser()
+            if (userData != null) {
+                Log.d("UserDataLog", userData.toString())
+            } else {
+                Log.d("UserDataLog", "No hay datos de usuario disponibles.")
+            }
+        }
+    }
+
+
+
+    //    fun uploadReviewTest(){
 //        viewModelScope.launch {
 //            val reviewTest = Review(userId="prueba", score = 5.4, description = "Esto es una mera prueba", date = LocalDate.now())
 //            firestoreRepository.upLoadReview("B9svfDJglRgEPyN6wSAh", reviewTest)
