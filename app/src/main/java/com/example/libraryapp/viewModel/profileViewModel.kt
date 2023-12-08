@@ -1,6 +1,9 @@
 package com.example.libraryapp.viewModel
 
+import android.content.Context
 import android.net.Uri
+import android.os.Environment
+import androidx.core.content.FileProvider
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -14,6 +17,11 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.io.File
+import java.io.IOException
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import javax.inject.Inject
 
 
@@ -50,14 +58,26 @@ class profileViewModel @Inject constructor(
         firestoreRepository.getProfileImageUrl(userId, onSuccess, onFailure)
     }
 
-    fun handleCropResult(result: CropImage.ActivityResult) {
-        if (result.isSuccessful) {
-            // Procesa la imagen recortada
-            val uriCropped = result.uriContent
-            // Sube la imagen usando tu lógica
-        } else {
-            // Maneja el error
+
+    fun createImageUri(context: Context): Uri? {
+        val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+        val storageDir: File? = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        return try {
+            val file = File.createTempFile(
+                "JPEG_${timeStamp}_", /* prefix */
+                ".jpg", /* suffix */
+                storageDir /* directory */
+            )
+
+            // Para compatibilidad con Android N y posteriores, usas FileProvider
+            val authority = "${context.packageName}.provider"
+            FileProvider.getUriForFile(context, authority, file)
+        } catch (e: IOException) {
+            e.printStackTrace()
+            null
         }
     }
+
+
 }
 

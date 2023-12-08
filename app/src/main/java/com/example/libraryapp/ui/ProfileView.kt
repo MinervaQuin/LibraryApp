@@ -1,5 +1,7 @@
 package com.example.libraryapp.ui
 
+import android.app.Activity
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder
 import android.net.Uri
@@ -20,6 +22,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.Composable
@@ -35,15 +39,18 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import coil.compose.AsyncImage
 import com.canhub.cropper.CropImageContract
 import com.canhub.cropper.CropImageContractOptions
 import com.canhub.cropper.CropImageOptions
-import com.canhub.cropper.CropImageView
 import com.example.libraryapp.theme.green
 import com.example.libraryapp.theme.red
 import com.example.libraryapp.theme.white
 import com.example.libraryapp.viewModel.profileViewModel
+import android.Manifest
+import androidx.compose.ui.layout.ContentScale
 
 @Composable
 fun ProfileScreen(
@@ -51,36 +58,67 @@ fun ProfileScreen(
 ){
     val userData by viewModel.userData.collectAsState()
     val imageUrl = remember { mutableStateOf("") }
+
     val context = LocalContext.current
     var imageUri by remember { mutableStateOf<Uri?>(null) }
+    var showImagePickerDialog by remember { mutableStateOf(false) }
+
+
+    val REQUEST_CAMERA_PERMISSION = 1 //TODO Esta variable me da que hay que cambiarla, huele a chapuza
+    /*
+    Aviso a navegantes, este código es más frágil y volátil que el gobierno actual
+    cuando lo escribí, solo Dios y yo sabíamos como funcionaba, ahora solo Dios
+    lo tiene claro, por favor, no intenteis "refactorizar" ni mucho menos "hacerlo más eficiente"
+     */
+
+    val imageUrlState = remember { mutableStateOf("") }
+
 
     val cropImageLauncher = rememberLauncherForActivityResult(CropImageContract()) { result ->
         if (result.isSuccessful) {
             // Procesa la imagen recortada
-            imageUri = result.uriContent
-            imageUri?.let {
-                viewModel.uploadProfileImage(it, onSuccess = { imageUrl ->
-                    // Actualizar la UI con la URL de la imagen
+            val croppedImageUri = result.uriContent
+            croppedImageUri?.let { uri ->
+                // Luego, en tu lanzador:
+                viewModel.uploadProfileImage(uri, onSuccess = { newImageUrl ->
+                    viewModel.getProfileImage(
+                        onSuccess = { fetchedUrl ->
+                            imageUrlState.value = fetchedUrl
+                        },
+                        onFailure = { exception ->
+                            // Manejar el error
+                        }
+                    )
                 }, onFailure = { exception ->
-                    // Manejar error
+                    // Manejar el error
                 })
             }
         } else {
             // Manejar error en el recorte
             val exception = result.error
+            // Opcional: Manejar el error
         }
     }
 
+    // Lanzador para seleccionar imagen de la galería
     val imagePickerLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-        uri?.let {
-            cropImageLauncher.launch(CropImageContractOptions(it, CropImageOptions()))
+        uri?.let { cropImageLauncher.launch(CropImageContractOptions(it, CropImageOptions())) }
+    }
+
+    // Lanzador para tomar foto con la cámara
+    val takePictureLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { success ->
+        if (success) {
+            // Aquí manejas la imagen capturada usando imageUri
+            imageUri?.let { uri ->
+                cropImageLauncher.launch(CropImageContractOptions(uri, CropImageOptions()))
+            }
         }
     }
 
     LaunchedEffect(Unit) {
         viewModel.getProfileImage(
             onSuccess = { url ->
-                imageUrl.value = url
+                imageUrlState.value = url
             },
             onFailure = { exception ->
                 // Manejar el error, por ejemplo, mostrar un mensaje
@@ -88,6 +126,41 @@ fun ProfileScreen(
         )
     }
 
+    if (showImagePickerDialog) {
+        AlertDialog(
+            onDismissRequest = { showImagePickerDialog = false },
+            title = { Text("Seleccionar Imagen") },
+            text = { Text("Elige de dónde quieres seleccionar la imagen.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    imagePickerLauncher.launch("image/*")
+                    showImagePickerDialog = false
+                }) {
+                    Text("Galería")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    val cameraPermission = ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA)
+                    if (cameraPermission != PackageManager.PERMISSION_GRANTED) {
+                        ActivityCompat.requestPermissions(
+                            context as Activity,
+                            arrayOf(Manifest.permission.CAMERA),
+                            REQUEST_CAMERA_PERMISSION
+                        )
+                    } else {
+                        imageUri = viewModel.createImageUri(context)
+                        imageUri?.let { uri ->
+                            takePictureLauncher.launch(uri)
+                        }
+                    }
+                    showImagePickerDialog = false
+                }) {
+                    Text("Cámara")
+                }
+            }
+        )
+    }
 
     Column(
         modifier = Modifier
@@ -97,7 +170,7 @@ fun ProfileScreen(
     ) {
         // Profile Image
         AsyncImage(
-            model = imageUrl.value,
+            model = imageUrlState.value,
             contentDescription = "Profile Picture",
             modifier = Modifier
                 .size(250.dp)
@@ -106,17 +179,18 @@ fun ProfileScreen(
                 .clickable {
                     // TODO: Acciones al hacer clic en la imagen
                 },
+            contentScale = ContentScale.Crop
         )
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(text = userData?.userName ?: "Error")
 
         Spacer(modifier = Modifier.height(35.dp))
-        ImageSelectorAndCropper()
+
         // Buttons
         Button(
             onClick = {
-                // TODO: cambiar correo
+                showImagePickerDialog = true
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -125,7 +199,7 @@ fun ProfileScreen(
             colors = ButtonDefaults.buttonColors(white),
             border = BorderStroke(2.dp, green)
         ) {
-            Text("Cambiar correo")
+            Text("Cambiar Foto de Perfil")
         }
 
         Spacer(modifier = Modifier.height(15.dp))
@@ -145,10 +219,6 @@ fun ProfileScreen(
         }
 
         Spacer(modifier = Modifier.height(85.dp))
-        Button(onClick = { imagePickerLauncher.launch("image/*") }) {
-            Text("Seleccionar Imagen")
-        }
-        Spacer(modifier = Modifier.height(85.dp))
 
         // Logout Button
         Button(
@@ -166,43 +236,5 @@ fun ProfileScreen(
             Text("Cerrar sesión")
         }
 
-    }
-}
-
-@Composable
-fun ImageSelectorAndCropper() {
-    var imageUri by remember {
-        mutableStateOf<Uri?>(null)
-    }
-    val context = LocalContext.current
-    val bitmap =  remember {
-        mutableStateOf<Bitmap?>(null)
-    }
-
-    val imageCropLauncher = rememberLauncherForActivityResult(CropImageContract()) { result ->
-        if (result.isSuccessful) {
-            // use the cropped image
-            imageUri = result.uriContent
-        } else {
-            // an error occurred cropping
-            val exception = result.error
-        }
-    }
-
-    val imagePickerLauncher = rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri: Uri? ->
-        val cropOptions = CropImageContractOptions(uri, CropImageOptions())
-        imageCropLauncher.launch(cropOptions)
-    }
-
-    if (imageUri != null) {
-        if (Build.VERSION.SDK_INT < 28) {
-            bitmap.value = MediaStore.Images.Media.getBitmap(context.contentResolver, imageUri)
-        } else {
-            val source = ImageDecoder.createSource(context.contentResolver, imageUri!!)
-            bitmap.value = ImageDecoder.decodeBitmap(source)
-        }
-        Button(onClick = { imagePickerLauncher.launch("image/*") }) {
-            Text("Pick image to crop")
-        }
     }
 }
