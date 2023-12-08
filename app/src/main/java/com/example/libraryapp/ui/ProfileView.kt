@@ -1,6 +1,10 @@
 package com.example.libraryapp.ui
 
+import android.graphics.Bitmap
+import android.graphics.ImageDecoder
 import android.net.Uri
+import android.os.Build
+import android.provider.MediaStore
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
@@ -24,12 +28,18 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.canhub.cropper.CropImageContract
+import com.canhub.cropper.CropImageContractOptions
+import com.canhub.cropper.CropImageOptions
+import com.canhub.cropper.CropImageView
 import com.example.libraryapp.theme.green
 import com.example.libraryapp.theme.red
 import com.example.libraryapp.theme.white
@@ -41,17 +51,29 @@ fun ProfileScreen(
 ){
     val userData by viewModel.userData.collectAsState()
     val imageUrl = remember { mutableStateOf("") }
+    val context = LocalContext.current
+    var imageUri by remember { mutableStateOf<Uri?>(null) }
 
-    val imagePickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
+    val cropImageLauncher = rememberLauncherForActivityResult(CropImageContract()) { result ->
+        if (result.isSuccessful) {
+            // Procesa la imagen recortada
+            imageUri = result.uriContent
+            imageUri?.let {
+                viewModel.uploadProfileImage(it, onSuccess = { imageUrl ->
+                    // Actualizar la UI con la URL de la imagen
+                }, onFailure = { exception ->
+                    // Manejar error
+                })
+            }
+        } else {
+            // Manejar error en el recorte
+            val exception = result.error
+        }
+    }
+
+    val imagePickerLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let {
-            viewModel.uploadProfileImage(uri, onSuccess = { imageUrl ->
-                // Manejar URL de la imagen subida, como actualizar la interfaz de usuario
-
-            }, onFailure = { exception ->
-                // Manejar error
-            })
+            cropImageLauncher.launch(CropImageContractOptions(it, CropImageOptions()))
         }
     }
 
@@ -90,7 +112,7 @@ fun ProfileScreen(
         Text(text = userData?.userName ?: "Error")
 
         Spacer(modifier = Modifier.height(35.dp))
-
+        ImageSelectorAndCropper()
         // Buttons
         Button(
             onClick = {
@@ -119,36 +141,11 @@ fun ProfileScreen(
             colors = ButtonDefaults.buttonColors(white),
             border = BorderStroke(2.dp, green)
         ) {
-            Text("Cambiar contraseña")
-        }
-
-        Spacer(modifier = Modifier.height(15.dp))
-
-        Button(
-            onClick = {
-                // TODO: cambiar correo
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(end= 30.dp, start =30.dp )
-                .height(40.dp),
-            colors = ButtonDefaults.buttonColors(white),
-            border = BorderStroke(2.dp, green)
-        ) {
             Text("Mis compras")
         }
+
         Spacer(modifier = Modifier.height(85.dp))
-        Button(
-            onClick = {
-                imagePickerLauncher.launch("image/*")
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(end= 30.dp, start =30.dp )
-                .height(40.dp),
-            colors = ButtonDefaults.buttonColors(white),
-            border = BorderStroke(2.dp, green)
-        ) {
+        Button(onClick = { imagePickerLauncher.launch("image/*") }) {
             Text("Seleccionar Imagen")
         }
         Spacer(modifier = Modifier.height(85.dp))
@@ -169,5 +166,43 @@ fun ProfileScreen(
             Text("Cerrar sesión")
         }
 
+    }
+}
+
+@Composable
+fun ImageSelectorAndCropper() {
+    var imageUri by remember {
+        mutableStateOf<Uri?>(null)
+    }
+    val context = LocalContext.current
+    val bitmap =  remember {
+        mutableStateOf<Bitmap?>(null)
+    }
+
+    val imageCropLauncher = rememberLauncherForActivityResult(CropImageContract()) { result ->
+        if (result.isSuccessful) {
+            // use the cropped image
+            imageUri = result.uriContent
+        } else {
+            // an error occurred cropping
+            val exception = result.error
+        }
+    }
+
+    val imagePickerLauncher = rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri: Uri? ->
+        val cropOptions = CropImageContractOptions(uri, CropImageOptions())
+        imageCropLauncher.launch(cropOptions)
+    }
+
+    if (imageUri != null) {
+        if (Build.VERSION.SDK_INT < 28) {
+            bitmap.value = MediaStore.Images.Media.getBitmap(context.contentResolver, imageUri)
+        } else {
+            val source = ImageDecoder.createSource(context.contentResolver, imageUri!!)
+            bitmap.value = ImageDecoder.decodeBitmap(source)
+        }
+        Button(onClick = { imagePickerLauncher.launch("image/*") }) {
+            Text("Pick image to crop")
+        }
     }
 }

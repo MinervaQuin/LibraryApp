@@ -377,7 +377,23 @@ class FirestoreRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun uploadImageToFirebase(imageUri: Uri, onSuccess: (String) -> Unit, onFailure: (Exception) -> Unit) {
+    /*override suspend fun uploadImageToFirebase(imageUri: Uri, onSuccess: (String) -> Unit, onFailure: (Exception) -> Unit) {
+        val userId = auth.currentUser?.uid ?: return
+        val storageRef = storage.reference.child("users/$userId/profilePicture.jpg")
+
+        storageRef.putFile(imageUri).addOnSuccessListener {
+            storageRef.downloadUrl.addOnSuccessListener { uri ->
+                onSuccess(uri.toString())
+            }
+        }.addOnFailureListener { exception ->
+            onFailure(exception)
+        }
+    }*/
+    override suspend fun uploadImageToFirebase(
+        imageUri: Uri,
+        onSuccess: (String) -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
         val userId = auth.currentUser?.uid ?: return
         val storageRef = storage.reference.child("users/$userId/profilePicture.jpg")
 

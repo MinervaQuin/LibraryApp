@@ -139,7 +139,7 @@ dependencies {
 
     //Accompanist (Permission)
     implementation ("com.google.accompanist:accompanist-permissions:0.31.3-beta")
-    implementation ("com.theartofdev.edmodo:android-image-cropper:2.8.+")
+    implementation ("com.vanniktech:android-image-cropper:4.5.0")
 
 }
 

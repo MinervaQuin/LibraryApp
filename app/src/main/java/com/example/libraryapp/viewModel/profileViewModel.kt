@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.canhub.cropper.CropImage
 import com.example.libraryapp.model.FirestoreRepository
 import com.example.libraryapp.model.firebaseAuth.UserData
 import com.google.firebase.auth.FirebaseAuth
@@ -15,11 +16,14 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+
 @HiltViewModel
 class profileViewModel @Inject constructor(
     private val firestoreRepository: FirestoreRepository
 ): ViewModel(
 ) {
+
+
     private var _userData = MutableStateFlow<UserData?>(null)
     val userData = _userData.asStateFlow()
 
@@ -33,14 +37,27 @@ class profileViewModel @Inject constructor(
     // Función para subir imagen
     fun uploadProfileImage(imageUri: Uri, onSuccess: (String) -> Unit, onFailure: (Exception) -> Unit) {
         viewModelScope.launch {
-            firestoreRepository.uploadImageToFirebase(imageUri, onSuccess, onFailure)
+            try {
+                firestoreRepository.uploadImageToFirebase(imageUri, onSuccess, onFailure)
+            } catch (e: Exception) {
+                onFailure(e)
+            }
         }
-
     }
+
     fun getProfileImage(onSuccess: (String) -> Unit, onFailure: (Exception) -> Unit) {
         val userId = firestoreRepository.authConection?.currentUser?.uid ?: return
         firestoreRepository.getProfileImageUrl(userId, onSuccess, onFailure)
     }
 
-
+    fun handleCropResult(result: CropImage.ActivityResult) {
+        if (result.isSuccessful) {
+            // Procesa la imagen recortada
+            val uriCropped = result.uriContent
+            // Sube la imagen usando tu lógica
+        } else {
+            // Maneja el error
+        }
+    }
 }
+
