@@ -2,11 +2,7 @@ package com.example.libraryapp.ui
 
 import android.app.Activity
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
-import android.graphics.ImageDecoder
 import android.net.Uri
-import android.os.Build
-import android.provider.MediaStore
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
@@ -50,11 +46,15 @@ import com.example.libraryapp.theme.red
 import com.example.libraryapp.theme.white
 import com.example.libraryapp.viewModel.profileViewModel
 import android.Manifest
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.ui.layout.ContentScale
+import androidx.navigation.NavController
 
 @Composable
 fun ProfileScreen(
-    viewModel: profileViewModel
+    viewModel: profileViewModel,
+    navController : NavController
 ){
     val userData by viewModel.userData.collectAsState()
     val imageUrl = remember { mutableStateOf("") }
@@ -76,21 +76,32 @@ fun ProfileScreen(
 
     val cropImageLauncher = rememberLauncherForActivityResult(CropImageContract()) { result ->
         if (result.isSuccessful) {
-            // Procesa la imagen recortada
             val croppedImageUri = result.uriContent
             croppedImageUri?.let { uri ->
-                // Luego, en tu lanzador:
                 viewModel.uploadProfileImage(uri, onSuccess = { newImageUrl ->
                     viewModel.getProfileImage(
                         onSuccess = { fetchedUrl ->
                             imageUrlState.value = fetchedUrl
+                            Toast.makeText(
+                                context,
+                                "Imagen Actualizada",
+                                Toast.LENGTH_LONG
+                            ).show()
                         },
                         onFailure = { exception ->
-                            // Manejar el error
+                            Toast.makeText(
+                                context,
+                                "Error al bajar la imagen",
+                                Toast.LENGTH_LONG
+                            ).show()
                         }
                     )
                 }, onFailure = { exception ->
-                    // Manejar el error
+                    Toast.makeText(
+                        context,
+                        "Error al subir la imagen",
+                        Toast.LENGTH_LONG
+                    ).show()
                 })
             }
         } else {
@@ -223,7 +234,13 @@ fun ProfileScreen(
         // Logout Button
         Button(
             onClick = {
-                // TODO: cambiar correo
+                viewModel.logMeOutPLEASE()
+                Toast.makeText(
+                    context,
+                    "Sesión Cerrada",
+                    Toast.LENGTH_LONG
+                ).show()
+                navController.navigate("firstScreens")
             },
             modifier = Modifier
                 .height(40.dp)

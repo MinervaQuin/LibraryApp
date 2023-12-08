@@ -6,6 +6,7 @@ import com.example.libraryapp.model.resources.Author
 import com.example.libraryapp.model.resources.Book
 import com.example.libraryapp.model.resources.Collection
 import com.example.libraryapp.model.resources.Review
+import com.google.android.gms.auth.api.identity.SignInClient
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -16,6 +17,7 @@ interface FirestoreRepository {
     val dataBase: FirebaseFirestore?
     val authConection: FirebaseAuth?
     val storageDataBase: FirebaseStorage?
+    val tapClient: SignInClient?
     suspend fun getBook(bookId: String): Book?
     suspend fun getAllBooks(booksIds: List<String>): List<Book?>
     suspend fun getAllBooks2(): List<Book?>
@@ -43,5 +45,6 @@ interface FirestoreRepository {
 
     suspend fun getuser(): UserData?
     suspend fun uploadImageToFirebase(imageUri: Uri, onSuccess: (String) -> Unit, onFailure: (Exception) -> Unit)
-    fun getProfileImageUrl(userId: String, onSuccess: (String) -> Unit, onFailure: (Exception) -> Unit)
+    suspend fun getProfileImageUrl(userId: String): String
+    suspend fun signOut()
 }

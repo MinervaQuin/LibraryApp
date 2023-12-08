@@ -54,8 +54,17 @@ class profileViewModel @Inject constructor(
     }
 
     fun getProfileImage(onSuccess: (String) -> Unit, onFailure: (Exception) -> Unit) {
-        val userId = firestoreRepository.authConection?.currentUser?.uid ?: return
-        firestoreRepository.getProfileImageUrl(userId, onSuccess, onFailure)
+        viewModelScope.launch {
+            val userId = firestoreRepository.authConection?.currentUser?.uid
+            if (userId != null) {
+                try {
+                    val url = firestoreRepository.getProfileImageUrl(userId)
+                    onSuccess(url)
+                } catch (e: Exception) {
+                    onFailure(e)
+                }
+            }
+        }
     }
 
 
@@ -78,6 +87,11 @@ class profileViewModel @Inject constructor(
         }
     }
 
+    fun logMeOutPLEASE(){
+        viewModelScope.launch {
+            firestoreRepository.signOut()
 
+        }
+    }
 }
 

@@ -252,7 +252,7 @@ class MainActivity : ComponentActivity() {
                                         .padding(paddingValues)
                                         .fillMaxSize()
                                 ) {
-                                    ProfileScreen(viewModel)
+                                    ProfileScreen(viewModel, navController = navController)
                                 }
                             }
                         )
