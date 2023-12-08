@@ -1,7 +1,13 @@
 package com.example.libraryapp.model.firebaseAuth
 
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.util.Log
+import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
+import com.example.libraryapp.R
 import com.example.libraryapp.model.FirestoreRepository
 import com.example.libraryapp.model.resources.Author
 import com.example.libraryapp.model.resources.AuthorFb
@@ -13,7 +19,10 @@ import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageException
 import kotlinx.coroutines.tasks.await
+import java.io.File
+import java.io.FileOutputStream
 import java.time.LocalDate
 import java.time.ZoneId
 import java.util.Date
@@ -29,7 +38,8 @@ class FirestoreRepositoryImpl @Inject constructor(
     private val firebaseFirestore: FirebaseFirestore,
     private val auth: FirebaseAuth,
     private val storage: FirebaseStorage,
-    private val oneTapClient: SignInClient // Inyectado directamente
+    private val oneTapClient: SignInClient, // Inyectado directamente
+    private val context: Context
 ) : FirestoreRepository {
     override val dataBase: FirebaseFirestore?
         get() = firebaseFirestore
@@ -42,6 +52,9 @@ class FirestoreRepositoryImpl @Inject constructor(
 
     override val tapClient: SignInClient
         get() = oneTapClient
+
+    override val contextFeo: Context
+        get() = context
 
     override suspend fun getBook(bookId: String): Book? {
         return try {
@@ -412,13 +425,51 @@ class FirestoreRepositoryImpl @Inject constructor(
         }
     }
 
+    suspend fun uploadBasicImageProfile(context: Context): String {
+        //digamos que esto funcionar, lo que se dice funcionar, no funciona
+        val currentUserPhotoUrl = auth.currentUser?.photoUrl
+        val imageToUploadUri = if (currentUserPhotoUrl != null) {
+            currentUserPhotoUrl // Usar la foto de perfil del usuario
+        } else {
+            Log.d("Hola", "ha llegado aquí")
+            // Convertir Drawable a Bitmap
+            val drawable = ContextCompat.getDrawable(context, R.drawable.fotopredefinida)
+            val bitmap = (drawable as BitmapDrawable).bitmap
+
+            // Crear archivo temporal y obtener URI
+            val file = File(context.cacheDir, "temp_image")
+            file.createNewFile()
+            val fos = FileOutputStream(file)
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos)
+            fos.close()
+            val authority = "${context.packageName}.provider"
+            FileProvider.getUriForFile(context, authority, file)
+        }
+
+        var uploadedImageUrl: String? = null
+        uploadImageToFirebase(imageToUploadUri, onSuccess = { url ->
+            uploadedImageUrl = url
+        }, onFailure = { exception ->
+            throw exception
+        })
+        return uploadedImageUrl ?: throw Exception("Error al subir la imagen")
+    }
+
     override suspend fun getProfileImageUrl(userId: String): String {
+
         val storageRef = storage.reference.child("users/$userId/profilePicture.jpg")
         return try {
             val uri = storageRef.downloadUrl.await()
             uri.toString()
-        } catch (exception: Exception) {
-            throw exception
+        } catch (exception: StorageException) {
+
+            if (exception.errorCode == StorageException.ERROR_OBJECT_NOT_FOUND) {
+
+                throw exception
+            } else {
+
+                throw exception
+            }
         }
     }
 

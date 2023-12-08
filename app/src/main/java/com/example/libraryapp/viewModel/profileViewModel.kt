@@ -4,15 +4,10 @@ import android.content.Context
 import android.net.Uri
 import android.os.Environment
 import androidx.core.content.FileProvider
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.canhub.cropper.CropImage
 import com.example.libraryapp.model.FirestoreRepository
 import com.example.libraryapp.model.firebaseAuth.UserData
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.storage.FirebaseStorage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -61,7 +56,8 @@ class profileViewModel @Inject constructor(
                     val url = firestoreRepository.getProfileImageUrl(userId)
                     onSuccess(url)
                 } catch (e: Exception) {
-                    onFailure(e)
+                    val url = "https://i.imgur.com/xiL43UU.jpeg"
+                    onSuccess(url)
                 }
             }
         }

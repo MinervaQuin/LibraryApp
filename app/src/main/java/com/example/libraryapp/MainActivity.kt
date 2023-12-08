@@ -57,6 +57,7 @@ import com.example.libraryapp.viewModel.ShoppingCart
 import com.example.libraryapp.viewModel.homeViewModel
 import com.example.libraryapp.viewModel.loginViewModel
 import com.example.libraryapp.viewModel.profileViewModel
+import com.example.libraryapp.viewModel.topBarViewModel
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
@@ -89,6 +90,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             val navController = rememberNavController()
             val homeViewModel : homeViewModel = hiltViewModel()
+            val topBarViewModel: topBarViewModel = hiltViewModel()
             NavHost(navController = navController, startDestination = "firstScreens"){
 
                 navigation(
@@ -160,7 +162,7 @@ class MainActivity : ComponentActivity() {
                     composable("homePage"){
                         Scaffold(
                             bottomBar = { BottomBar(navController = navController) },
-                            topBar = { TopBar(navController = navController) },
+                            topBar = { TopBar(navController = navController, topBarViewModel) },
                             content = { paddingValues ->
                                 Column(
                                     modifier = Modifier
@@ -193,7 +195,7 @@ class MainActivity : ComponentActivity() {
                         val cartViewModel : CartViewModel = ShoppingCart.getViewModelInstance()
                         Scaffold(
                             bottomBar = { BottomBar(navController = navController) },
-                            topBar = { TopBar(navController = navController) },
+                            topBar = { TopBar(navController = navController, topBarViewModel) },
                             content = { paddingValues ->
                                 Column(
                                     modifier = Modifier
@@ -212,7 +214,7 @@ class MainActivity : ComponentActivity() {
                         // Contenido de la pantalla del carrito
                         Scaffold(
                             bottomBar = { BottomBar(navController = navController) },
-                            topBar = { TopBar(navController = navController)},
+                            topBar = { TopBar(navController = navController, topBarViewModel)},
                             content = { paddingValues ->
                                 Column(
                                     modifier = Modifier
@@ -228,7 +230,7 @@ class MainActivity : ComponentActivity() {
                     composable("maps"){
                         Scaffold(
                             bottomBar = { BottomBar(navController = navController) },
-                            topBar = { TopBar(navController = navController)},
+                            topBar = { TopBar(navController = navController, topBarViewModel)},
                             content = { paddingValues ->
                                 Column(
                                     modifier = Modifier
@@ -245,7 +247,7 @@ class MainActivity : ComponentActivity() {
                         val viewModel : profileViewModel = hiltViewModel()
                         Scaffold(
                             bottomBar = { BottomBar(navController = navController) },
-                            topBar = { TopBar(navController = navController)},
+                            topBar = { TopBar(navController = navController, topBarViewModel)},
                             content = { paddingValues ->
                                 Column(
                                     modifier = Modifier
@@ -265,7 +267,7 @@ class MainActivity : ComponentActivity() {
                     composable("bookDetailsView"){
                         Scaffold(
                             bottomBar = { BottomBar(navController = navController) },
-                            topBar = { TopBar(navController = navController)},
+                            topBar = { TopBar(navController = navController, topBarViewModel)},
                             content = { paddingValues ->
                                 Column(
                                     modifier = Modifier
@@ -292,7 +294,7 @@ class MainActivity : ComponentActivity() {
                     // Contenido de la pantalla del carrito
                     Scaffold(
                         bottomBar = { BottomBar(navController = navController) },
-                        topBar = { TopBar(navController = navController)},
+                        topBar = { TopBar(navController = navController, topBarViewModel)},
                         content = { paddingValues ->
                             Column(
                                 modifier = Modifier
@@ -307,7 +309,7 @@ class MainActivity : ComponentActivity() {
                 composable("SearchScreen"){
                     Scaffold(
                         bottomBar = { BottomBar(navController = navController) },
-                        topBar = { TopBar(navController = navController)},
+                        topBar = { TopBar(navController = navController, topBarViewModel)},
                         content = { paddingValues ->
                             Column(
                                 modifier = Modifier

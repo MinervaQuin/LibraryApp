@@ -1,6 +1,8 @@
 package com.example.libraryapp
 
 
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -40,6 +42,7 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,7 +53,9 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -62,7 +67,7 @@ import kotlinx.coroutines.launch
 import coil.compose.AsyncImage
 import com.example.libraryapp.theme.white
 import com.example.libraryapp.viewModel.ShoppingCart
-
+import com.example.libraryapp.viewModel.topBarViewModel
 
 
 data class NavigationItem(
@@ -75,12 +80,16 @@ data class NavigationItem(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopBar(navController: NavController) {
+fun TopBar(navController: NavController, viewModel: topBarViewModel) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
     var selectedItem by remember { mutableStateOf<NavigationItem?>(null) }
     var isOnCartScreen by remember { mutableStateOf(false) }
+
+    val userData by viewModel.userData.collectAsState()
+
+    val profilePictureUrl by  viewModel.profilePictureUrl.collectAsState()
 
     val items = listOf(
         NavigationItem(
@@ -210,19 +219,28 @@ fun TopBar(navController: NavController) {
                     // Agrega aquí la lógica para mostrar la foto de perfil del usuario
                     // Puedes usar AsyncImage, Image, u otros componentes según tus necesidades
                     AsyncImage(
-                        model = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png",
+                        model = profilePictureUrl,
                         contentDescription = "Profile Picture",
                         modifier = Modifier
                             .size(70.dp)
                             .clip(CircleShape)
+                            .border(width = 2.dp, color = Color.Black, CircleShape)
+                            .clickable {
+                                // TODO: Acciones al hacer clic en la imagen
+                            },
+                        contentScale = ContentScale.Crop
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     // Agrega el nombre del usuario debajo de la imagen
-                    Text(text = "Nombre de Usuario", fontSize = 16.sp, color = gray)
+                    Text(text = userData!!.userName?: "Error", fontSize = 16.sp, color = gray)
                 }
-                Divider(modifier = Modifier.fillMaxWidth().padding(start = 30.dp, end = 30.dp), color = gray, thickness = 1.dp)
+                Divider(modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 30.dp, end = 30.dp), color = gray, thickness = 1.dp)
                 LazyColumn(
-                    modifier = Modifier.fillMaxSize().padding(bottom = 65.dp),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(bottom = 65.dp),
                     contentPadding = PaddingValues(3.dp)
                 ) {
                     items.forEachIndexed { index, item ->
@@ -252,7 +270,8 @@ fun TopBar(navController: NavController) {
                             )
                             if (index == 1) {
                                 Divider(
-                                    modifier = Modifier.fillMaxWidth()
+                                    modifier = Modifier
+                                        .fillMaxWidth()
                                         .padding(start = 30.dp, end = 30.dp),
                                     color = gray,
                                     thickness = 1.dp
@@ -290,6 +309,7 @@ fun TopBar(navController: NavController) {
                         } else {
                             drawerState.close()
                         }
+                        viewModel.getProfileImage()
                     }
 
                 }

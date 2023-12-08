@@ -1,5 +1,6 @@
 package com.example.libraryapp.model
 
+import android.content.Context
 import android.net.Uri
 import com.example.libraryapp.model.firebaseAuth.UserData
 import com.example.libraryapp.model.resources.Author
@@ -18,6 +19,7 @@ interface FirestoreRepository {
     val authConection: FirebaseAuth?
     val storageDataBase: FirebaseStorage?
     val tapClient: SignInClient?
+    val contextFeo: Context
     suspend fun getBook(bookId: String): Book?
     suspend fun getAllBooks(booksIds: List<String>): List<Book?>
     suspend fun getAllBooks2(): List<Book?>

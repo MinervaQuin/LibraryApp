@@ -49,7 +49,10 @@ import android.Manifest
 import android.content.Context
 import android.widget.Toast
 import androidx.compose.ui.layout.ContentScale
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun ProfileScreen(
@@ -240,6 +243,9 @@ fun ProfileScreen(
                     "Sesión Cerrada",
                     Toast.LENGTH_LONG
                 ).show()
+                viewModel.viewModelScope.launch {
+                    delay(500)
+                }
                 navController.navigate("firstScreens")
             },
             modifier = Modifier

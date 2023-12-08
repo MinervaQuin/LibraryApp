@@ -59,6 +59,7 @@ class AppModule {
         firebaseFirestore: FirebaseFirestore,
         firebaseAuth: FirebaseAuth,
         storage: FirebaseStorage,
-        tapClient: SignInClient
-    ): FirestoreRepository = FirestoreRepositoryImpl(firebaseFirestore, firebaseAuth, storage, tapClient)
+        tapClient: SignInClient,
+        @ApplicationContext appContext: Context
+    ): FirestoreRepository = FirestoreRepositoryImpl(firebaseFirestore, firebaseAuth, storage, tapClient, appContext)
 }
