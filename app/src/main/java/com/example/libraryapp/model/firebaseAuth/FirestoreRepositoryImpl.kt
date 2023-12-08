@@ -1,5 +1,6 @@
 package com.example.libraryapp.model.firebaseAuth
 
+import android.net.Uri
 import android.util.Log
 import com.example.libraryapp.model.FirestoreRepository
 import com.example.libraryapp.model.resources.Author
@@ -10,6 +11,7 @@ import com.example.libraryapp.model.resources.Review
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.tasks.await
 import java.time.LocalDate
 import java.time.ZoneId
@@ -23,13 +25,18 @@ import kotlin.random.Random
 
 class FirestoreRepositoryImpl @Inject constructor(
     private val firebaseFirestore: FirebaseFirestore,
-    private val auth: FirebaseAuth // Inyectado o asignado de alguna manera
+    private val auth: FirebaseAuth,
+    private val storage: FirebaseStorage
 ) : FirestoreRepository {
     override val dataBase: FirebaseFirestore?
         get() = firebaseFirestore
 
     override val authConection: FirebaseAuth?
         get() = auth
+
+    override val storageDataBase: FirebaseStorage?
+        get() = storage
+
     override suspend fun getBook(bookId: String): Book? {
         return try {
             val document = firebaseFirestore.collection("books").document(bookId).get().await()
@@ -368,8 +375,29 @@ class FirestoreRepositoryImpl @Inject constructor(
         } catch (e: Exception) {
             Log.d("FirestoreRepository", "upLoadReview failed with ", e)
         }
+    }
 
+    override suspend fun uploadImageToFirebase(imageUri: Uri, onSuccess: (String) -> Unit, onFailure: (Exception) -> Unit) {
+        val userId = auth.currentUser?.uid ?: return
+        val storageRef = storage.reference.child("users/$userId/profilePicture.jpg")
 
+        storageRef.putFile(imageUri).addOnSuccessListener {
+            storageRef.downloadUrl.addOnSuccessListener { uri ->
+                onSuccess(uri.toString())
+            }
+        }.addOnFailureListener { exception ->
+            onFailure(exception)
+        }
+    }
+
+    override fun getProfileImageUrl(userId: String, onSuccess: (String) -> Unit, onFailure: (Exception) -> Unit) {
+        val storageRef = storage.reference.child("users/$userId/profilePicture.jpg")
+
+        storageRef.downloadUrl.addOnSuccessListener { uri ->
+            onSuccess(uri.toString())
+        }.addOnFailureListener { exception ->
+            onFailure(exception)
+        }
     }
 
 //    override suspend fun getReviewsFromABook(bookId: String): List<Review?>{

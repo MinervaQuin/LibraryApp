@@ -1,5 +1,6 @@
 package com.example.libraryapp.model
 
+import android.net.Uri
 import com.example.libraryapp.model.firebaseAuth.UserData
 import com.example.libraryapp.model.resources.Author
 import com.example.libraryapp.model.resources.Book
@@ -8,11 +9,13 @@ import com.example.libraryapp.model.resources.Review
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import java.time.LocalDate
 
 interface FirestoreRepository {
     val dataBase: FirebaseFirestore?
     val authConection: FirebaseAuth?
+    val storageDataBase: FirebaseStorage?
     suspend fun getBook(bookId: String): Book?
     suspend fun getAllBooks(booksIds: List<String>): List<Book?>
     suspend fun getAllBooks2(): List<Book?>
@@ -39,4 +42,6 @@ interface FirestoreRepository {
     suspend fun getReviewsFromABook(bookId: String): List<Review?>
 
     suspend fun getuser(): UserData?
+    suspend fun uploadImageToFirebase(imageUri: Uri, onSuccess: (String) -> Unit, onFailure: (Exception) -> Unit)
+    fun getProfileImageUrl(userId: String, onSuccess: (String) -> Unit, onFailure: (Exception) -> Unit)
 }

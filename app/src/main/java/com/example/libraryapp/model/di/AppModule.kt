@@ -8,6 +8,7 @@ import com.example.libraryapp.model.firebaseAuth.UserData
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -35,10 +36,13 @@ class AppModule {
         )
     }
     @Provides
+    fun provideFirebaseStorage(): FirebaseStorage = FirebaseStorage.getInstance()
+    @Provides
     fun provideFirebaseAuth(): FirebaseAuth = FirebaseAuth.getInstance()
     @Provides
     fun provideFirestoreRepository(
         firebaseFirestore: FirebaseFirestore,
-        firebaseAuth: FirebaseAuth
-    ): FirestoreRepository = FirestoreRepositoryImpl(firebaseFirestore, firebaseAuth)
+        firebaseAuth: FirebaseAuth,
+        storage: FirebaseStorage
+    ): FirestoreRepository = FirestoreRepositoryImpl(firebaseFirestore, firebaseAuth, storage)
 }

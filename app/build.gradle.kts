@@ -71,6 +71,7 @@ dependencies {
 
 
     implementation("com.google.firebase:firebase-auth:22.2.0")
+    implementation("com.google.firebase:firebase-storage-ktx:20.3.0")
 
 
 
@@ -138,7 +139,7 @@ dependencies {
 
     //Accompanist (Permission)
     implementation ("com.google.accompanist:accompanist-permissions:0.31.3-beta")
-
+    implementation ("com.theartofdev.edmodo:android-image-cropper:2.8.+")
 
 }
 
