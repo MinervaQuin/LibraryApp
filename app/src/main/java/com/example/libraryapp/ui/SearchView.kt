@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -34,11 +35,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -111,17 +114,18 @@ fun BookScreen(
 
 
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun SearchAppBar(searchViewModel: SearchViewModel,
                  modifyState: (List<Book?>) -> Unit,
                  updateSearchString: (String) -> Unit,
-                 navController: NavHostController)
-{
+                 navController: NavHostController) {
     var searchString by remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
+    val softwareKeyboardController = LocalSoftwareKeyboardController.current
 
+    SelectionContainer {
     OutlinedTextField(
         modifier = Modifier
             .fillMaxWidth()
@@ -134,22 +138,24 @@ fun SearchAppBar(searchViewModel: SearchViewModel,
                     try {
                         // Use withContext to switch to the IO dispatcher if needed
                         withContext(Dispatchers.IO) {
-                            if (searchString.length == 0){
+                            if (searchString.length == 0) {
                                 modifyState(searchViewModel.getAllBooks())
-                            }else {
+                            } else {
                                 modifyState(searchViewModel.getBooksStringMatch(searchString))
                             }
                             updateSearchString(searchString)
                         }
                     } catch (e: Exception) {
                         Log.e("Firestore", "Error in SearchBar", e)
+                    } finally {
+                        softwareKeyboardController?.hide()
                     }
                 }
             }
         ),
 
         value = searchString,
-        onValueChange = { searchString = it},
+        onValueChange = { searchString = it },
         singleLine = true,
         leadingIcon = {
             IconButton(onClick = {
@@ -170,17 +176,20 @@ fun SearchAppBar(searchViewModel: SearchViewModel,
                     try {
                         // Use withContext to switch to the IO dispatcher if needed
                         withContext(Dispatchers.IO) {
-                            if (searchString.length == 0){
+                            if (searchString.length == 0) {
                                 modifyState(searchViewModel.getAllBooks())
-                            }else {
+                            } else {
                                 modifyState(searchViewModel.getBooksStringMatch(searchString))
                             }
                             updateSearchString(searchString)
                         }
                     } catch (e: Exception) {
                         Log.e("Firestore", "Error in SearchBar", e)
+                    } finally {
+                        softwareKeyboardController?.hide()
                     }
-            }}) { // Ir a pagina de scan codigo de barras
+                }
+            }) { // Ir a pagina de scan codigo de barras
 
                 Icon(
                     imageVector = Icons.Filled.Search,
@@ -196,7 +205,8 @@ fun SearchAppBar(searchViewModel: SearchViewModel,
             cursorColor = GreenApp
         ),
 
-    )
+        )
+}
 }
 
 @Composable
