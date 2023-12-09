@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -34,6 +35,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -92,7 +94,6 @@ fun BookScreen(
             modifier = if (stringSearched.length != 0) Modifier.padding(start = 6.dp, top=8.dp, bottom = 8.dp) else Modifier.padding(start = 0.dp))
         LazyVerticalGrid(
             columns = GridCells.Adaptive(minSize = 180.dp),
-            //modifier = Modifier.padding(bottom = 60.dp, top = 0.dp)
         ){
             items(items = books) {
                 BookItem(it, modifier = Modifier, navController)
@@ -115,7 +116,8 @@ fun BookScreen(
 fun SearchAppBar(searchViewModel: SearchViewModel,
                  modifyState: (List<Book?>) -> Unit,
                  updateSearchString: (String) -> Unit,
-                 navController: NavHostController) {
+                 navController: NavHostController)
+{
     var searchString by remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -126,8 +128,29 @@ fun SearchAppBar(searchViewModel: SearchViewModel,
             .padding(top = 15.dp, start = 10.dp, end = 10.dp)
             .height(50.dp),
 
+        keyboardActions = KeyboardActions(
+            onDone = {
+                coroutineScope.launch {
+                    try {
+                        // Use withContext to switch to the IO dispatcher if needed
+                        withContext(Dispatchers.IO) {
+                            if (searchString.length == 0){
+                                modifyState(searchViewModel.getAllBooks())
+                            }else {
+                                modifyState(searchViewModel.getBooksStringMatch(searchString))
+                            }
+                            updateSearchString(searchString)
+                        }
+                    } catch (e: Exception) {
+                        Log.e("Firestore", "Error in SearchBar", e)
+                    }
+                }
+            }
+        ),
+
         value = searchString,
         onValueChange = { searchString = it},
+        singleLine = true,
         leadingIcon = {
             IconButton(onClick = {
                 ShoppingCart.setNavController(navController)
@@ -239,6 +262,8 @@ fun BookInfo(book: Book?){
         )
     }
 }
+
+
 
 @Preview(showBackground = true)
 @Composable

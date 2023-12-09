@@ -405,8 +405,6 @@ fun BookInitialInfo(book: Book, navController: NavHostController) {
 @Composable
 fun BookLittleInfo(book: Book,navController: NavController){
 
-
-
     Row(modifier = Modifier
         .fillMaxWidth()
         .padding(10.dp)
