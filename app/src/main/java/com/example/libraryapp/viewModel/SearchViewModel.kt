@@ -13,6 +13,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.libraryapp.MainActivity
 import com.example.libraryapp.model.FirestoreRepository
+import com.example.libraryapp.model.LibraryAppState
 import com.example.libraryapp.model.resources.Author
 import com.example.libraryapp.model.resources.Book
 import com.google.zxing.integration.android.IntentIntegrator
@@ -20,12 +21,14 @@ import com.google.zxing.integration.android.IntentIntegrator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Singleton
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
-    private val firestoreRepository: FirestoreRepository
+    private val firestoreRepository: FirestoreRepository,
+    val libraryAppState: LibraryAppState,
 
-): ViewModel(){
+    ): ViewModel(){
     private val _isFallo = MutableLiveData<Boolean>()
     val isFallo get() = _isFallo
     private var allBooks: List<Book?> = emptyList()
@@ -91,6 +94,14 @@ class SearchViewModel @Inject constructor(
 
     fun getBookList(): List<Book?> {
         return searchedBooks
+    }
+
+    fun setSearchedString( searchString: String){
+        libraryAppState.setSearchedString(searchString)
+    }
+
+    fun getSearchedString(): String {
+        return libraryAppState.getSearchedString()
     }
 
 }
