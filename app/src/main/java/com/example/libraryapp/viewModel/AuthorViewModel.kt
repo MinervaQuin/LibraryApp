@@ -22,12 +22,17 @@ class AuthorViewModel @Inject constructor(
     init {
     }
 
-    fun updateAutor(id: String){
-        viewModelScope.launch {
-            val author: Author? = firestoreRepository.getAuthor(id)
-            if (author != null) {
-                autor=author
-            }
+    fun updateAutor(id: String?){
+        if(id==null){
+            autor=ShoppingCart.getAutor() as Author
+        }
+        else{
+            viewModelScope.launch {
+                val author: Author? = firestoreRepository.getAuthor(id)
+                if (author != null) {
+                    autor=author
+                }
+            }   
         }
     }
 }

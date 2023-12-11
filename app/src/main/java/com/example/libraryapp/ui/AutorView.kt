@@ -63,7 +63,8 @@ import coil.compose.AsyncImage
 import com.example.libraryapp.ui.BookPreview
 
 @Composable
-fun AutorScreen (navController: NavController, ViewModel: AuthorViewModel,id: String){
+fun AutorScreen (navController: NavController, ViewModel: AuthorViewModel,id: String?){
+
     ViewModel.updateAutor(id)
     val autor = ViewModel.autor
     Column (

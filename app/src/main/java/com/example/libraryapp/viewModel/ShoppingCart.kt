@@ -2,6 +2,7 @@ package com.example.libraryapp.viewModel
 
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import com.example.libraryapp.model.resources.Author
 import kotlinx.coroutines.flow.MutableStateFlow
 import com.example.libraryapp.model.resources.Book
 
@@ -10,7 +11,8 @@ object ShoppingCart {
     private var _categorySelected = MutableStateFlow("")
     private lateinit var bookSelected: Book
     private lateinit var navController: NavHostController
-    private lateinit var autorId: String
+    private var autorId: String? = null
+    private var autor: Author? = null
 
 
     fun init() {
@@ -26,10 +28,18 @@ object ShoppingCart {
     fun getSelectedCategory(): String{
         return _categorySelected.value
     }
-    fun setautorId(new: String){
+
+    fun setAutor(new: Author?){
+        this.autor = new
+    }
+    fun getAutor(): Author?{
+        return this.autor
+    }
+
+    fun setautorId(new: String?){
         this.autorId = new
     }
-    fun getautorId(): String{
+    fun getautorId(): String?{
         return this.autorId
     }
 

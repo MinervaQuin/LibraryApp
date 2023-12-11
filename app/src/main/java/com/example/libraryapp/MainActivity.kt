@@ -46,6 +46,7 @@ import com.example.libraryapp.ui.HomeView
 import com.example.libraryapp.ui.LoginView
 import com.example.libraryapp.ui.MapScreen
 import com.example.libraryapp.ui.ProfileScreen
+import com.example.libraryapp.ui.autoresView
 import com.example.libraryapp.ui.signUpView
 import com.example.libraryapp.ui.theme.BookDetailsScreen
 import com.example.libraryapp.ui.theme.BookScreen
@@ -54,6 +55,7 @@ import com.example.libraryapp.viewModel.AuthorViewModel
 import com.example.libraryapp.viewModel.CartViewModel
 import com.example.libraryapp.viewModel.SearchViewModel
 import com.example.libraryapp.viewModel.ShoppingCart
+import com.example.libraryapp.viewModel.autoresViewModel
 import com.example.libraryapp.viewModel.homeViewModel
 import com.example.libraryapp.viewModel.loginViewModel
 import com.example.libraryapp.viewModel.profileViewModel
@@ -91,7 +93,7 @@ class MainActivity : ComponentActivity() {
             val navController = rememberNavController()
             val homeViewModel : homeViewModel = hiltViewModel()
             val topBarViewModel: topBarViewModel = hiltViewModel()
-            NavHost(navController = navController, startDestination = "firstScreens"){
+            NavHost(navController = navController, startDestination = "AutoresDestination"){
 
                 navigation(
                     startDestination = "login",
@@ -226,6 +228,23 @@ class MainActivity : ComponentActivity() {
                             }
                         )
                     }
+                    composable("AuthorDestination") {
+                        val viewModel : AuthorViewModel = hiltViewModel()
+                        // Contenido de la pantalla del carrito
+                        Scaffold(
+                            bottomBar = { BottomBar(navController = navController) },
+                            topBar = { TopBar(navController = navController, topBarViewModel)},
+                            content = { paddingValues ->
+                                Column(
+                                    modifier = Modifier
+                                        .padding(paddingValues)
+                                        .fillMaxSize()
+                                ) {
+                                    AutorScreen(navController, viewModel, ShoppingCart.getautorId())
+                                }
+                            }
+                        )
+                    }
 
                     composable("maps"){
                         Scaffold(
@@ -289,9 +308,9 @@ class MainActivity : ComponentActivity() {
                 }
 
                 //fuera del grafo
-                composable("AuthorDestination") {
-                    val viewModel : AuthorViewModel = hiltViewModel()
-                    // Contenido de la pantalla del carrito
+
+                composable("AutoresDestination") {
+                    val viewModel : autoresViewModel = hiltViewModel()
                     Scaffold(
                         bottomBar = { BottomBar(navController = navController) },
                         topBar = { TopBar(navController = navController, topBarViewModel)},
@@ -301,11 +320,12 @@ class MainActivity : ComponentActivity() {
                                     .padding(paddingValues)
                                     .fillMaxSize()
                             ) {
-                                AutorScreen(navController, viewModel, ShoppingCart.getautorId())
+                                autoresView(navController, viewModel)
                             }
                         }
                     )
                 }
+
                 composable("SearchScreen"){
                     Scaffold(
                         bottomBar = { BottomBar(navController = navController) },

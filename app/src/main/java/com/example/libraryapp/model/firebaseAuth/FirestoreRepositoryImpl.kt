@@ -170,6 +170,34 @@ class FirestoreRepositoryImpl @Inject constructor(
 
     }
 
+    override suspend fun getAllAutors(): List<Author?> {
+        val Array: MutableList<Author?> = mutableListOf()
+        return try {
+            val querySnapshot = FirebaseFirestore.getInstance()
+                .collection("authors") // Reemplaza con el nombre de tu colección en Firestore
+                .get()
+                .await()
+
+            for (document in querySnapshot.documents) {
+                val autor = Author()
+
+                var bookArray = getAllBooks(document.get("works") as? List<String> ?: listOf())
+                autor.name = document.getString("name") ?: "Error al encontrar el nombre"
+                autor.biography = document.getString("biography")?: "No se ha encontrado una Biografía"
+                autor.cover= document.getString("cover")?: "Not found"
+                autor.works = bookArray.toTypedArray()
+                Array.add(autor)
+
+            }
+            Log.d("Firestore", Array.size.toString())
+            Array
+        } catch (e: Exception) {
+            Log.d("FirestoreRepository", "getAllBooks failed with ", e)
+            emptyList()
+        }
+    }
+
+
     override suspend fun getCollection(collectionId: String) : Collection?{
         return try {
             val documentSnapshot = firebaseFirestore.collection("collections").document(collectionId).get().await()
