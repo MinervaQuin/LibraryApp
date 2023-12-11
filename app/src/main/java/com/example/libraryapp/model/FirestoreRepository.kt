@@ -31,7 +31,7 @@ interface FirestoreRepository {
     suspend fun getCollection(collectionId: String) : Collection?
     suspend fun getReviews(bookId: String): List<Review?>
 
-    suspend fun upLoadReview(bookId: String, review: Review): Unit
+    suspend fun upLoadReview(bookId: String, review: Review)
 
 /*
     suspend fun upLoadUserInfo(field: String): Unit
@@ -42,12 +42,14 @@ interface FirestoreRepository {
 
     suspend fun uploadBookToFirestore()
     suspend fun addNewAttribute()
-    suspend fun addASecondCollection()
     suspend fun deleteReviews()
     suspend fun getReviewsFromABook(bookId: String): List<Review?>
+    suspend fun getReviewFromUserId(bookId: String, userId: String): Review?
+    fun updateReview(bookId: String, reviewId: String, newData: Map<String, Any>)
 
     suspend fun getuser(): UserData?
     suspend fun uploadImageToFirebase(imageUri: Uri, onSuccess: (String) -> Unit, onFailure: (Exception) -> Unit)
     suspend fun getProfileImageUrl(userId: String): String
     suspend fun signOut()
+    suspend fun uploadBookScore(bookId: String, newScore: Int)
 }

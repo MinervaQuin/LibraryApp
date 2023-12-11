@@ -78,37 +78,45 @@ fun BookDetailsScreen(
 
     navController: NavHostController,
     bookDetailsViewModel: BookDetailsViewModel = hiltViewModel(),
-    book: Book
 ){
-    val offset = remember { mutableStateOf(0f) }
     val bookUiState by bookDetailsViewModel.bookUiState.collectAsState()
+    val book = bookDetailsViewModel.libraryAppState.getBook()
+
 
     var reviews by remember { mutableStateOf<List<Review?>>(emptyList()) }
 
-    LaunchedEffect(bookDetailsViewModel) {
-        try {
-            reviews = bookDetailsViewModel.getReviews(book.ref)
-        } catch (e: Exception) {
-            Log.e("Firestore", "Error en BookScreen", e)
+
+    LaunchedEffect(bookDetailsViewModel.refreshReviews) {
+        bookDetailsViewModel.refreshReviews.collect { newRefreshReviewsValue ->
+
+            try {
+                reviews =
+                    bookDetailsViewModel.getReviews(bookDetailsViewModel.libraryAppState.getBookId())
+                Log.d("firebase", "SE HA ACTUALIZADO LAS REVIEWS")
+            } catch (e: Exception) {
+                Log.e("firebase", "Error en BookScreen", e)
+            }
         }
     }
 
     Column (modifier = Modifier.verticalScroll(rememberScrollState())
     ){
-
-        BookInitialInfo(book, navController)
-        BookSinopsis(book.sinopsis)
-        FactSheet(book)
-        ReviewBook(book.title, bookDetailsViewModel, bookUiState)
+//
+        BookInitialInfo(book!!, navController)
+        BookSinopsis(book!!.sinopsis)
+        FactSheet(book!!)
+        ReviewBook(book!!.title, bookDetailsViewModel, bookUiState)
         Divider()
-        ResumeOfReviews(num_opi = reviews.size, rateScore = book.score.toDouble())
+        ResumeOfReviews(num_opi = reviews.size,
+            bookDetailsViewModel = bookDetailsViewModel
+        )
         Column (
-            modifier = Modifier.height(400.dp)
+            modifier = Modifier
+                .height(400.dp)
                 .verticalScroll(rememberScrollState())
         ) {
             for (review in reviews) {
                 if (review != null) {
-                    Log.d("Reviews","Review añadida")
                     UserReview(review, bookDetailsViewModel = bookDetailsViewModel)
                 }
             }
@@ -120,15 +128,16 @@ fun BookDetailsScreen(
 
 @Composable
 fun ResumeOfReviews(
-    rateScore: Double,
     num_opi: Int,
+    bookDetailsViewModel: BookDetailsViewModel
 ){
+
     Row (modifier = Modifier.padding(top=20.dp, bottom = 10.dp, start = 15.dp)){
         Box (modifier = Modifier.weight(0.2f),
             contentAlignment = Alignment.Center
             ) {
             createCircle()
-            Text(text = rateScore.toString(),
+            Text(text = bookDetailsViewModel.libraryAppState.getBook()?.score.toString(),
                 style = TextStyle(
                     fontSize = 20.sp,
                     fontWeight = FontWeight(700),
@@ -143,7 +152,7 @@ fun ResumeOfReviews(
                 .padding(start = 10.dp),
             verticalArrangement = Arrangement.Bottom
         ){
-            RatingBar(currentRating = rateScore)
+            RatingBar(currentRating = bookDetailsViewModel.libraryAppState.getBook()?.score?.toDouble() ?: 0.0)
             Text(text = num_opi.toString() + " opiniones")
         }
     }
@@ -168,6 +177,8 @@ fun UserReview(
     review: Review,
     bookDetailsViewModel: BookDetailsViewModel
 ){
+
+
     var expanded by remember {mutableStateOf(false)}
     val formatter = DateTimeFormatter.ofPattern("dd/MM/yy")
     val formattedDate = bookDetailsViewModel.getFormattedTimeAgo(review.date)
@@ -224,6 +235,7 @@ fun ReviewBook(
 ){
     var myRating by remember { mutableStateOf(0) }
 
+
     Column (
         modifier = Modifier.padding(bottom = 5.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -244,22 +256,28 @@ fun ReviewBook(
                 .padding(top = 8.dp)
         )
         Text(text = "¿Qué te ha parecido?")
+        var userReview: Review? = bookDetailsViewModel.getReviewFromUser()
         AnimatedRatingBar(
             currentRating = bookUiState.reviewScore,
             onRatingChanged = { bookDetailsViewModel.updateRating(it) }
         )
         Button(
-            onClick = { bookDetailsViewModel.showDialog(true) }, //Ir a la páginad de hacer una opinión
-            colors = ButtonDefaults.buttonColors(containerColor = GreenApp),
-
+            onClick = { bookDetailsViewModel.showDialog(true) }, //Ir a la páginas de hacer una opinión
+            colors = ButtonDefaults.buttonColors(containerColor = GreenApp)
             ) {
-            Text("Deja tu opinión")
-            AddReview(showDialog = bookUiState.showDialog,
-                sendComment = { bookDetailsViewModel.sendReview( it )  },
+
+            if (userReview != null) {
+                Text("Edita tu opinión")
+            }else{
+                Text("Deja tu opinión")
+            }
+            AddReview(
+                showDialog = bookUiState.showDialog,
                 updateRating = { bookDetailsViewModel.updateRating( it ) },
                 bookUiState= bookUiState,
                 bookDetailsViewModel = bookDetailsViewModel,
-                bookTitle = bookTitle
+                bookTitle = bookTitle,
+                userReview = userReview ?: null
             )
         }
     }
@@ -270,18 +288,27 @@ fun ReviewBook(
 fun AddReview(
     bookTitle: String,
     showDialog: Boolean,
-    sendComment: (String) -> Unit,
+    userReview: Review?,
     updateRating: (Int) -> Unit,
     bookUiState: BookDetailsUiState,
     bookDetailsViewModel: BookDetailsViewModel,
 
     )
 {
-    var comentarioTexto by remember { mutableStateOf("") }
+
+    var comentarioTexto by remember { mutableStateOf(userReview?.description ?: "") }
+    var score by remember { mutableStateOf(userReview?.score?.toInt()) }
+
+    LaunchedEffect(userReview) {
+        comentarioTexto = userReview?.description ?: ""
+    }
+
+    LaunchedEffect(userReview) {
+        score = userReview?.score?.toInt() ?: 0
+    }
 
 
 
-    // Dialog composable
     if (showDialog) {
 
         Dialog(
@@ -308,9 +335,7 @@ fun AddReview(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(10.dp)
-
-                        //.background(color = Color.White)
-                            ,
+                    ,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
@@ -332,13 +357,16 @@ fun AddReview(
                         )
                     )
                     AnimatedRatingBar(
-                        currentRating = bookUiState.reviewScore,
-                        onRatingChanged = { bookDetailsViewModel.updateRating(it)  }) //conectar con la pantalla anterior
+                        currentRating =  bookUiState.reviewScore,
+                        onRatingChanged = {bookDetailsViewModel.updateRating(it) }) //conectar con la pantalla anterior
                     SelectionContainer {
                         OutlinedTextField(
                             value = comentarioTexto,
                             onValueChange = { comentarioTexto = it },
-                            label = { Text("Ingresa tu comentario") },
+                            label = {
+                                Text(if (!comentarioTexto.isEmpty()) "Ingresa tu comentario" else comentarioTexto)
+
+                            },
                             modifier = Modifier
                                 .padding(8.dp)
                                 .fillMaxWidth()
@@ -348,7 +376,7 @@ fun AddReview(
                             ),
                             keyboardActions = KeyboardActions(
                                 onSend = {
-                                    sendComment(comentarioTexto)
+                                    sendComment(comentarioTexto, bookUiState.reviewScore, bookDetailsViewModel)
                                     comentarioTexto = ""
                                 }
                             ),
@@ -361,7 +389,7 @@ fun AddReview(
                     }
                     Button(
                         onClick = {
-                            sendComment(comentarioTexto)
+                            sendComment(comentarioTexto, bookUiState.reviewScore, bookDetailsViewModel)
                             comentarioTexto = ""
                         },
                         colors = ButtonDefaults.buttonColors(GreenApp)
@@ -376,6 +404,9 @@ fun AddReview(
 
 }
 
+fun sendComment(comentarioTexto: String, reviewScore: Int, bookDetailsViewModel: BookDetailsViewModel) {
+    bookDetailsViewModel.sendReview( comentarioTexto, reviewScore )
+}
 
 
 @Composable

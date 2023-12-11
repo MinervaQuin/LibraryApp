@@ -63,16 +63,33 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import coil.compose.rememberImagePainter
 import com.example.libraryapp.R
 import com.example.libraryapp.model.resources.CollectionSamples
 import com.example.libraryapp.model.resources.LongCollectionSamples
 import com.example.libraryapp.model.resources.carouselImage
+import com.example.libraryapp.ui.theme.GreenApp
+import com.example.libraryapp.ui.theme.SearchAppBar
 import com.example.libraryapp.ui.theme.rojoSangre
+import com.example.libraryapp.viewModel.SearchViewModel
 import kotlinx.coroutines.delay
 
 
@@ -81,7 +98,7 @@ fun HomeView(
     userData: UserData?, //TODO esto hay que ponerlo en el viewModel
     onSignOut: () -> Unit,
     viewModel: homeViewModel,
-    navController: NavController
+    navController: NavHostController
     ) {
     val cartViewModel: CartViewModel = ShoppingCart.getViewModelInstance()
 
@@ -89,7 +106,12 @@ fun HomeView(
     val collectionsArray by viewModel.collectionArray.collectAsState()
     val largeCollectionSamplesArray by viewModel.largeCollectionSamplesArray.collectAsState()
     val carouselImageArray by viewModel.carouselImageArray.collectAsState()
+    val searchViewModel : SearchViewModel = hiltViewModel()
 
+    SearchAppBarHP(
+        searchViewModel = searchViewModel,
+        navController = navController
+    )
 
     LazyColumn(
         modifier = Modifier
@@ -348,6 +370,68 @@ fun LargeCollectionBox(collection: LongCollectionSamples, navController: NavCont
         }
     }
 
+}
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
+@Composable
+fun SearchAppBarHP(searchViewModel: SearchViewModel,
+                   navController: NavHostController)
+{
+    var searchString by remember { mutableStateOf("") }
+    val context = LocalContext.current
+
+    SelectionContainer {
+        OutlinedTextField(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 15.dp, start = 10.dp, end = 10.dp)
+                .height(50.dp),
+
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    searchViewModel.setSearchedString(searchString)
+                    navController.navigate("SearchScreen")
+                }
+            ),
+
+            value = searchString,
+            onValueChange = { searchString = it },
+            singleLine = true,
+            leadingIcon = {
+                IconButton(onClick = {
+                    ShoppingCart.setNavController(navController)
+                    searchViewModel.initiateScan(context)
+                }) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.upc_scan),
+                        contentDescription = "Close Icon",
+                        tint = GreenApp
+                    )
+                }
+            },
+            trailingIcon = {
+
+                IconButton(onClick = {
+                    searchViewModel.setSearchedString(searchString)
+                    navController.navigate("SearchScreen")
+                }) { // Ir a pagina de scan codigo de barras
+
+                    Icon(
+                        imageVector = Icons.Filled.Search,
+                        contentDescription = "Search Icon",
+                        tint = Color(0xFF77CF7C)
+                    )
+                }
+            },
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+
+                unfocusedBorderColor = GreenApp,
+                focusedBorderColor = GreenApp,
+                cursorColor = GreenApp
+            ),
+
+            )
+    }
 }
 
 @Preview(showBackground = true)

@@ -2,7 +2,6 @@ package com.example.libraryapp.ui.theme
 
 
 import android.util.Log
-import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -37,7 +36,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -48,10 +46,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.Observer
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
-import com.example.libraryapp.MainActivity
 import com.example.libraryapp.R
 import com.example.libraryapp.model.resources.Book
 import com.example.libraryapp.theme.LibraryAppTheme
@@ -66,16 +62,15 @@ import kotlinx.coroutines.withContext
 fun BookScreen(
     modifier: Modifier = Modifier.padding(10.dp),
     navController: NavHostController,
-    bookTitle: String = "Reina Roja"
 ){
     val searchViewModel : SearchViewModel = hiltViewModel()
     var books by remember { mutableStateOf<List<Book?>>(emptyList()) }
-    var stringSearched by remember { mutableStateOf<String>("") }
+    var stringSearched by remember { mutableStateOf<String>(searchViewModel.getSearchedString()) }
 
 
     LaunchedEffect(searchViewModel) {
         try {
-            books = searchViewModel.getAllBooks()
+            books = searchViewModel.getBooksStringMatch(stringSearched)
         } catch (e: Exception) {
             Log.e("Firestore", "Error en BookScreen", e)
         }
@@ -90,7 +85,8 @@ fun BookScreen(
             updateSearchString = { newSearchString ->
                 stringSearched = newSearchString
             },
-            navController
+            navController = navController,
+            searchString = stringSearched
         )
         Text(text = if (stringSearched.length != 0) "Resultados para: " + stringSearched else "",
             fontWeight = FontWeight.Bold,
@@ -99,7 +95,7 @@ fun BookScreen(
             columns = GridCells.Adaptive(minSize = 180.dp),
         ){
             items(items = books) {
-                BookItem(it, modifier = Modifier, navController)
+                BookItem(it, modifier = Modifier, navController, searchViewModel)
 
                 if (it != null) {
                     Log.d("Firestore", it.title)
@@ -116,11 +112,15 @@ fun BookScreen(
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
-fun SearchAppBar(searchViewModel: SearchViewModel,
-                 modifyState: (List<Book?>) -> Unit,
-                 updateSearchString: (String) -> Unit,
-                 navController: NavHostController) {
-    var searchString by remember { mutableStateOf("") }
+fun SearchAppBar(
+    searchViewModel: SearchViewModel,
+    modifyState: (List<Book?>) -> Unit,
+    updateSearchString: (String) -> Unit,
+    navController: NavHostController,
+    searchString: String
+)
+{
+    var searchString by remember { mutableStateOf(searchString) }
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
     val softwareKeyboardController = LocalSoftwareKeyboardController.current
@@ -209,14 +209,18 @@ fun SearchAppBar(searchViewModel: SearchViewModel,
 }
 }
 
+
+
 @Composable
-fun BookItem(book: Book?, modifier: Modifier, navController: NavHostController) {
+fun BookItem(book: Book?, modifier: Modifier, navController: NavHostController, searchViewModel: SearchViewModel) {
     Column(
         modifier = Modifier
             .padding(bottom = 8.dp)
             .clickable {
                 if (book != null) {
-                    ShoppingCart.setBookSelected(book)
+//                    ShoppingCart.setBookSelected(book)
+                    searchViewModel.libraryAppState.setBookId(book.ref)
+                    searchViewModel.libraryAppState.setBook(book)
                 }
                 navController.navigate("BookDetailsView")
             } //BookDetail(

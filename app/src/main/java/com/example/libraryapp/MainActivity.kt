@@ -35,6 +35,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import com.example.libraryapp.model.FirestoreRepository
+import com.example.libraryapp.model.LibraryAppState
 import com.example.libraryapp.model.firebaseAuth.FirestoreRepositoryImpl
 import com.example.libraryapp.model.firebaseAuth.GoogleAuthUiClient
 import com.example.libraryapp.model.resources.Author
@@ -93,7 +94,7 @@ class MainActivity : ComponentActivity() {
             val navController = rememberNavController()
             val homeViewModel : homeViewModel = hiltViewModel()
             val topBarViewModel: topBarViewModel = hiltViewModel()
-            NavHost(navController = navController, startDestination = "AutoresDestination"){
+            NavHost(navController = navController, startDestination = "secondScreens"){
 
                 navigation(
                     startDestination = "login",
@@ -293,7 +294,7 @@ class MainActivity : ComponentActivity() {
                                         .padding(paddingValues)
                                         .fillMaxSize()
                                 ) {
-                                    BookDetailsScreen(navController = navController, book = ShoppingCart.getBookSelected())
+                                    BookDetailsScreen(navController = navController)
                                 }
                             }
                         )
