@@ -70,7 +70,7 @@ fun BookScreen(
 
     LaunchedEffect(searchViewModel) {
         try {
-            books = searchViewModel.getAllBooks()
+            books = searchViewModel.getBooksStringMatch(stringSearched)
         } catch (e: Exception) {
             Log.e("Firestore", "Error en BookScreen", e)
         }
