@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -154,7 +155,7 @@ fun BookCategoriesDropdown(
         modifier = Modifier
             .padding(horizontal = 10.dp)
             .width(149.dp)
-            .height(27.dp)
+            .height(35.dp)
             .clickable {
                 expanded = !expanded
             }
@@ -163,7 +164,7 @@ fun BookCategoriesDropdown(
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
-                .fillMaxWidth()
+                .fillMaxSize()
  //               .padding(16.dp)
         ) {
             Spacer(modifier = Modifier.width(8.dp))
