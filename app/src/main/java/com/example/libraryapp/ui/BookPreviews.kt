@@ -30,6 +30,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
@@ -37,12 +38,14 @@ import coil.compose.AsyncImage
 import com.example.libraryapp.R
 import com.example.libraryapp.model.resources.Book
 import com.example.libraryapp.ui.theme.RatingBar
+import com.example.libraryapp.viewModel.AuthorViewModel
 import com.example.libraryapp.viewModel.CartViewModel
+import com.example.libraryapp.viewModel.CategoryViewModel
 import com.example.libraryapp.viewModel.ShoppingCart
 import kotlinx.coroutines.launch
 
 @Composable
-fun BookPreview (obra: Book, navController: NavController){
+fun BookPreview (obra: Book, navController: NavController, viewModel: CategoryViewModel? = null, viewModel2: AuthorViewModel? = null){
     val cartViewModel: CartViewModel = ShoppingCart.getViewModelInstance()
     val context = LocalContext.current
     Box(modifier = Modifier
@@ -52,7 +55,12 @@ fun BookPreview (obra: Book, navController: NavController){
         .shadow(elevation = 4.dp, spotColor = Color(0x40000000), ambientColor = Color(0x40000000))
         .border(width = 1.dp, color = Color(0xFF000000))
         .clickable {
-            ShoppingCart.setBookSelected(obra)
+            if (viewModel != null){
+                viewModel.setNewBook(obra)
+            }
+            else{
+                viewModel2!!.setNewBook(obra)
+            }
             navController.navigate("BookDetailsView")
         }
     )
@@ -134,7 +142,7 @@ fun BookPreview (obra: Book, navController: NavController){
 }
 
 @Composable
-fun BookPreviewWide (obra : Book, navController: NavController) {
+fun BookPreviewWide (obra : Book, navController: NavController, viewModel: CategoryViewModel) {
     val cartViewModel: CartViewModel = ShoppingCart.getViewModelInstance()
     val context = LocalContext.current
     Box(modifier = Modifier
@@ -148,7 +156,7 @@ fun BookPreviewWide (obra : Book, navController: NavController) {
         )
         .border(width = 1.dp, color = Color(0xFF000000))
         .clickable {
-            ShoppingCart.setBookSelected(obra)
+            viewModel.setNewBook(obra)
             navController.navigate("BookDetailsView")
         }
     ) {

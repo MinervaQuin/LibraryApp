@@ -126,7 +126,7 @@ fun CategoryView (navController: NavController, ViewModel: CategoryViewModel,cat
         LazyRow(){
             items(1){
                 for (i in 0 until ViewModel.novedades.size){
-                    ViewModel.novedades[i]?.let { it1 -> BookPreview(it1,navController) }
+                    ViewModel.novedades[i]?.let { it1 -> BookPreview(it1,navController, ViewModel) }
                 }
             }
         }
@@ -138,7 +138,7 @@ fun CategoryView (navController: NavController, ViewModel: CategoryViewModel,cat
             }
         )
         for (i in 0 until ViewModel.filtrados.size){
-            BookPreviewWide(ViewModel.filtrados[i],navController)
+            BookPreviewWide(ViewModel.filtrados[i],navController, ViewModel)
         }
     }
 }

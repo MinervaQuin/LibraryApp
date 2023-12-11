@@ -7,6 +7,7 @@ import com.example.libraryapp.model.resources.Book
 import androidx.compose.runtime.*
 import androidx.lifecycle.viewModelScope
 import com.example.libraryapp.model.FirestoreRepository
+import com.example.libraryapp.model.LibraryAppState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -14,7 +15,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AuthorViewModel @Inject constructor(
-    private val firestoreRepository: FirestoreRepository
+    private val firestoreRepository: FirestoreRepository,
+    val libraryAppState: LibraryAppState
 ) : ViewModel() {
     var autor by mutableStateOf(Author())
         private set
@@ -34,5 +36,8 @@ class AuthorViewModel @Inject constructor(
                 }
             }   
         }
+    }
+    fun setNewBook(book: Book){
+        libraryAppState.setBook(book)
     }
 }

@@ -9,6 +9,7 @@ import androidx.compose.runtime.*
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.libraryapp.model.FirestoreRepository
+import com.example.libraryapp.model.LibraryAppState
 import com.example.libraryapp.model.resources.Collection
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,7 +20,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CategoryViewModel @Inject constructor(
-    private val firestoreRepository: FirestoreRepository
+    private val firestoreRepository: FirestoreRepository,
+    val libraryAppState: LibraryAppState
 ) : ViewModel() {
 
     private var _loading = MutableStateFlow(false)
@@ -62,6 +64,9 @@ class CategoryViewModel @Inject constructor(
             "eBooks", "Autores", "Novedades" )
     }
 
+    fun setNewBook(book: Book){
+        libraryAppState.setBook(book)
+    }
 /*    private fun getBookFiltrados(Categorias : String): Array<Book> {
         if(Categorias == "Ficción"){
             return arrayOf(

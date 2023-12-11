@@ -171,7 +171,7 @@ fun AutorScreen (navController: NavController, ViewModel: AuthorViewModel,id: St
         LazyRow(){
             items(1){
                 for (i in 0 until autor.works.size){
-                    autor.works[i]?.let { it1 -> BookPreview(it1,navController) }
+                    autor.works[i]?.let { it1 -> BookPreview(it1,navController, viewModel2 = ViewModel) }
                 }
             }
         }
