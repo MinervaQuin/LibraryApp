@@ -93,10 +93,6 @@ class BookDetailsViewModel @Inject constructor(
                 }
 
 
-
-                Log.d("Reviews", "reviewSum: " + reviewSum)
-//                Log.d("Reviews", "reviewSum: " + libraryAppState.getBook()?.score?)
-
                 var newScore= reviewSum/reviews.size
                 Log.d("Reviews", "newScore: " + newScore)
                 firestoreRepository.uploadBookScore(bookId= libraryAppState.getBookId(), newScore= ceil(newScore.toDouble()).toInt())

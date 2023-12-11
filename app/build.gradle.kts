@@ -120,7 +120,8 @@ dependencies {
     kapt ("com.google.dagger:hilt-compiler:2.48.1")
 
     implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
-
+    //Progress bar
+    implementation ("androidx.activity:activity-ktx:1.4.0")
 
     implementation ("io.ktor:ktor-client-android:2.3.6")
     implementation ("io.ktor:ktor-client-json-jvm:2.3.6")

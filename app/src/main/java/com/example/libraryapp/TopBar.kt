@@ -1,6 +1,7 @@
 package com.example.libraryapp
 
 
+import android.graphics.Rect
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -208,6 +209,7 @@ fun TopBar(navController: NavController, viewModel: topBarViewModel) {
 
 
     DismissibleNavigationDrawer(drawerContent = {
+
             DismissibleDrawerSheet {
                 Spacer(modifier = Modifier.height(55.dp))
                 Column(
@@ -233,6 +235,7 @@ fun TopBar(navController: NavController, viewModel: topBarViewModel) {
                     Spacer(modifier = Modifier.height(8.dp))
                     // Agrega el nombre del usuario debajo de la imagen
                     Text(text = userData?.userName?: "Error", fontSize = 16.sp, color = gray)
+
                 }
                 Divider(modifier = Modifier
                     .fillMaxWidth()
@@ -274,7 +277,8 @@ fun TopBar(navController: NavController, viewModel: topBarViewModel) {
                                         .fillMaxWidth()
                                         .padding(start = 30.dp, end = 30.dp),
                                     color = gray,
-                                    thickness = 1.dp
+                                    thickness = 1.dp,
+
                                 )
                             }
                         }
@@ -284,7 +288,9 @@ fun TopBar(navController: NavController, viewModel: topBarViewModel) {
     },
         drawerState = drawerState,
         gesturesEnabled = drawerState.isOpen,
-        modifier = Modifier.width(250.dp)
+        modifier = Modifier
+            .width(250.dp)
+
     ) {
     }
     TopAppBar(
