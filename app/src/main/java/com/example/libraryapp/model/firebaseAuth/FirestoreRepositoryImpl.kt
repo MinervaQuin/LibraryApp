@@ -17,12 +17,14 @@ import com.example.libraryapp.model.resources.Review
 import com.google.android.gms.auth.api.identity.SignInClient
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageException
 import kotlinx.coroutines.tasks.await
 import java.io.File
 import java.io.FileOutputStream
+import java.lang.NullPointerException
 import java.time.LocalDate
 import java.time.ZoneId
 import java.util.Date
@@ -96,7 +98,10 @@ class FirestoreRepositoryImpl @Inject constructor(
 
             for (document in querySnapshot.documents) {
                 document.getString("title")?.let { Log.d("Firestore", it) }
-                val book = document.toObject(Book::class.java)
+                var book = document.toObject(Book::class.java)
+                if (book != null) {
+                    book.ref = document.id
+                }
                 bookArray.add(book)
             }
             Log.d("Firestore", bookArray.size.toString())
@@ -203,10 +208,16 @@ class FirestoreRepositoryImpl @Inject constructor(
 
             for (document in querySnapshot.documents) {
                 if(document.exists()){
-                    val review = Review()
-//                    review.userId = document.getString("userId") ?: "Error"
-                    review.description = document.getString("description") ?: "No se ha encontrado una descripción"
-                    review.score = document.getDouble("score") ?: 0.0
+                    val review = Review(
+                        document.id!!,
+                        document.getString("userId")!!,
+                        document.getString("userName")!!,
+                        document.getDouble("score")!!,
+                        document.getString("description")!!
+                    )
+////                    review.userId = document.getString("userId") ?: "Error"
+//                    review.description = document.getString("description") ?: "No se ha encontrado una descripción"
+//                    review.score = document.getDouble("score") ?: 0.0
 
                     val timestamp = document.getTimestamp("date")
                     val localDate = timestamp?.toDate()?.toInstant()?.atZone(ZoneId.systemDefault())?.toLocalDate()
@@ -215,7 +226,7 @@ class FirestoreRepositoryImpl @Inject constructor(
                     reviews.add(review)
                 }
                 else{
-                    reviews.add(Review())
+                    reviews.add(null)
                 }
             }
             reviews
@@ -224,6 +235,71 @@ class FirestoreRepositoryImpl @Inject constructor(
             emptyList()
         }
     }
+
+    override suspend fun getReviewFromUserId(bookId: String, userId: String): Review? {
+        return try {
+            var review: Review? = null
+            // Acceder a la colección "reviews" del libro específico
+            val querySnapshot = firebaseFirestore
+                .collection("books")
+                .document(bookId)
+                .collection("reviews")
+                .get()
+                .await()
+
+            // Recorrer los documentos en el resultado de la consulta
+            for (document in querySnapshot.documents) {
+                // Obtener el valor del campo "userId" del documento
+                val userIdFromDocument = document.getString("userId")
+                if (userIdFromDocument.equals(userId)) {
+                    Log.d("firebase", "Este usuario tiene una review")
+                    if (userIdFromDocument != null) {
+                        review = Review(
+                            document.id!!,
+                            document.getString("userId")!!,
+                            document.getString("userName")!!,
+                            document.getDouble("score")!!,
+                            document.getString("description")!!
+                        )
+//                        review.reviewId = document.id
+//                        review.userId = document.getString("userId")!!
+//                        review.description = document.getString("description") !!
+//                        review.score = document.getDouble("score") !!
+
+                        val timestamp = document.getTimestamp("date")
+                        val localDate = timestamp?.toDate()?.toInstant()?.atZone(ZoneId.systemDefault())?.toLocalDate()
+                        review.date = localDate
+
+                    }
+                }
+            }
+
+            review
+        } catch (e: Exception) {
+            // Manejar la excepción, por ejemplo, imprimir un mensaje de error
+            e.printStackTrace()
+            Log.d("firebase", "Este usuario no tiene review")
+            null // Devolver una lista vacía en caso de error
+        }
+    }
+
+
+    override fun updateReview(bookId: String, reviewId: String, newData: Map<String, Any>) {
+        // Referencia al documento que deseas actualizar
+        val usuarioRef = firebaseFirestore.collection("books").document(bookId).collection("reviews").document(reviewId)
+
+        // Actualiza el campo específico con el nuevo valor
+        usuarioRef
+            .update(newData)
+            .addOnSuccessListener {
+                // La actualización fue exitosa
+            }
+            .addOnFailureListener { e ->
+                // Ocurrió un error al actualizar
+                println("Error al actualizar campo: $e")
+            }
+    }
+
 
     override suspend fun localDateToTimestamp(date: LocalDate?): Timestamp? {
         return date?.let {
@@ -247,22 +323,72 @@ class FirestoreRepositoryImpl @Inject constructor(
             // Preparar los datos del objeto Review para Firestore
             val reviewData = hashMapOf(
                 "userId" to review.userId,
+                "userName" to review.userName,
                 "score" to review.score,
                 "description" to review.description,
                 "date" to localDateToTimestamp(review.date) // Convierte LocalDate a Timestamp
             )
+            Log.d("firebase", "Valores de reviewData: $reviewData")
+
+
 
             // Crear un nuevo documento en Firestore
-            firestore.collection("books").document(bookId)
-                .collection("reviews").document() // Firestore generará un ID de documento
-                .set(reviewData)
-                .await()
+//            firestore.collection("books").document(bookId)
+//                .collection("reviews").add(reviewData)
+//                .await()
 
-            Log.d("FirestoreRepository", "Review subida con éxito para el libro: $bookId")
+            firestore.collection("books").document(bookId).collection("reviews").add(reviewData as Map<String, Any>)
+                .addOnSuccessListener {
+                    Log.d("firebase", "Documento actualizado con éxito")
+                }
+                .addOnFailureListener { e ->
+                    Log.e("firebase", "Error al actualizar documento", e)
+                }
+
+
+
+            Log.d("firebase", "Review subida con éxito para el libro: $bookId")
         } catch (e: Exception) {
-            Log.d("FirestoreRepository", "upLoadReview failed with ", e)
+            Log.d("firebase", "upLoadReview failed with ", e)
         }
     }
+
+
+//    override suspend fun upLoadReview(bookId: String, review: Review) {
+//        try {
+//            val firestore = FirebaseFirestore.getInstance()
+//
+//            // Preparar los datos del objeto Review para Firestore
+//            val reviewData = hashMapOf(
+//                "userId" to review.userId,
+//                "userName" to review.userName,
+//                "score" to review.score,
+//                "description" to review.description,
+//                "date" to localDateToTimestamp(review.date) // Convierte LocalDate a Timestamp
+//            )
+//
+//            // Referencia al libro en Firestore
+//            Log.d("FirestoreRepository", bookId)
+////            val bookRef = firestore.collection("books").document(bookId)
+//
+//            // Crear un nuevo documento de revisión en la colección 'reviews' del libro
+////            val reviewDocRef = bookRef.collection("reviews").add(reviewData).await()
+////
+////            // Puedes devolver la ID del documento de revisión recién creado si es necesario
+////            val reviewId = reviewDocRef.id
+////
+////            val bookDoc = bookRef.get().await()
+////            if (!bookDoc.exists()) {
+////                // El documento no existe, crearlo
+////                Log.d("FirestoreRepository", "No Existe el Libro")
+////            }
+//
+//            // Crear un nuevo documento de revisión en la colección 'reviews' del libro
+////            bookRef.collection("reviews").add(reviewData).await()
+//        } catch (e: Exception) {
+//            Log.d("FirestoreRepository", "upLoadReview failed with ", e)
+//        }
+//    }
 
     override suspend fun uploadBookToFirestore() {
         val newBook = Book(
@@ -359,42 +485,7 @@ class FirestoreRepositoryImpl @Inject constructor(
         return Timestamp(epochMillis / 1000, ((epochMillis % 1000) * 1_000_000).toInt())
     }
 
-    override suspend fun addASecondCollection() {
-        try {
-            val db = FirebaseFirestore.getInstance()
-            val mainCollectionRef = db.collection("authors")
 
-            mainCollectionRef.get().addOnSuccessListener { documents ->
-                for (document in documents) {
-                    val documentId = document.id
-
-                    // Agregar documentos a la subcolección
-                    for (i in 2..6) {  // Por ejemplo, agregar tres documentos
-                        val localDate = LocalDate.now()
-                        val timestamp: Timestamp = convertLocalDateToTimestamp(localDate)
-                        val data = hashMapOf(
-                            "biography" to "",
-                            "cover" to "",
-                            "works" to listOf<String>()
-
-                        )
-
-                        // Agregar el documento a la subcolección
-                        mainCollectionRef.add(data)
-                            .addOnSuccessListener {
-                                Log.d("Firestore", "Subcollecion creada actualizado con éxito")
-                            }
-                            .addOnFailureListener { e ->
-                                // Manejar el error si es necesario
-                            }
-                    }
-                }
-            }
-
-        } catch (e: Exception) {
-            Log.d("FirestoreRepository", "upLoadReview failed with ", e)
-        }
-    }
 
     /*override suspend fun uploadImageToFirebase(imageUri: Uri, onSuccess: (String) -> Unit, onFailure: (Exception) -> Unit) {
         val userId = auth.currentUser?.uid ?: return
@@ -483,58 +574,7 @@ class FirestoreRepositoryImpl @Inject constructor(
         }
     }
 
-//    override suspend fun getReviewsFromABook(bookId: String): List<Review?>{
-//
-//
-//        try {
-//            val reviewList: MutableList<Review?> = mutableListOf()
-//            val db = FirebaseFirestore.getInstance()
-//            val mainCollectionPath = "books"
-//            val documentId = bookId
-//            val subcollectionPath = "reviews"
-//
-//            val subcollectionRef = db.collection(mainCollectionPath)
-//                .document(documentId)
-//                .collection(subcollectionPath)
-//
-//            subcollectionRef.get()
-//                .addOnSuccessListener { documents ->
-//                    for (document in documents) {
-//                        val documentData = document.data
-////                        val review = document.toObject(Review::class.java)
-//
-//
-//                        val review = Review()
-////                        val asasdf = document.getDouble("userId")
-//                        review.userName = document.getString("userName") ?: "Error"
-//                        review.description = document.getString("description") ?: "No se ha encontrado una descripción"
-//                        review.score = document.getDouble("score") ?: 0.0
-////
-//                        val timestamp = document.getTimestamp("date")
-//                        val localDate = timestamp?.toDate()?.toInstant()?.atZone(ZoneId.systemDefault())?.toLocalDate()
-//                        review.date = localDate
-//
-//                        reviewList.add(review)
-////                        Log.d("Reviews","Datos del documento: $review.userName")
-//                    }
-//                    Log.d("Reviews", "hey")
-//                    reviewList
-//                }
-//                .addOnFailureListener { e ->
-//                    // Manejar errores
-//                    Log.d("Reviews","Error al obtener documentos de la subcolección: $e")
-//                }
-//            Log.d("Reviews", "Tamaño reviews : " + reviewList.size.toString() )
-//            return reviewList
-//
-//
-//        }catch (e: Exception){
-//            Log.d("Reviews","validate Review failed with ", e)
-//
-//            return emptyList()
-//        }
-//
-//    }
+
 
     //    reviews: List<String> = List(5) { "$it" },
     val opiniones: List<String> = listOf(
@@ -635,16 +675,29 @@ class FirestoreRepositoryImpl @Inject constructor(
                     for (document in documents) {
                         val documentData = document.data
 
-                        val review = Review()
-                        review.userName = document.getString("userName") ?: "Error"
-                        review.description = document.getString("description") ?: "No se ha encontrado una descripción"
-                        review.score = document.getDouble("score") ?: 0.0
+                        try {
+                            val review = Review(
+                                document.id!!,
+                                document.getString("userId")!!,
+                                document.getString("userName")!!,
+                                document.getDouble("score")!!,
+                                document.getString("description")!!
+                            )
 
-                        val timestamp = document.getTimestamp("date")
-                        val localDate = timestamp?.toDate()?.toInstant()?.atZone(ZoneId.systemDefault())?.toLocalDate()
-                        review.date = localDate
+                            val timestamp = document.getTimestamp("date")
+                            val localDate = timestamp?.toDate()?.toInstant()?.atZone(ZoneId.systemDefault())?.toLocalDate()
+                            review.date = localDate
 
-                        reviewList.add(review)
+                            reviewList.add(review)
+                        }catch (e: NullPointerException){
+                            Log.d("Reviews","No es una review")
+                        }
+
+//                        review.userName = document.getString("userName") ?: "Error"
+//                        review.description = document.getString("description") ?: "No se ha encontrado una descripción"
+//                        review.score = document.getDouble("score") ?: 0.0
+
+
                     }
                     Log.d("Reviews", "Tamaño reviews : " + reviewList.size.toString())
                     continuation.resume(reviewList)
@@ -727,7 +780,9 @@ class FirestoreRepositoryImpl @Inject constructor(
                 userName = displayName,
                 profilePictureUrl = photoUrl?.toString()
             )
+
         }
+
     }
 
 

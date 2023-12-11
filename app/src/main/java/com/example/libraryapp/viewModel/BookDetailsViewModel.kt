@@ -1,40 +1,85 @@
 package com.example.libraryapp.viewModel
 
 import android.util.Log
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.libraryapp.model.BookDetailsUiState
 import com.example.libraryapp.model.FirestoreRepository
+import com.example.libraryapp.model.LibraryAppState
+import com.example.libraryapp.model.firebaseAuth.UserData
 import com.example.libraryapp.model.resources.Review
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
-import java.time.temporal.TemporalQueries.localDate
 import javax.inject.Inject
 
 
 @HiltViewModel
 class BookDetailsViewModel @Inject constructor(
-    private val firestoreRepository: FirestoreRepository
+    private val firestoreRepository: FirestoreRepository,
+    val libraryAppState: LibraryAppState
 
 ): ViewModel(){
     private val _bookUiState = MutableStateFlow(BookDetailsUiState())
     val bookUiState: StateFlow<BookDetailsUiState> = _bookUiState.asStateFlow()
 
+    private var _userData = MutableStateFlow<UserData?>(null)
+    val userData = _userData.asStateFlow()
+
+    private var userReview : Review? = null
+    var reviews: List<Review?> = emptyList()
+    var refreshReviews = MutableStateFlow<Boolean>(false )
 
 
-    fun sendReview(comment: String){
+    fun sendReview(comment: String, reviewScore: Int){
         _bookUiState.update { currentState ->
             currentState.copy(
                 comment = comment,
                 showDialog = false
             )
+        }
+
+        viewModelScope.launch {
+            try {
+                val newData = mapOf(
+                    "description" to comment,
+                    "score" to reviewScore
+                )
+                // Perform asynchronous operation
+                if (userReview != null) {
+                    firestoreRepository.updateReview(bookId= libraryAppState.getBookId(), reviewId = userReview!!.reviewId, newData=newData)
+                    Log.d("firebase", "REVIEW UPDATED")
+                }else {
+                    val newReview = Review(
+                        userId=_userData!!.value!!.userId,
+                        userName = _userData!!.value!!.userName!!,
+                        score = _bookUiState.value.reviewScore.toDouble(),
+                        description = _bookUiState.value.comment,
+                        date = LocalDate.now()
+                    )
+
+                    firestoreRepository.upLoadReview(bookId= libraryAppState.getBookId(), review = newReview)
+                }
+//                userReview?.let { firestoreRepository.updateReview(bookId= libraryAppState.getBookId(), reviewId = it.reviewId, newData=newData) }
+                getReviews(libraryAppState.getBookId())
+                refreshReviews.value = !refreshReviews.value
+                Log.d("Reviews", refreshReviews.value.toString())
+
+            } catch (e: Exception) {
+                Log.d("firebase", "REVIEW NOT UPDATED")
+            }
         }
 
     }
@@ -48,13 +93,18 @@ class BookDetailsViewModel @Inject constructor(
     }
 
     suspend fun getReviews(bookId: String): List<Review?>{
-        // Declaración de una lista mutable llamada "reviews"
-        // Declaración de una lista llamada "reviews"
-        val reviews: List<Review?> = firestoreRepository.getReviewsFromABook(bookId)
+
+        reviews = firestoreRepository.getReviewsFromABook(bookId)
 
         Log.d("Reviews", bookId + " : " + reviews.size.toString() )
         return reviews
     }
+//
+//    fun getUserReview(): Review?{
+//        userReview = getReviewFromUser()
+//        Log.d("firebase", "qweret" + (userReview?.userId ?: "NO" ))
+//        return userReview
+//    }
 
 
 
@@ -98,6 +148,25 @@ class BookDetailsViewModel @Inject constructor(
             else -> commentCast.format(
                 DateTimeFormatter.ofPattern("yyyy-MM-dd"))
         }
+    }
+
+    fun getReviewFromUser(): Review? {
+        viewModelScope.launch {
+            try {
+                // Perform asynchronous operation
+
+                _userData.value = firestoreRepository.getuser()
+                _userData.value?.let { userReview = firestoreRepository.getReviewFromUserId(libraryAppState.getBookId(), it.userId) }
+//
+//                if (userReview != null) {
+//                    Log.d("firebase", "Review conseguida" + userReview!!.description)
+//                }
+
+            } catch (e: Exception) {
+                Log.d("firebase", "Review error")
+            }
+        }
+        return userReview
     }
 
 }

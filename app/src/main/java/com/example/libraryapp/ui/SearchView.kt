@@ -95,7 +95,7 @@ fun BookScreen(
             columns = GridCells.Adaptive(minSize = 180.dp),
         ){
             items(items = books) {
-                BookItem(it, modifier = Modifier, navController)
+                BookItem(it, modifier = Modifier, navController, searchViewModel)
 
                 if (it != null) {
                     Log.d("Firestore", it.title)
@@ -212,13 +212,15 @@ fun SearchAppBar(
 
 
 @Composable
-fun BookItem(book: Book?, modifier: Modifier, navController: NavHostController) {
+fun BookItem(book: Book?, modifier: Modifier, navController: NavHostController, searchViewModel: SearchViewModel) {
     Column(
         modifier = Modifier
             .padding(bottom = 8.dp)
             .clickable {
                 if (book != null) {
-                    ShoppingCart.setBookSelected(book)
+//                    ShoppingCart.setBookSelected(book)
+                    searchViewModel.libraryAppState.setBookId(book.ref)
+                    searchViewModel.libraryAppState.setBook(book)
                 }
                 navController.navigate("BookDetailsView")
             } //BookDetail(

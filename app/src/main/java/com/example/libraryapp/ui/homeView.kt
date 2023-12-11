@@ -378,9 +378,7 @@ fun SearchAppBarHP(searchViewModel: SearchViewModel,
                    navController: NavHostController)
 {
     var searchString by remember { mutableStateOf("") }
-    val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
-    val softwareKeyboardController = LocalSoftwareKeyboardController.current
 
     SelectionContainer {
         OutlinedTextField(
@@ -392,7 +390,6 @@ fun SearchAppBarHP(searchViewModel: SearchViewModel,
             keyboardActions = KeyboardActions(
                 onDone = {
                     searchViewModel.setSearchedString(searchString)
-                    Log.d("firebase", "SEARCH STRING HOME: " + searchViewModel.getSearchedString())
                     navController.navigate("SearchScreen")
                 }
             ),
@@ -415,9 +412,7 @@ fun SearchAppBarHP(searchViewModel: SearchViewModel,
             trailingIcon = {
 
                 IconButton(onClick = {
-                    Log.d("firebase", "SEARCH STRING HOME: " + searchViewModel.getSearchedString())
                     searchViewModel.setSearchedString(searchString)
-                    Log.d("firebase", "SEARCH STRING HOME: " + searchViewModel.getSearchedString())
                     navController.navigate("SearchScreen")
                 }) { // Ir a pagina de scan codigo de barras
 
