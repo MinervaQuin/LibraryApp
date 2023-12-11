@@ -107,7 +107,9 @@ fun BookDetailsScreen(
         FactSheet(book!!)
         ReviewBook(book!!.title, bookDetailsViewModel, bookUiState)
         Divider()
-        ResumeOfReviews(num_opi = reviews.size, rateScore = book!!.score.toDouble())
+        ResumeOfReviews(num_opi = reviews.size,
+            bookDetailsViewModel = bookDetailsViewModel
+        )
         Column (
             modifier = Modifier
                 .height(400.dp)
@@ -126,15 +128,16 @@ fun BookDetailsScreen(
 
 @Composable
 fun ResumeOfReviews(
-    rateScore: Double,
     num_opi: Int,
+    bookDetailsViewModel: BookDetailsViewModel
 ){
+
     Row (modifier = Modifier.padding(top=20.dp, bottom = 10.dp, start = 15.dp)){
         Box (modifier = Modifier.weight(0.2f),
             contentAlignment = Alignment.Center
             ) {
             createCircle()
-            Text(text = rateScore.toString(),
+            Text(text = bookDetailsViewModel.libraryAppState.getBook()?.score.toString(),
                 style = TextStyle(
                     fontSize = 20.sp,
                     fontWeight = FontWeight(700),
@@ -149,7 +152,7 @@ fun ResumeOfReviews(
                 .padding(start = 10.dp),
             verticalArrangement = Arrangement.Bottom
         ){
-            RatingBar(currentRating = rateScore)
+            RatingBar(currentRating = bookDetailsViewModel.libraryAppState.getBook()?.score?.toDouble() ?: 0.0)
             Text(text = num_opi.toString() + " opiniones")
         }
     }
@@ -232,6 +235,7 @@ fun ReviewBook(
 ){
     var myRating by remember { mutableStateOf(0) }
 
+
     Column (
         modifier = Modifier.padding(bottom = 5.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -252,15 +256,16 @@ fun ReviewBook(
                 .padding(top = 8.dp)
         )
         Text(text = "¿Qué te ha parecido?")
+        var userReview: Review? = bookDetailsViewModel.getReviewFromUser()
         AnimatedRatingBar(
             currentRating = bookUiState.reviewScore,
             onRatingChanged = { bookDetailsViewModel.updateRating(it) }
         )
         Button(
-            onClick = { bookDetailsViewModel.showDialog(true) }, //Ir a la páginad de hacer una opinión
+            onClick = { bookDetailsViewModel.showDialog(true) }, //Ir a la páginas de hacer una opinión
             colors = ButtonDefaults.buttonColors(containerColor = GreenApp)
             ) {
-            var userReview: Review? = bookDetailsViewModel.getReviewFromUser()
+
             if (userReview != null) {
                 Text("Edita tu opinión")
             }else{
@@ -292,10 +297,16 @@ fun AddReview(
 {
 
     var comentarioTexto by remember { mutableStateOf(userReview?.description ?: "") }
+    var score by remember { mutableStateOf(userReview?.score?.toInt()) }
 
     LaunchedEffect(userReview) {
         comentarioTexto = userReview?.description ?: ""
     }
+
+    LaunchedEffect(userReview) {
+        score = userReview?.score?.toInt() ?: 0
+    }
+
 
 
     if (showDialog) {
@@ -346,8 +357,8 @@ fun AddReview(
                         )
                     )
                     AnimatedRatingBar(
-                        currentRating = bookUiState.reviewScore,
-                        onRatingChanged = { bookDetailsViewModel.updateRating(it)  }) //conectar con la pantalla anterior
+                        currentRating =  bookUiState.reviewScore,
+                        onRatingChanged = {bookDetailsViewModel.updateRating(it) }) //conectar con la pantalla anterior
                     SelectionContainer {
                         OutlinedTextField(
                             value = comentarioTexto,

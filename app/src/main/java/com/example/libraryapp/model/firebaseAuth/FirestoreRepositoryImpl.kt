@@ -329,14 +329,6 @@ class FirestoreRepositoryImpl @Inject constructor(
                 "date" to localDateToTimestamp(review.date) // Convierte LocalDate a Timestamp
             )
             Log.d("firebase", "Valores de reviewData: $reviewData")
-
-
-
-            // Crear un nuevo documento en Firestore
-//            firestore.collection("books").document(bookId)
-//                .collection("reviews").add(reviewData)
-//                .await()
-
             firestore.collection("books").document(bookId).collection("reviews").add(reviewData as Map<String, Any>)
                 .addOnSuccessListener {
                     Log.d("firebase", "Documento actualizado con éxito")
@@ -353,42 +345,34 @@ class FirestoreRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun uploadBookScore(bookId: String, newScore: Int){
+        try {
+            val firestore = FirebaseFirestore.getInstance()
 
-//    override suspend fun upLoadReview(bookId: String, review: Review) {
-//        try {
-//            val firestore = FirebaseFirestore.getInstance()
-//
-//            // Preparar los datos del objeto Review para Firestore
-//            val reviewData = hashMapOf(
-//                "userId" to review.userId,
-//                "userName" to review.userName,
-//                "score" to review.score,
-//                "description" to review.description,
-//                "date" to localDateToTimestamp(review.date) // Convierte LocalDate a Timestamp
-//            )
-//
-//            // Referencia al libro en Firestore
-//            Log.d("FirestoreRepository", bookId)
-////            val bookRef = firestore.collection("books").document(bookId)
-//
-//            // Crear un nuevo documento de revisión en la colección 'reviews' del libro
-////            val reviewDocRef = bookRef.collection("reviews").add(reviewData).await()
-////
-////            // Puedes devolver la ID del documento de revisión recién creado si es necesario
-////            val reviewId = reviewDocRef.id
-////
-////            val bookDoc = bookRef.get().await()
-////            if (!bookDoc.exists()) {
-////                // El documento no existe, crearlo
-////                Log.d("FirestoreRepository", "No Existe el Libro")
-////            }
-//
-//            // Crear un nuevo documento de revisión en la colección 'reviews' del libro
-////            bookRef.collection("reviews").add(reviewData).await()
-//        } catch (e: Exception) {
-//            Log.d("FirestoreRepository", "upLoadReview failed with ", e)
-//        }
-//    }
+            val bookRef = firestore.collection("books").document(bookId)
+
+            // Crear un mapa con el campo que deseas actualizar
+            val updateData = hashMapOf<String, Any>(
+                "score" to newScore
+                // Aquí puedes agregar más campos si es necesario
+            )
+
+            // Actualizar el documento con los nuevos datos
+            bookRef.update(updateData)
+                .addOnSuccessListener {
+                    Log.d("firebase", "DocumentSnapshot successfully updated!")
+                }
+                .addOnFailureListener { e ->
+                    Log.w("firebase", "Error updating document", e)
+                }
+        }catch (e: Exception) {
+            Log.d("firebase", "upLoadScore failed with ", e)
+        }
+
+    }
+
+
+
 
     override suspend fun uploadBookToFirestore() {
         val newBook = Book(
@@ -699,7 +683,7 @@ class FirestoreRepositoryImpl @Inject constructor(
 
 
                     }
-                    Log.d("Reviews", "Tamaño reviews : " + reviewList.size.toString())
+//                    Log.d("Reviews", "Tamaño reviews : " + reviewList.size.toString())
                     continuation.resume(reviewList)
                 }
                 .addOnFailureListener { e ->

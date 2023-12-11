@@ -50,4 +50,5 @@ interface FirestoreRepository {
     suspend fun uploadImageToFirebase(imageUri: Uri, onSuccess: (String) -> Unit, onFailure: (Exception) -> Unit)
     suspend fun getProfileImageUrl(userId: String): String
     suspend fun signOut()
+    suspend fun uploadBookScore(bookId: String, newScore: Int)
 }

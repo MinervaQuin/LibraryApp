@@ -11,6 +11,7 @@ import com.example.libraryapp.model.BookDetailsUiState
 import com.example.libraryapp.model.FirestoreRepository
 import com.example.libraryapp.model.LibraryAppState
 import com.example.libraryapp.model.firebaseAuth.UserData
+import com.example.libraryapp.model.resources.Book
 import com.example.libraryapp.model.resources.Review
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,6 +19,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.lang.Math.ceil
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -42,6 +44,14 @@ class BookDetailsViewModel @Inject constructor(
     var reviews: List<Review?> = emptyList()
     var refreshReviews = MutableStateFlow<Boolean>(false )
 
+    init {
+        _bookUiState.update { currentState ->
+            currentState.copy(
+                reviewScore = libraryAppState.getBook()?.score ?: 0
+            )
+        }
+    }
+
 
     fun sendReview(comment: String, reviewScore: Int){
         _bookUiState.update { currentState ->
@@ -64,7 +74,7 @@ class BookDetailsViewModel @Inject constructor(
                 }else {
                     val newReview = Review(
                         userId=_userData!!.value!!.userId,
-                        userName = _userData!!.value!!.userName!!,
+                        userName = _userData!!.value!!.userName?: "user",
                         score = _bookUiState.value.reviewScore.toDouble(),
                         description = _bookUiState.value.comment,
                         date = LocalDate.now()
@@ -72,13 +82,38 @@ class BookDetailsViewModel @Inject constructor(
 
                     firestoreRepository.upLoadReview(bookId= libraryAppState.getBookId(), review = newReview)
                 }
-//                userReview?.let { firestoreRepository.updateReview(bookId= libraryAppState.getBookId(), reviewId = it.reviewId, newData=newData) }
                 getReviews(libraryAppState.getBookId())
                 refreshReviews.value = !refreshReviews.value
-                Log.d("Reviews", refreshReviews.value.toString())
+
+                var reviewSum = 0
+                for (review in reviews) {
+                    if (review != null) {
+                        reviewSum += ceil(review.score).toInt()
+                    }
+                }
+
+
+
+                Log.d("Reviews", "reviewSum: " + reviewSum)
+//                Log.d("Reviews", "reviewSum: " + libraryAppState.getBook()?.score?)
+
+                var newScore= reviewSum/reviews.size
+                Log.d("Reviews", "newScore: " + newScore)
+                firestoreRepository.uploadBookScore(bookId= libraryAppState.getBookId(), newScore= ceil(newScore.toDouble()).toInt())
+                val currentBook = libraryAppState.getBook()
+
+                val updatedBook = currentBook?.apply {
+                    score = newScore
+                }
+
+                if (updatedBook != null) {
+                    libraryAppState.setBook(updatedBook)
+                }
+
 
             } catch (e: Exception) {
-                Log.d("firebase", "REVIEW NOT UPDATED")
+                Log.d("firebase", "REVIEW NOT UPDATED/CREATED")
+                Log.e("firebase", "Error al crear review", e)
             }
         }
 
@@ -96,7 +131,7 @@ class BookDetailsViewModel @Inject constructor(
 
         reviews = firestoreRepository.getReviewsFromABook(bookId)
 
-        Log.d("Reviews", bookId + " : " + reviews.size.toString() )
+//        Log.d("Reviews", bookId + " : " + reviews.size.toString() )
         return reviews
     }
 //

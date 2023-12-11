@@ -6,7 +6,7 @@ class Book (
     val author_name: String = "",
     val title: String = "",
     val sinopsis: String = "",
-    val score: Int = 0, // Cambiado a Int, suponiendo que score es un valor entero
+    var score: Int = 0, // Cambiado a Int, suponiendo que score es un valor entero
     val cover: String = "",
     val price: Double = 0.0, // Cambiado a Double, suponiendo que el precio puede ser decimal
     var ref: String = "",
