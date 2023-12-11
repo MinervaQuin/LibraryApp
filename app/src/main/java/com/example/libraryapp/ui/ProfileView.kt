@@ -162,11 +162,20 @@ fun ProfileScreen(
                             arrayOf(Manifest.permission.CAMERA),
                             REQUEST_CAMERA_PERMISSION
                         )
-                    } else {
+
+                    }
+                    if (cameraPermission == PackageManager.PERMISSION_GRANTED){
                         imageUri = viewModel.createImageUri(context)
                         imageUri?.let { uri ->
                             takePictureLauncher.launch(uri)
                         }
+                    }
+                    else{
+                        Toast.makeText(
+                            context,
+                            "No se puede abrir la cámara",
+                            Toast.LENGTH_LONG
+                        ).show()
                     }
                     showImagePickerDialog = false
                 }) {
