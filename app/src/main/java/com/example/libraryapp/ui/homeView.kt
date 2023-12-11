@@ -1,7 +1,5 @@
 package com.example.libraryapp.ui
 
-
-import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -10,16 +8,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -30,36 +24,23 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.compose.rememberNavController
-import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
 import com.example.libraryapp.model.firebaseAuth.UserData
-import com.example.libraryapp.model.resources.Book
 import com.example.libraryapp.viewModel.CartViewModel
 import com.example.libraryapp.viewModel.ShoppingCart
-import com.example.libraryapp.ui.theme.GreenAppOpacity
 import com.example.libraryapp.viewModel.homeViewModel
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -67,12 +48,9 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.res.painterResource
 import androidx.navigation.NavController
-import coil.compose.rememberImagePainter
-import com.example.libraryapp.R
 import com.example.libraryapp.model.resources.CollectionSamples
 import com.example.libraryapp.model.resources.LongCollectionSamples
 import com.example.libraryapp.model.resources.carouselImage
-import com.example.libraryapp.ui.theme.rojoSangre
 import kotlinx.coroutines.delay
 
 
@@ -223,7 +201,13 @@ fun CollectionBox(collection: CollectionSamples, navController: NavController) {
             .border(2.dp, Color.Black, shape = RectangleShape)
             .clickable {
                 ShoppingCart.setSelectedCategory(collection.route)
-                navController.navigate("category")
+                if(collection.route == "AutoresDestination"){
+                    navController.navigate("AutoresDestination")
+                }
+                else{
+                    navController.navigate("category")
+                }
+
             },
         elevation = CardDefaults.elevatedCardElevation(8.dp),
         shape = RectangleShape // Bordes rectos
@@ -231,7 +215,7 @@ fun CollectionBox(collection: CollectionSamples, navController: NavController) {
         Column {
             Box(
                 modifier = Modifier
-                    .weight(1f) // Toma la mayor parte del espacio disponible
+                    .weight(1f)
                     .fillMaxWidth()
             ) {
                 Image(
@@ -239,14 +223,14 @@ fun CollectionBox(collection: CollectionSamples, navController: NavController) {
                     contentDescription = "Book cover",
                     modifier = Modifier
                         .fillMaxSize(),
-                    contentScale = ContentScale.Crop // Ajusta la imagen para llenar el espacio asignado
+                    contentScale = ContentScale.Crop
                 )
             }
             Box(
                 modifier = Modifier
-                    .weight(0.15f) // Toma una fracción más pequeña del espacio
+                    .weight(0.15f)
                     .fillMaxWidth()
-                    .background(collection.color) // Fondo negro para el texto
+                    .background(collection.color)
             ) {
                 Text(
                     text = collection.title.toUpperCase(),
@@ -290,7 +274,7 @@ fun LargeCollectionBox(collection: LongCollectionSamples, navController: NavCont
                 Image(
                     painter = painterResource(id = collection.imageRes), // Imagen de fondo
                     contentDescription = null,
-                    contentScale = ContentScale.Crop, // Asegúrate de que la imagen se ajuste correctamente
+                    contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize()
                 )
                 Text(
@@ -299,7 +283,7 @@ fun LargeCollectionBox(collection: LongCollectionSamples, navController: NavCont
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier
-                        .align(Alignment.Center) // Centra el texto
+                        .align(Alignment.Center)
                         .padding(8.dp)
                 )
             }

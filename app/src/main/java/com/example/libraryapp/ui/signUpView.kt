@@ -1,6 +1,7 @@
 package com.example.libraryapp.ui
 
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
@@ -63,12 +64,18 @@ import androidx.compose.material3.AlertDialogDefaults.shape
 import androidx.compose.runtime.collectAsState
 import androidx.compose.foundation.shape.*
 import androidx.compose.material3.*
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import kotlinx.coroutines.flow.collect
 
 @Composable
-fun signUpView(signUpViewModel: signUpViewModel = viewModel(), navController: NavController){
-    //@TODO Sustituir el fondo por vectores animados
+fun signUpView(viewModel: signUpViewModel = hiltViewModel(), navController: NavController){
+
     val image = painterResource(R.drawable.vector_sign_up)
+
+    val state = viewModel.state
+    val context = LocalContext.current
 
     var userName by remember { mutableStateOf(TextFieldValue("")) }
     var userEmail by remember { mutableStateOf(TextFieldValue("")) }
@@ -79,18 +86,28 @@ fun signUpView(signUpViewModel: signUpViewModel = viewModel(), navController: Na
     var selectedDate by remember { mutableStateOf("") }
 
 
-
-    val loading by signUpViewModel.loading.collectAsState()
-    val message by signUpViewModel.message.collectAsState()
-    //TODO Ver diferencias entre observeAsState() y collectAsState() y entender cual es mejor
-    val shouldNavigate by signUpViewModel.navigateToNextScreen.collectAsState()
-    val showFirstScreen by signUpViewModel.showFirstScreen2.collectAsState()
+    val shouldNavigate by viewModel.navigateToNextScreen.collectAsState()
+    val showFirstScreen by viewModel.showFirstScreen2.collectAsState()
 
     LaunchedEffect(shouldNavigate) {
         if (shouldNavigate == true) {
             navController.navigate("login") {
                 // Configuraciones adicionales de navegación si las necesitas
                 popUpTo("seconScreens") { inclusive = true }
+            }
+        }
+    }
+
+    LaunchedEffect(key1 = context) {
+        viewModel.validationEvents.collect { event ->
+            when (event) {
+                is signUpViewModel.ValidationEvent.Success -> {
+                    Toast.makeText(
+                        context,
+                        "Registro Exitoso",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
             }
         }
     }
@@ -102,7 +119,7 @@ fun signUpView(signUpViewModel: signUpViewModel = viewModel(), navController: Na
                 popUpTo("signUp") { inclusive = true }
             }
         }else{
-            signUpViewModel.changeScreen()
+            viewModel.changeScreen()
         }
 
     }
@@ -132,7 +149,7 @@ fun signUpView(signUpViewModel: signUpViewModel = viewModel(), navController: Na
 
                 if(showFirstScreen){
                     Spacer(modifier = Modifier.height(8.dp))
-                    InputField(value = userName, onChange = {userName = it}, label = "Nombre de Usuario", icon = Icons.Outlined.AccountCircle)
+                    InputField(value = userName, onChange = {userName = it}, isError = state.emailError != null , label = "Nombre de Usuario", icon = Icons.Outlined.AccountCircle)
                     Spacer(modifier = Modifier.height(8.dp))
                     InputField(value = userEmail, onChange = {userEmail = it}, label = "Correo", icon = Icons.Outlined.Email)
                     Spacer(modifier = Modifier.height(8.dp))
@@ -148,7 +165,7 @@ fun signUpView(signUpViewModel: signUpViewModel = viewModel(), navController: Na
                             .padding(16.dp),
                     ) {
                         Button(
-                            onClick = { signUpViewModel.registerUser(userEmail.text, userPassword.text) },
+                            onClick = { viewModel.registerUser(userEmail.text, userPassword.text) },
                             modifier = Modifier
 
                                 .height(50.dp),
@@ -174,7 +191,7 @@ fun signUpView(signUpViewModel: signUpViewModel = viewModel(), navController: Na
 
                 ){
                 Button(
-                    onClick = { signUpViewModel.changeScreen() },
+                    onClick = { viewModel.changeScreen() },
                     colors = ButtonDefaults.buttonColors(verdeFuerte),
                     shape = CircleShape,
                     modifier = Modifier
@@ -251,82 +268,9 @@ fun DatePickerNice() {
             }
     )
 }
-
-
-    /*
-    Button(
-        onClick = {
-        calendarState.show()
-                  },
-        shape = RoundedCornerShape(20.dp),
-        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE7E0EC)), // Color de fondo similar al de los TextField
-        modifier = Modifier.size(width = 275.dp, height = 53.dp),
-
-        )
-    {
-        // El Text ahora muestra la fecha seleccionada formateada
-        Row(
-            modifier = Modifier.fillMaxWidth(), // Asegúrate de que el Row ocupe el ancho completo del botón
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.aligned(Alignment.Start)
-        ) {
-            Icon(
-                imageVector = Icons.Default.DateRange, // Usa tu icono deseado
-                contentDescription = "Select Date", // Descripción para accesibilidad
-                modifier = Modifier.padding(end= 8.dp), // Espacio entre el icono y el texto
-                tint = Color.Black // Establece el color del ícono a negro
-            )
-            Text(
-                text = dateFormatter.format(selectedDate.value),
-                color = Color(0xFF49454F) // Asegúrate de que el color del texto sea visible contra el color de fondo del botón
-            )
-        }
-    }*/
-
-
-
-
-/*
-@Composable
-fun DatePickerDemo(onDateSelected: (String) -> Unit) {
-    val context = LocalContext.current
-    val calendar = remember { Calendar.getInstance() }
-    val year = calendar.get(Calendar.YEAR)
-    val month = calendar.get(Calendar.MONTH)
-    val day = calendar.get(Calendar.DAY_OF_MONTH)
-
-    // rememberDatePickerDialog es una función de extensión para recordar el DatePickerDialog
-    val datePickerDialog = rememberDatePickerDialog(year, month, day) { _, year, month, day ->
-        // Los meses en Calendar empiezan desde 0, por lo que se suma 1 para obtener la representación correcta
-        onDateSelected("$day/${month + 1}/$year")
-    }
-
-    Button(onClick = { datePickerDialog.show() }) {
-        Text(text = "Select your birth date")
-    }
-}
-
-// Función de extensión para recordar el DatePickerDialog y evitar la recreación en cada recomposición
-@Composable
-private fun rememberDatePickerDialog(
-    year: Int,
-    month: Int,
-    day: Int,
-    onDateSet: (DatePicker, Int, Int, Int) -> Unit
-): DatePickerDialog {
-    val context = LocalContext.current
-    return remember {
-        DatePickerDialog(context, onDateSet, year, month, day).apply {
-            // Configuraciones adicionales del DatePickerDialog pueden ir aquí si es necesario
-        }
-    }
-}
-*/
-
-
 @Preview(showBackground = true)
 @Composable
 fun signUpViewPreview() {
     val navController = rememberNavController()
-    signUpView(navController = navController)
+    //signUpView(navController = navController)
 }
