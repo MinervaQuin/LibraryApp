@@ -120,6 +120,7 @@ fun BookItem(
 @Composable
 fun Cart(navController: NavController, cartViewModel: CartViewModel) {
     val cartItemsMap by remember { mutableStateOf(cartViewModel.cartItems.value) }
+    val cartItemsState by cartViewModel.cartItems.collectAsState()
     LaunchedEffect(cartItemsMap) {
         cartViewModel.recalculateCart()
     }
@@ -148,7 +149,7 @@ fun Cart(navController: NavController, cartViewModel: CartViewModel) {
                 .border(1.25.dp, green)
         ) {
             // Verifica si el carrito está vacío
-            if (cartItemsMap.isEmpty()) {
+            if (cartItemsState.isEmpty()) {
                 Text(
                     text = "Tu carrito está vacío",
                     fontSize = 18.sp,
@@ -164,7 +165,7 @@ fun Cart(navController: NavController, cartViewModel: CartViewModel) {
                     modifier = Modifier.fillMaxWidth()
                         .fillMaxHeight()
                 ) {
-                    items(cartItemsMap.keys.toList()) { book ->
+                    items(cartItemsState.keys.toList()) { book ->
                         val quantity = cartItemsMap[book] ?: 0
 
                         BookItem(
@@ -186,6 +187,10 @@ fun Cart(navController: NavController, cartViewModel: CartViewModel) {
                     }
                 }
             }
+        }
+
+        LaunchedEffect(cartItemsState) {
+            cartViewModel.recalculateCart()
         }
         // Grupo de opciones para elegir el método de entrega
         DeliveryOptions(cartViewModel)
