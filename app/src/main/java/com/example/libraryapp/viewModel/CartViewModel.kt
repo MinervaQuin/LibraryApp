@@ -20,15 +20,6 @@ class CartViewModel @Inject constructor(
     val cartItems: StateFlow<Map<Book, Int>> = _cartItemsStateFlow.asStateFlow()
     val cartState = mutableStateOf(CartState())
 
-    /* para probar el funcionamiento descomentar esto
-    init {
-        // Inicializar el carrito con algunos libros desde la base de datos
-        viewModelScope.launch {
-            addBookToCartFromDatabase("B9svfDJglRgEPyN6wSAh")
-            // Puedes agregar más libros según sea necesario
-        }
-    }
-    */
 
     companion object {
         // Cambiar el acceso a la instancia del CartViewModel mediante el Singleton

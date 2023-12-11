@@ -1,6 +1,8 @@
 package com.example.libraryapp.ui
 
 
+import android.annotation.SuppressLint
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.runtime.Composable
@@ -17,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -116,8 +119,7 @@ fun BookItem(
 
 @Composable
 fun Cart(navController: NavController, cartViewModel: CartViewModel) {
-    val cartItemsMap by cartViewModel.cartItems.collectAsState()
-
+    val cartItemsMap by remember { mutableStateOf(cartViewModel.cartItems.value) }
     LaunchedEffect(cartItemsMap) {
         cartViewModel.recalculateCart()
     }
@@ -125,7 +127,6 @@ fun Cart(navController: NavController, cartViewModel: CartViewModel) {
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
-
         // Título
         Text(
             text = "Tu Pedido",
@@ -142,36 +143,50 @@ fun Cart(navController: NavController, cartViewModel: CartViewModel) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
+                .fillMaxHeight()
                 .weight(1f)
                 .border(1.25.dp, green)
         ) {
+            // Verifica si el carrito está vacío
+            if (cartItemsMap.isEmpty()) {
+                Text(
+                    text = "Tu carrito está vacío",
+                    fontSize = 18.sp,
+                    color = gray,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                        .wrapContentSize(Alignment.Center)
+                )
+            } else {
             // Lista de libros en el carrito
-            LazyColumn(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                items(cartItemsMap.keys.toList()) {book ->
-                    val quantity = cartItemsMap[book] ?: 0
+                LazyColumn(
+                    modifier = Modifier.fillMaxWidth()
+                        .fillMaxHeight()
+                ) {
+                    items(cartItemsMap.keys.toList()) { book ->
+                        val quantity = cartItemsMap[book] ?: 0
 
-                    BookItem(
-                        book = book,
-                        quantity = quantity,
-                        onRemoveClick = {
-                            cartViewModel.removeBookFromCart(book)
-                        },
-                        onAddClick = {
-                            cartViewModel.addBookToCart(book)
-                        },
-                        onSubtractClick = {
-                            val newQuantity = quantity - 1
-                            if (newQuantity > 0) {
-                                cartViewModel.updateCartItemQuantity(book, newQuantity)
+                        BookItem(
+                            book = book,
+                            quantity = quantity,
+                            onRemoveClick = {
+                                cartViewModel.removeBookFromCart(book)
+                            },
+                            onAddClick = {
+                                cartViewModel.addBookToCart(book)
+                            },
+                            onSubtractClick = {
+                                val newQuantity = quantity - 1
+                                if (newQuantity > 0) {
+                                    cartViewModel.updateCartItemQuantity(book, newQuantity)
+                                }
                             }
-                        }
-                    )
+                        )
+                    }
                 }
             }
         }
-
         // Grupo de opciones para elegir el método de entrega
         DeliveryOptions(cartViewModel)
 
@@ -179,14 +194,14 @@ fun Cart(navController: NavController, cartViewModel: CartViewModel) {
         PricingSummary(cartViewModel.cartState)
 
         // Botón de acción
-        ActionButton(cartViewModel.cartState.value, navController)
+        ActionButton(cartViewModel, navController)
     }
 }
 
 
 @Composable
 fun DeliveryOptions(cartViewModel: CartViewModel) {
-    val cartState = cartViewModel.cartState
+    val cartState = remember { cartViewModel.cartState }
 
     Box(
         modifier = Modifier
@@ -232,7 +247,7 @@ fun DeliveryOptions(cartViewModel: CartViewModel) {
 
 @Composable
 fun PricingSummary(cartState: MutableState<CartViewModel.CartState>) {
-    val state = cartState.value // Obtener el valor actual de MutableState
+    val state = remember { cartState.value }
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -269,36 +284,47 @@ fun PricingSummary(cartState: MutableState<CartViewModel.CartState>) {
 
 
 
+@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
-fun ActionButton(cartState: CartViewModel.CartState, navController: NavController) {
+fun ActionButton(cartViewModel: CartViewModel, navController: NavController) {
+    val context = LocalContext.current
     Button(
         onClick = {
-            if (cartState.deliveryOption == CartViewModel.DeliveryOption.PICK_UP) {
+            if (cartViewModel.cartState.value.deliveryOption == CartViewModel.DeliveryOption.PICK_UP &&
+                cartViewModel.cartItems.value.isNotEmpty()
+            ) {
                 // Navegar a la pantalla de selección de tienda (no implementada)
                 navController.navigate("maps")
-            } else {
+            } else if (cartViewModel.cartState.value.deliveryOption == CartViewModel.DeliveryOption.HOME_DELIVERY &&
+                cartViewModel.cartItems.value.isNotEmpty()
+            ) {
                 // Navegar a la pantalla de compra (no implementada)
-                navController.navigate("payment")
+                Toast.makeText(context, "No implementado", Toast.LENGTH_SHORT).show()
             }
         },
         colors = ButtonDefaults.buttonColors(white),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(50.dp),
-        border = BorderStroke(2.dp, green)
-
+            .padding(20.dp),
+        border = BorderStroke(2.dp, green),
+        enabled = cartViewModel.cartItems.value.isNotEmpty()  // Deshabilita el botón si el carrito está vacío
     ) {
-        if (cartState.deliveryOption == CartViewModel.DeliveryOption.PICK_UP) {
-            Text("Elegir tienda",
-                color= gray
+        if (cartViewModel.cartState.value.deliveryOption == CartViewModel.DeliveryOption.PICK_UP) {
+            Text(
+                "Elegir tienda",
+                color = if (cartViewModel.cartItems.value.isNotEmpty()) gray else Color.Gray
             )
         } else {
-            Text("Ir a pagar",
-                color= gray
+            Text(
+                "Ir a pagar",
+                color = if (cartViewModel.cartItems.value.isNotEmpty()) gray else Color.Gray
             )
         }
     }
 }
+
+
+
 
 
 
