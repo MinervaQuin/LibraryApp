@@ -24,9 +24,10 @@ class AuthorViewModel @Inject constructor(
     init {
     }
 
-    fun updateAutor(id: String?){
+    fun updateAutor(){
+        val id =  libraryAppState.getautorId()
         if(id==null){
-            autor=ShoppingCart.getAutor() as Author
+            autor=libraryAppState.getAutor() as Author
         }
         else{
             viewModelScope.launch {

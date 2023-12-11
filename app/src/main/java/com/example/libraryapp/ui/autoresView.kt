@@ -90,10 +90,10 @@ fun autoresView(navController: NavController, viewModel: autoresViewModel) {
                     .align(alignment = Alignment.CenterHorizontally)
             ) {
                 if (autor1 != null) {
-                    autorPreview(autor = autor1, navController = navController)
+                    autorPreview(autor = autor1, navController = navController,viewModel)
                 }
                 if (autor2 != null) {
-                    autorPreview(autor = autor2, navController = navController)
+                    autorPreview(autor = autor2, navController = navController,viewModel)
                 }
             }
         }
@@ -101,7 +101,7 @@ fun autoresView(navController: NavController, viewModel: autoresViewModel) {
 }
 
 @Composable
-fun autorPreview(autor: Author?, navController: NavController) {
+fun autorPreview(autor: Author?, navController: NavController,viewModel: autoresViewModel) {
     Box(
         modifier = Modifier
             .padding(10.dp)
@@ -110,8 +110,7 @@ fun autorPreview(autor: Author?, navController: NavController) {
             .shadow(elevation = 4.dp, spotColor = Color(0x40000000), ambientColor = Color(0x40000000))
             .border(width = 1.dp, color = Color(0xFF000000))
             .clickable {
-                ShoppingCart.setautorId(null)
-                ShoppingCart.setAutor(autor)
+                viewModel.setnewAutor(autor)
                 navController.navigate("AuthorDestination")
             }
     ) {

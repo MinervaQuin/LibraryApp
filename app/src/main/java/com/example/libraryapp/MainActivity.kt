@@ -94,7 +94,7 @@ class MainActivity : ComponentActivity() {
             val navController = rememberNavController()
             val homeViewModel : homeViewModel = hiltViewModel()
             val topBarViewModel: topBarViewModel = hiltViewModel()
-            NavHost(navController = navController, startDestination = "secondScreens"){
+            NavHost(navController = navController, startDestination = "AutoresDestination"){
 
                 navigation(
                     startDestination = "login",
@@ -241,7 +241,7 @@ class MainActivity : ComponentActivity() {
                                         .padding(paddingValues)
                                         .fillMaxSize()
                                 ) {
-                                    AutorScreen(navController, viewModel, ShoppingCart.getautorId())
+                                    AutorScreen(navController, viewModel)
                                 }
                             }
                         )

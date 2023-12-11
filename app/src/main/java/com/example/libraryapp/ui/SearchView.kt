@@ -159,7 +159,7 @@ fun SearchAppBar(
         singleLine = true,
         leadingIcon = {
             IconButton(onClick = {
-                ShoppingCart.setNavController(navController)
+                searchViewModel.setNewNavController(navController)
                 searchViewModel.initiateScan(context)
             }) {
                 Icon(

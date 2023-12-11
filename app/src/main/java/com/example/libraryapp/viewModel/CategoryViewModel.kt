@@ -87,8 +87,8 @@ class CategoryViewModel @Inject constructor(
     }
 */
     private fun updatebooks(Categorias : String) {
-        _loading.value = true
         viewModelScope.launch {
+            _loading.value = true
             if(Categorias == "Todas Las Categorias"){
                 novedades = firestoreRepository.getAllBooks2().toTypedArray()
                 val listaLibros: List<Book> = novedades.filterNotNull()

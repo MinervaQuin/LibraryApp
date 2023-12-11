@@ -33,7 +33,7 @@ import javax.inject.Inject
 @HiltViewModel
 class homeViewModel @Inject constructor(
     private val firestoreRepository: FirestoreRepository,
-
+    val libraryAppState: LibraryAppState
 ): ViewModel(){
 
     private val _isFallo = MutableLiveData<Boolean>()
@@ -138,8 +138,8 @@ class homeViewModel @Inject constructor(
             val books = getBooksStringMatch(result)
             if (books.isNotEmpty()){
                 val book = books[0] as Book
-                ShoppingCart.setBookSelected(book)
-                ShoppingCart.getNavController().navigate("BookDetailsView")
+                libraryAppState.setBook(book)
+                libraryAppState.getNavController().navigate("BookDetailsView")
                 _isFallo.value = false
             }
             else{
