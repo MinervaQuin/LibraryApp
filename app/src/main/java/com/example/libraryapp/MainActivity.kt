@@ -103,56 +103,13 @@ class MainActivity : ComponentActivity() {
                 ){
                     composable("login") {
 
-                        val viewModel = viewModel<loginViewModel>()
-                        val state by viewModel.state.collectAsStateWithLifecycle()
+                        val viewModel : loginViewModel = hiltViewModel()
 
-                        LaunchedEffect(key1 = Unit){
-                            if(googleAuthUiClient.getSignedInUser() != null){
-                                navController.navigate("secondScreens")
-                            }
-                        }
 
-                        val launcher = rememberLauncherForActivityResult(
-                            contract = ActivityResultContracts.StartIntentSenderForResult(),
-                            onResult = {result ->
-                                if(result.resultCode == RESULT_OK) {
-                                    lifecycleScope.launch {
-                                        val signInResult = googleAuthUiClient.signInWithIntent(
-                                            intent = result.data ?: return@launch
-                                        )
-                                        viewModel.onSignInResult(signInResult)
-                                    }
-                                }
-                            }
-                        )
-
-                        LaunchedEffect(key1 = state.isSignInSuccessful) {
-                            if(state.isSignInSuccessful) {
-                                Toast.makeText(
-                                    applicationContext,
-                                    "Sesión Iniciada",
-                                    Toast.LENGTH_LONG
-                                ).show()
-
-                                navController.navigate("secondScreens")
-                                viewModel.resetState()
-                            }
-                        }
 
                         LoginView(
                             navController = navController,
-                            state = state,
-                            onSignInClick = {
-                                lifecycleScope.launch {
-                                    val signInIntentSender = googleAuthUiClient.signIn()
-                                    launcher.launch(
-                                        IntentSenderRequest.Builder(
-                                            signInIntentSender ?: return@launch
-                                        ).build()
-                                    )
-                                }
-                            }
-
+                            viewModel = viewModel
                         )
                     }
 

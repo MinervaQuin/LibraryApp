@@ -2,6 +2,10 @@ package com.example.libraryapp.ui
 
 
 import android.widget.Toast
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -37,10 +41,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -55,29 +62,77 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
 import com.example.libraryapp.theme.*
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.libraryapp.model.firebaseAuth.GoogleAuthUiClient
 import com.example.libraryapp.model.firebaseAuth.SignInState
+import com.google.android.gms.auth.api.identity.Identity
+import kotlinx.coroutines.launch
 
 @Composable
-fun LoginView(loginViewModel : loginViewModel = viewModel(), navController: NavController,state: SignInState, onSignInClick: () -> Unit){
-    //@TODO: En vez de 1 solo elemento como fondo, hacer que sean 3 con animación de movimiento
+fun LoginView(viewModel : loginViewModel, navController: NavController){
     val image = painterResource(R.drawable.fondo_login)
     val googleIconImageVector = ImageVector.vectorResource(id = R.drawable.vector_google)
-
 
 
     var userEmail by remember { mutableStateOf(TextFieldValue("")) }
     var password by remember { mutableStateOf(TextFieldValue("")) }
 
+
     val context = LocalContext.current
-    LaunchedEffect(key1 = state.signInError){
+
+
+
+    val coroutineScope = rememberCoroutineScope()
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartIntentSenderForResult(),
+        onResult = { result ->
+            if(result.resultCode == ComponentActivity.RESULT_OK) {
+                coroutineScope.launch {
+                    val signInResult = viewModel.googleAuthUiClient.signInWithIntent(
+                        intent = result.data ?: return@launch
+                    )
+                    viewModel.onSignInResult(signInResult)
+                }
+            }
+        }
+    )
+
+    val state by viewModel.state.collectAsState()
+
+    LaunchedEffect(key1 = state.signInError) {
         state.signInError?.let { error ->
             Toast.makeText(
                 context,
                 error,
                 Toast.LENGTH_LONG
             ).show()
+        }
+    }
+
+
+    LaunchedEffect(key1 = Unit){
+        if(viewModel.googleAuthUiClient.getSignedInUser() != null){
+            navController.navigate("secondScreens")
+        }
+    }
+
+
+
+    LaunchedEffect(key1 = state.isSignInSuccessful) {
+        if(state.isSignInSuccessful) {
+            Toast.makeText(
+                context,
+                "Sesión Iniciada",
+                Toast.LENGTH_LONG
+            ).show()
+
+            navController.navigate("secondScreens")
+            viewModel.resetState()
         }
     }
 
@@ -107,8 +162,6 @@ fun LoginView(loginViewModel : loginViewModel = viewModel(), navController: NavC
                 Spacer(modifier = Modifier.height(8.dp))
 
 
-
-                //TODO Hacer que al darle al enter cambie el focus en vez de poner un puto enter
                 InputField(value = userEmail, onChange = {userEmail = it}, label = "Correo", icon = Icons.Outlined.Email)
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -121,7 +174,7 @@ fun LoginView(loginViewModel : loginViewModel = viewModel(), navController: NavC
                 Button(
                     onClick = {
                         //loginViewModel.updateCredentials(userEmail.text, password.text)
-                        loginViewModel.signInWithEmail(userEmail.text,password.text){
+                        viewModel.signInWithEmail(userEmail.text,password.text){
                             navController.navigate("homePage")
                         }
                     },
@@ -151,7 +204,16 @@ fun LoginView(loginViewModel : loginViewModel = viewModel(), navController: NavC
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 Button(
-                    onClick = onSignInClick,
+                    onClick = {
+                        coroutineScope.launch {
+                            val signInIntentSender = viewModel.googleAuthUiClient.signIn()
+                            launcher.launch(
+                                IntentSenderRequest.Builder(
+                                    signInIntentSender ?: return@launch
+                                ).build()
+                            )
+                        }
+                    },
                     modifier = Modifier
                         .width(300.dp)
                         .height(50.dp), // Altura del botón
