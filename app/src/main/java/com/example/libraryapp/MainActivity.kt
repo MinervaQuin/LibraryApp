@@ -121,19 +121,6 @@ class MainActivity : ComponentActivity() {
                             }
                         )
 
-                        LaunchedEffect(key1 = state.isSignInSuccessful) {
-                            if(state.isSignInSuccessful) {
-                                Toast.makeText(
-                                    applicationContext,
-                                    "Sesión Iniciada",
-                                    Toast.LENGTH_LONG
-                                ).show()
-
-                                navController.navigate("secondScreens")
-                                viewModel.resetState()
-                            }
-                        }
-
                         LoginView(
                             navController = navController,
                             viewModel = viewModel
