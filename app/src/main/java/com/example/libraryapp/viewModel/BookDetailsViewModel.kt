@@ -52,8 +52,8 @@ class BookDetailsViewModel @Inject constructor(
         }
     }
 
-    fun setNewBookId(new : String){
-        libraryAppState.setBookId(new)
+    fun setNewAutorId(new : String){
+        libraryAppState.setautorId(new)
     }
     fun sendReview(comment: String, reviewScore: Int){
         _bookUiState.update { currentState ->
