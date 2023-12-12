@@ -17,7 +17,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.DrawerValue
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalDrawer
+import androidx.compose.material.rememberDrawerState
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
@@ -95,8 +98,10 @@ class MainActivity : ComponentActivity() {
             val navController = rememberNavController()
             val homeViewModel : homeViewModel = hiltViewModel()
             val topBarViewModel: topBarViewModel = hiltViewModel()
+            val drawerState = rememberDrawerState(DrawerValue.Open)
+            val scope = rememberCoroutineScope()
 
-            NavHost(navController = navController, startDestination = "firstScreens"){
+            NavHost(navController = navController, startDestination = "AutoresDestination"){
 
                 navigation(
                     startDestination = "login",
@@ -313,7 +318,15 @@ class MainActivity : ComponentActivity() {
                 //fuera del grafo
 
                 composable("AutoresDestination") {
+
                     val viewModel : autoresViewModel = hiltViewModel()
+                    ModalDrawer(
+                        drawerContent = {
+                            // Contenido del cajón (drawer)
+                            drawer(navController = navController, drawerState = drawerState, topBarViewModel)
+                        },
+                        drawerState = drawerState,
+                    ) {
                     Scaffold(
                         bottomBar = { BottomBar(navController = navController) },
                         topBar = { TopBar(navController = navController, topBarViewModel)},
@@ -327,6 +340,7 @@ class MainActivity : ComponentActivity() {
                             }
                         }
                     )
+                    }
                 }
 
                 composable("SearchScreen"){
