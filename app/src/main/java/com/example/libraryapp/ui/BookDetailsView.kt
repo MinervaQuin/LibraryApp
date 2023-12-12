@@ -177,11 +177,13 @@ fun UserReview(
     review: Review,
     bookDetailsViewModel: BookDetailsViewModel
 ){
-
-
     var expanded by remember {mutableStateOf(false)}
     val formatter = DateTimeFormatter.ofPattern("dd/MM/yy")
     val formattedDate = bookDetailsViewModel.getFormattedTimeAgo(review.date)
+
+    val maxLines = 3
+    val isTextLong = review.description.length > 150
+    Log.d("firebase", "isTextlong: " + isTextLong)
 
     Column(modifier = Modifier.padding(10.dp)) {
         Row {
@@ -208,22 +210,24 @@ fun UserReview(
             }
 
         }
-        Text(text = review.description,
-            maxLines = if (expanded) Int.MAX_VALUE else 3,
+        Text(
+            text = review.description,
+            maxLines = if (expanded || !isTextLong) Int.MAX_VALUE else maxLines,
             overflow = TextOverflow.Ellipsis,
             textAlign = TextAlign.Justify,
-            modifier = Modifier.padding(5.dp))
-
-        ClickableText(
-            text= if (expanded) AnnotatedString("Leer menos") else AnnotatedString("Leer más"),
-            onClick = {expanded = !expanded},
-
-            style = TextStyle(color = GreenApp, fontWeight =FontWeight.Bold, textDecoration = TextDecoration.Underline ),
-            modifier = Modifier
-                .padding(start = 8.dp, bottom = 5.dp)
-                .fillMaxWidth()
-
+            modifier = Modifier.padding(5.dp)
         )
+
+        if (isTextLong) {
+            ClickableText(
+                text = if (expanded) AnnotatedString("Leer menos") else AnnotatedString("Leer más"),
+                onClick = { expanded = !expanded },
+                style = TextStyle(color = GreenApp, fontWeight = FontWeight.Bold, textDecoration = TextDecoration.Underline),
+                modifier = Modifier
+                    .padding(start = 8.dp, bottom = 5.dp)
+                    .fillMaxWidth()
+            )
+        }
     }
 }
 

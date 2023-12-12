@@ -72,6 +72,7 @@ class BookDetailsViewModel @Inject constructor(
                 // Perform asynchronous operation
                 if (userReview != null) {
                     firestoreRepository.updateReview(bookId= libraryAppState.getBookId(), reviewId = userReview!!.reviewId, newData=newData)
+                    userReview!!.description = comment
                     Log.d("firebase", "REVIEW UPDATED")
                 }else {
                     val newReview = Review(
