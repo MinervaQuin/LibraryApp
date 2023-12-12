@@ -102,7 +102,7 @@ fun BookDetailsScreen(
     Column (modifier = Modifier.verticalScroll(rememberScrollState())
     ){
 //
-        BookInitialInfo(book!!, navController)
+        BookInitialInfo(book!!, navController,bookDetailsViewModel)
         BookSinopsis(book!!.sinopsis)
         FactSheet(book!!)
         ReviewBook(book!!.title, bookDetailsViewModel, bookUiState)
@@ -410,7 +410,7 @@ fun sendComment(comentarioTexto: String, reviewScore: Int, bookDetailsViewModel:
 
 
 @Composable
-fun BookInitialInfo(book: Book, navController: NavHostController) {
+fun BookInitialInfo(book: Book, navController: NavHostController, bookDetailsViewModel: BookDetailsViewModel) {
     val context = LocalContext.current
     Row(
         modifier = Modifier.padding(top=10.dp, bottom = 10.dp)
@@ -420,7 +420,7 @@ fun BookInitialInfo(book: Book, navController: NavHostController) {
             horizontalAlignment = Alignment.Start,
             modifier = Modifier.padding(start = 10.dp)
         ) {
-            BookLittleInfo(book, navController)
+            BookLittleInfo(book, navController,bookDetailsViewModel)
             Button(onClick = { ShoppingCart.getViewModelInstance().addBookToCart(book)
                 Toast.makeText(context, "Se ha añadido el libro a tu cesta", Toast.LENGTH_SHORT).show()}) {//Ir a la pagina de la cesta
                 Text(text = "Añadir a la cesta")
@@ -434,7 +434,7 @@ fun BookInitialInfo(book: Book, navController: NavHostController) {
 
 
 @Composable
-fun BookLittleInfo(book: Book,navController: NavController){
+fun BookLittleInfo(book: Book,navController: NavController, bookDetailsViewModel: BookDetailsViewModel){
 
     Row(modifier = Modifier
         .fillMaxWidth()
@@ -449,7 +449,7 @@ fun BookLittleInfo(book: Book,navController: NavController){
             ClickableText(
                 text= AnnotatedString(book.author_name),
                 onClick = {
-                    ShoppingCart.setautorId(book.author_id.toString())
+                    bookDetailsViewModel.setNewAutorId(book.author_id.toString())
                     navController.navigate("AuthorDestination")
                 }, //pantalla información autor
 

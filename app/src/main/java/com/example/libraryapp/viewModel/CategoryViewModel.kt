@@ -9,6 +9,7 @@ import androidx.compose.runtime.*
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.libraryapp.model.FirestoreRepository
+import com.example.libraryapp.model.LibraryAppState
 import com.example.libraryapp.model.resources.Collection
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,7 +20,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CategoryViewModel @Inject constructor(
-    private val firestoreRepository: FirestoreRepository
+    private val firestoreRepository: FirestoreRepository,
+    val libraryAppState: LibraryAppState
 ) : ViewModel() {
 
     private var _loading = MutableStateFlow(false)
@@ -55,6 +57,8 @@ class CategoryViewModel @Inject constructor(
         private set
     var selectedCategory by mutableStateOf<String>("")
         private set
+    var selectedShort by mutableStateOf<String>("Precio ascendente")
+        private set
     init {
         // Inicializa la lista de libros con datos de prueba o desde algún origen de datos
         categories = listOf("Todas Las Categorias","Imprescindibles","Ficción", "No Ficción", "Infantil","Misterio", "Romance",
@@ -62,28 +66,11 @@ class CategoryViewModel @Inject constructor(
             "eBooks", "Autores", "Novedades" )
     }
 
-/*    private fun getBookFiltrados(Categorias : String): Array<Book> {
-        if(Categorias == "Ficción"){
-            return arrayOf(
-                Book(12, 15, "Stephen King", "Misery1", "hola hola", 3, "Tapa Dura", 35.0),
-                Book(12, 15, "Stephen King", "Misery2", "hola hola", 7, "Tapa Dura", 40.0),
-                Book(12, 15, "Stephen King", "Misery3", "hola hola", 7, "Tapa Dura", 45.0),
-            )
-        }
-        return arrayOf(
-            Book(1, 10, "Arturo Pérez Reverte", "Linea de fuego1", "hola hola", 3, "Tapa Dura", 20.0),
-            Book(1, 10, "Arturo Pérez Reverte", "Linea de fuego2", "hola hola", 7, "Tapa Dura", 20.0),
-            Book(1, 10, "Arturo Pérez Reverte", "Linea de fuego3", "hola hola", 7, "Tapa Dura", 20.0),
-            Book(1, 10, "Arturo Pérez Reverte", "Linea de fuego4", "hola hola", 7, "Tapa Dura", 20.0),
-            Book(1, 10, "Arturo Pérez Reverte", "Linea de fuego5", "hola hola", 7, "Tapa Dura", 20.0),
-            Book(1, 10, "Arturo Pérez Reverte", "Linea de fuego6", "hola hola", 7, "Tapa Dura", 20.0),
-        )
-
+    fun setNewBook(book: Book){
+        libraryAppState.setBook(book)
     }
-*/
-    private fun updatebooks(Categorias : String) {
-        _loading.value = true
-        viewModelScope.launch {
+    suspend fun updatebooks(Categorias : String) {
+            _loading.value = true
             if(Categorias == "Todas Las Categorias"){
                 novedades = firestoreRepository.getAllBooks2().toTypedArray()
                 val listaLibros: List<Book> = novedades.filterNotNull()
@@ -102,15 +89,46 @@ class CategoryViewModel @Inject constructor(
                 filtrados = coleccion.books as Array<Book>
             }
             _loading.value = false
-        }
     }
     fun updateCategories(newCategories: List<String>) {
         categories = newCategories
     }
     fun updateSelectedCategory(newCategory: String) {
         selectedCategory = newCategory
-        updatebooks(selectedCategory)
+        viewModelScope.launch {
+            updatebooks(selectedCategory)
+            updateShort(selectedShort)
+        }
         ShoppingCart.setSelectedCategory(newCategory)
+    }
+
+    fun updateFiltrados(low : Int, high: Int) {
+        viewModelScope.launch {
+            updatebooks(selectedCategory)
+            filtrados = filtrados.filter { it.price >= low }.toTypedArray()
+            filtrados = filtrados.filter { it.price <= high }.toTypedArray()
+            updateShort(selectedShort)
+        }
+    }
+
+    fun updateShort(short :String) {
+        selectedShort = short
+        if (selectedShort=="Precio ascendente"){
+            filtrados = filtrados.sortedBy { it.price }.toTypedArray()
+        }
+        if (selectedShort=="Precio descendente"){
+            filtrados = filtrados.sortedByDescending { it.price }.toTypedArray()
+        }
+        if (selectedShort=="Mas valorados"){
+            filtrados = filtrados.sortedByDescending { it.score }.toTypedArray()
+        }
+        if (selectedShort=="Título A-Z"){
+            filtrados = filtrados.sortedBy { it.title }.toTypedArray()
+        }
+        if (selectedShort=="Título Z-A"){
+            filtrados = filtrados.sortedByDescending { it.title }.toTypedArray()
+        }
+
     }
 
 }

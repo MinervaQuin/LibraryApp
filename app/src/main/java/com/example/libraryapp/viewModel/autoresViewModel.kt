@@ -7,6 +7,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.libraryapp.model.FirestoreRepository
+import com.example.libraryapp.model.LibraryAppState
 import com.example.libraryapp.model.resources.Author
 import com.example.libraryapp.model.resources.Book
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,7 +18,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class autoresViewModel @Inject constructor(
-    private val firestoreRepository: FirestoreRepository
+    private val firestoreRepository: FirestoreRepository,
+    val libraryAppState: LibraryAppState
 ) : ViewModel() {
 
     var autores by mutableStateOf(arrayOf<Author?>())
@@ -30,5 +32,10 @@ class autoresViewModel @Inject constructor(
             autores = firestoreRepository.getAllAutors().toTypedArray()
             _loading.value = false
         }
+    }
+
+    fun setnewAutor(autor: Author?){
+        libraryAppState.setautorId(null)
+        libraryAppState.setautor(autor)
     }
 }

@@ -312,13 +312,23 @@ class FirestoreRepositoryImpl @Inject constructor(
     }
 
 
-    override fun updateReview(bookId: String, reviewId: String, newData: Map<String, Any>) {
+    override suspend fun updateReview(bookId: String, reviewId: String, newData: Map<String, Any>) {
         // Referencia al documento que deseas actualizar
         val usuarioRef = firebaseFirestore.collection("books").document(bookId).collection("reviews").document(reviewId)
 
+        var timestamp = localDateToTimestamp(LocalDate.now())
         // Actualiza el campo específico con el nuevo valor
         usuarioRef
             .update(newData)
+            .addOnSuccessListener {
+                // La actualización fue exitosa
+            }
+            .addOnFailureListener { e ->
+                // Ocurrió un error al actualizar
+                println("Error al actualizar campo: $e")
+            }
+        usuarioRef
+            .update("date", timestamp)
             .addOnSuccessListener {
                 // La actualización fue exitosa
             }

@@ -63,9 +63,8 @@ import coil.compose.AsyncImage
 import com.example.libraryapp.ui.BookPreview
 
 @Composable
-fun AutorScreen (navController: NavController, ViewModel: AuthorViewModel,id: String?){
-
-    ViewModel.updateAutor(id)
+fun AutorScreen (navController: NavController, ViewModel: AuthorViewModel){
+    ViewModel.updateAutor()
     val autor = ViewModel.autor
     Column (
         modifier = Modifier
@@ -171,7 +170,7 @@ fun AutorScreen (navController: NavController, ViewModel: AuthorViewModel,id: St
         LazyRow(){
             items(1){
                 for (i in 0 until autor.works.size){
-                    autor.works[i]?.let { it1 -> BookPreview(it1,navController) }
+                    autor.works[i]?.let { it1 -> BookPreview(it1,navController, viewModel2 = ViewModel) }
                 }
             }
         }

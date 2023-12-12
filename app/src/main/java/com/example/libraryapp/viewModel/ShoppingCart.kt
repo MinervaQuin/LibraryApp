@@ -9,10 +9,10 @@ import com.example.libraryapp.model.resources.Book
 object ShoppingCart {
     private lateinit var viewModel: CartViewModel
     private var _categorySelected = MutableStateFlow("")
-    private lateinit var bookSelected: Book
-    private lateinit var navController: NavHostController
-    private var autorId: String? = null
-    private var autor: Author? = null
+    //private lateinit var bookSelected: Book
+    //private lateinit var navController: NavHostController
+    //private var autorId: String? = null
+    //private var autor: Author? = null
 
 
     fun init() {
@@ -29,7 +29,7 @@ object ShoppingCart {
         return _categorySelected.value
     }
 
-    fun setAutor(new: Author?){
+    /*fun setAutor(new: Author?){
         this.autor = new
     }
     fun getAutor(): Author?{
@@ -55,6 +55,6 @@ object ShoppingCart {
     }
     fun getBookSelected(): Book{
         return this.bookSelected
-    }
+    }*/
 }
 

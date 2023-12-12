@@ -52,7 +52,9 @@ class BookDetailsViewModel @Inject constructor(
         }
     }
 
-
+    fun setNewAutorId(new : String){
+        libraryAppState.setautorId(new)
+    }
     fun sendReview(comment: String, reviewScore: Int){
         _bookUiState.update { currentState ->
             currentState.copy(
@@ -65,7 +67,7 @@ class BookDetailsViewModel @Inject constructor(
             try {
                 val newData = mapOf(
                     "description" to comment,
-                    "score" to reviewScore
+                    "score" to reviewScore,
                 )
                 // Perform asynchronous operation
                 if (userReview != null) {
@@ -127,7 +129,10 @@ class BookDetailsViewModel @Inject constructor(
 
         reviews = firestoreRepository.getReviewsFromABook(bookId)
 
-//        Log.d("Reviews", bookId + " : " + reviews.size.toString() )
+        reviews = reviews.filterNotNull()
+
+        // Ordenar las revisiones por fecha en orden ascendente (de la más antigua a la más reciente)
+        reviews = reviews.sortedByDescending { it?.date }
         return reviews
     }
 //

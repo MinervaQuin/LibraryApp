@@ -136,12 +136,6 @@ fun TopBar(navController: NavController, viewModel: topBarViewModel) {
             route = "Category"
         ),
         NavigationItem(
-            title = "Ofertas",
-            selectedIcon = Icons.Filled.Book,
-            unselectedIcon = Icons.Outlined.Book,
-            route = "sales"
-        ),
-        NavigationItem(
             title = "Ayuda",
             selectedIcon = Icons.Filled.Info,
             unselectedIcon = Icons.Outlined.Info,

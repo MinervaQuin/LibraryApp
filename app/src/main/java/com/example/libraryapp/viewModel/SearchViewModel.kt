@@ -11,6 +11,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavHostController
 import com.example.libraryapp.MainActivity
 import com.example.libraryapp.model.FirestoreRepository
 import com.example.libraryapp.model.LibraryAppState
@@ -48,8 +49,8 @@ class SearchViewModel @Inject constructor(
             val books = getBooksStringMatch(result)
             if (books.isNotEmpty()){
                 val book = books[0] as Book
-                ShoppingCart.setBookSelected(book)
-                ShoppingCart.getNavController().navigate("BookDetailsView")
+                libraryAppState.setBook(book)
+                libraryAppState.getNavController().navigate("BookDetailsView")
                 _isFallo.value = false
             }
             else{
@@ -102,6 +103,10 @@ class SearchViewModel @Inject constructor(
 
     fun getSearchedString(): String {
         return libraryAppState.getSearchedString()
+    }
+
+    fun setNewNavController(new: NavHostController){
+        libraryAppState.setNavController(new)
     }
 
 }
