@@ -166,7 +166,7 @@ fun Cart(navController: NavController, cartViewModel: CartViewModel) {
                         .fillMaxHeight()
                 ) {
                     items(cartItemsState.keys.toList()) { book ->
-                        val quantity = cartItemsMap[book] ?: 0
+                        val quantity = cartItemsState[book] ?: 0
 
                         BookItem(
                             book = book,

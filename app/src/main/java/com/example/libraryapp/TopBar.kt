@@ -1,13 +1,11 @@
 package com.example.libraryapp
 
 
-import android.graphics.Rect
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -48,7 +46,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -57,12 +54,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.libraryapp.theme.gray
-
 import com.example.libraryapp.ui.theme.GreenAppOpacity
 import kotlinx.coroutines.launch
 import coil.compose.AsyncImage
@@ -222,7 +217,7 @@ fun TopBar(navController: NavController, viewModel: topBarViewModel) {
                             .clip(CircleShape)
                             .border(width = 2.dp, color = Color.Black, CircleShape)
                             .clickable {
-                                // TODO: Acciones al hacer clic en la imagen
+                                navController.navigate("Profile")
                             },
                         contentScale = ContentScale.Crop
                     )
