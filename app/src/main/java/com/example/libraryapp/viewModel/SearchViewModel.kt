@@ -33,7 +33,21 @@ class SearchViewModel @Inject constructor(
     private val _isFallo = MutableLiveData<Boolean>()
     val isFallo get() = _isFallo
     private var allBooks: List<Book?> = emptyList()
-    private var searchedBooks : List<Book?> = emptyList()
+    private var searchedBooks : List<Book?> = mutableListOf()
+
+    private val _booksLoaded = MutableLiveData<Boolean>()
+    val booksLoaded: LiveData<Boolean> get() = _booksLoaded
+
+    init {
+        viewModelScope.launch {
+            getBooksStringMatch(libraryAppState.getSearchedString())
+            _booksLoaded.postValue(true)
+        }
+    }
+
+    fun getSearchedBooks(): List<Book?> {
+        return searchedBooks
+    }
 
     fun initiateScan(context: Context) {
         viewModelScope.launch {
@@ -62,19 +76,16 @@ class SearchViewModel @Inject constructor(
     suspend fun getBooksStringMatch(searchString: String): List<Book?> {
 
          try {
-                // Esperar a que getAllBooks2 complete su ejecución
-
              if (allBooks.isEmpty()){
                  allBooks = firestoreRepository.getAllBooks2()
-
              }
-//                firestoreRepository.addASecondCollection()
-                 return firestoreRepository.searchAllBooks(allBooks, searchString)
+             searchedBooks=firestoreRepository.searchAllBooks(allBooks, searchString)
 
          } catch (e: Exception) {
              Log.e("Firestore", "Error en getBooksStringMatch", e)
-             return emptyList()
+             searchedBooks= emptyList()
          }
+        return searchedBooks
     }
 
     suspend fun getAllBooks(): List<Book?> {

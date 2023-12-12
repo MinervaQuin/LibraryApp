@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -20,6 +21,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -51,11 +53,14 @@ import coil.compose.AsyncImage
 import com.example.libraryapp.R
 import com.example.libraryapp.model.resources.Book
 import com.example.libraryapp.theme.LibraryAppTheme
+import com.example.libraryapp.theme.green
 import com.example.libraryapp.viewModel.SearchViewModel
 import com.example.libraryapp.viewModel.ShoppingCart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import androidx.compose.runtime.livedata.observeAsState
+
 
 
 @Composable
@@ -64,47 +69,67 @@ fun BookScreen(
     navController: NavHostController,
 ){
     val searchViewModel : SearchViewModel = hiltViewModel()
-    var books by remember { mutableStateOf<List<Book?>>(emptyList()) }
     var stringSearched by remember { mutableStateOf<String>(searchViewModel.getSearchedString()) }
+    val booksLoaded by searchViewModel.booksLoaded.observeAsState(initial = false)
+
+    if (!booksLoaded){
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .size(80.dp)
+                    .padding(16.dp),
+                color = green
 
 
-    LaunchedEffect(searchViewModel) {
-        try {
-            books = searchViewModel.getBooksStringMatch(stringSearched)
-        } catch (e: Exception) {
-            Log.e("Firestore", "Error en BookScreen", e)
+            )
         }
-    }
-    val navController2 = navController
-    Column {
-        SearchAppBar(
-            searchViewModel = searchViewModel,
-            modifyState = { newValue ->
-                books = newValue
-            },
-            updateSearchString = { newSearchString ->
-                stringSearched = newSearchString
-            },
-            navController = navController,
-            searchString = stringSearched
-        )
-        Text(text = if (stringSearched.length != 0) "Resultados para: " + stringSearched else "",
-            fontWeight = FontWeight.Bold,
-            modifier = if (stringSearched.length != 0) Modifier.padding(start = 6.dp, top=8.dp, bottom = 8.dp) else Modifier.padding(start = 0.dp))
-        LazyVerticalGrid(
-            columns = GridCells.Adaptive(minSize = 180.dp),
-        ){
-            items(items = books) {
-                BookItem(it, modifier = Modifier, navController, searchViewModel)
 
-                if (it != null) {
-                    Log.d("Firestore", it.title)
+    }else {
+
+        var books by remember { mutableStateOf<List<Book?>>(emptyList()) }
+
+        LaunchedEffect(searchViewModel.getSearchedBooks()) {
+            books = searchViewModel.getSearchedBooks()
+        }
+        Column {
+            SearchAppBar(
+                searchViewModel = searchViewModel,
+                modifyState = { newValue ->
+                    books = newValue
+                },
+                updateSearchString = { newSearchString ->
+                    stringSearched = newSearchString
+                },
+                navController = navController,
+                searchString = stringSearched
+            )
+            Text(
+                text = if (stringSearched.length != 0) "Resultados para: " + stringSearched else "",
+                fontWeight = FontWeight.Bold,
+                modifier = if (stringSearched.length != 0) Modifier.padding(
+                    start = 6.dp,
+                    top = 8.dp,
+                    bottom = 8.dp
+                ) else Modifier.padding(start = 0.dp)
+            )
+            LazyVerticalGrid(
+                columns = GridCells.Adaptive(minSize = 180.dp),
+            ) {
+                items(items = books) {
+                    BookItem(it, modifier = Modifier, navController, searchViewModel)
+
+                    if (it != null) {
+                        Log.d("Firestore", it.title)
+                    }
                 }
             }
+            Spacer(modifier = Modifier.height(55.dp))
         }
-        Spacer(modifier = Modifier.height(55.dp))
     }
-
 }
 
 

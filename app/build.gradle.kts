@@ -142,6 +142,8 @@ dependencies {
     implementation ("com.google.accompanist:accompanist-permissions:0.31.3-beta")
     implementation ("com.vanniktech:android-image-cropper:4.5.0")
 
+    implementation("androidx.compose.runtime:runtime-livedata:1.3.2")
+
 }
 
 kapt {
