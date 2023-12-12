@@ -262,21 +262,21 @@ fun ReviewBook(
             onRatingChanged = { bookDetailsViewModel.updateRating(it) }
         )
         Button(
-            onClick = { bookDetailsViewModel.showDialog(true) }, //Ir a la páginas de hacer una opinión
-            colors = ButtonDefaults.buttonColors(containerColor = GreenApp)
-            ) {
+                    onClick = { bookDetailsViewModel.showDialog(true) }, //Ir a la páginas de hacer una opinión
+                    colors = ButtonDefaults.buttonColors(containerColor = GreenApp)
+                ) {
 
-            if (userReview != null) {
-                Text("Edita tu opinión")
-            }else{
-                Text("Deja tu opinión")
-            }
-            AddReview(
-                showDialog = bookUiState.showDialog,
-                updateRating = { bookDetailsViewModel.updateRating( it ) },
-                bookUiState= bookUiState,
-                bookDetailsViewModel = bookDetailsViewModel,
-                bookTitle = bookTitle,
+                    if (userReview != null) {
+                        Text("Edita tu opinión")
+                    }else{
+                        Text("Deja tu opinión")
+                    }
+                    AddReview(
+                        showDialog = bookUiState.showDialog,
+                        updateRating = { bookDetailsViewModel.updateRating( it ) },
+                        bookUiState= bookUiState,
+                        bookDetailsViewModel = bookDetailsViewModel,
+                        bookTitle = bookTitle,
                 userReview = userReview ?: null
             )
         }
