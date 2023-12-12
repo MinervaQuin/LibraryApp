@@ -11,9 +11,11 @@ import com.example.libraryapp.model.emailValidationUseCase.ValidateEmail
 import com.example.libraryapp.model.emailValidationUseCase.ValidatePassword
 import com.example.libraryapp.model.emailValidationUseCase.ValidateRepeatedPassword
 import com.example.libraryapp.model.emailValidationUseCase.ValidateTerms
+import com.example.libraryapp.model.emailValidationUseCase.ValidateUserName
 import com.example.libraryapp.model.firebaseAuth.EmailAuthUiClient
 import com.example.libraryapp.model.resources.registrationFormState
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,10 +27,12 @@ import javax.inject.Inject
 
 @HiltViewModel
 class signUpViewModel @Inject constructor(
+    private val validateUserName: ValidateUserName,
     private val validateEmail: ValidateEmail,
     private val validatePassword: ValidatePassword,
     private val validateRepeatedPassword: ValidateRepeatedPassword,
-    private val validateTerms: ValidateTerms
+    private val validateTerms: ValidateTerms,
+    private val emailService: EmailAuthUiClient
 ): ViewModel(){
 
     var state by mutableStateOf(registrationFormState())
@@ -50,12 +54,13 @@ class signUpViewModel @Inject constructor(
     private var _showFirstScreen2 = MutableStateFlow(true)
     var showFirstScreen2 = _showFirstScreen2.asStateFlow()
 
-    val emailService by lazy {
-        EmailAuthUiClient(auth)
-    }
+
 
     fun onEvent(event: RegistrationFormEvent) {
         when(event) {
+            is RegistrationFormEvent.NameChanged -> {
+                state = state.copy(name = event.name)
+            }
             is RegistrationFormEvent.EmailChanged -> {
                 state = state.copy(email = event.email)
             }
@@ -76,6 +81,7 @@ class signUpViewModel @Inject constructor(
 
 
     private fun submitData() {
+        val nameResult = validateUserName.execute((state.name))
         val emailResult = validateEmail.execute(state.email)
         val passwordResult = validatePassword.execute(state.password)
         val repeatedPasswordResult = validateRepeatedPassword.execute(
@@ -84,6 +90,7 @@ class signUpViewModel @Inject constructor(
         val termsResult = validateTerms.execute(state.acceptedTerms)
 
         val hasError = listOf(
+            nameResult,
             emailResult,
             passwordResult,
             repeatedPasswordResult,
@@ -92,6 +99,7 @@ class signUpViewModel @Inject constructor(
 
         if(hasError) {
             state = state.copy(
+                nameError = nameResult.errorMessage,
                 emailError = emailResult.errorMessage,
                 passwordError = passwordResult.errorMessage,
                 repeatedPasswordError = repeatedPasswordResult.errorMessage,
@@ -100,29 +108,15 @@ class signUpViewModel @Inject constructor(
             return
         }
         viewModelScope.launch {
-            validationEventChannel.send(ValidationEvent.Success)
+            //validationEventChannel.send(ValidationEvent.Success)
         }
+        registerUser(state.email, state.password, state.name)
     }
 
     sealed class ValidationEvent {
         object Success: ValidationEvent()
+        data class Failed(val errorMessage: String) : ValidationEvent()
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
     fun changeScreen(){
@@ -131,25 +125,29 @@ class signUpViewModel @Inject constructor(
         }else{
             _showFirstScreen2.value = true
         }
-        Log.d("Variable publica: ", "${showFirstScreen2.value}")
-        Log.d("Variable privada: ", "${_showFirstScreen2.value}")
-
     }
 
-    fun registerUser(email: String, password: String) {
+    private fun registerUser(email: String, password: String, userName: String) {
         viewModelScope.launch {
             _loading.value = true
-            val result = emailService.registerUser(email, password)
-            _message.value = result.fold(
+            val result = emailService.registerUser(email, password, userName)
+            result.fold(
                 onSuccess = {
-                    _navigateToNextScreen.value = true // Indica que el registro fue exitoso y se debe navegar
-                    it
+                    // Manejo del caso de éxito
+                    validationEventChannel.send(ValidationEvent.Success)
                 },
-                onFailure = {
-                    "Error de registro: ${it.message}"
+                onFailure = { exception ->
+                    // Manejo del caso de error
+                    when (exception) {
+                        is FirebaseAuthUserCollisionException -> {
+                            validationEventChannel.send(ValidationEvent.Failed("Error, el correo ya está en uso"))
+                        }
+                        else -> {
+                            validationEventChannel.send(ValidationEvent.Failed("Error, vuelva a intentarlo más tarde"))
+                        }
+                    }
                 }
             )
-            _loading.value = false
         }
     }
 

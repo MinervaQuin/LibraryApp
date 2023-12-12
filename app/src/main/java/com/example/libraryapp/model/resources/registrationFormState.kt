@@ -1,6 +1,8 @@
 package com.example.libraryapp.model.resources
 
 data class registrationFormState(
+    val name: String = "",
+    val nameError: String? = null,
     val email: String = "",
     val emailError: String? = null,
     val password: String = "",

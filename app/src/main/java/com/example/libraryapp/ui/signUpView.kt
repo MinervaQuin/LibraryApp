@@ -73,12 +73,15 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.libraryapp.model.RegistrationFormEvent
+import com.example.libraryapp.ui.theme.rojoSangre
+import com.example.libraryapp.ui.theme.rositaGracioso
 import kotlinx.coroutines.flow.collect
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -90,14 +93,7 @@ fun signUpView(viewModel: signUpViewModel = hiltViewModel(), navController: NavC
     val state = viewModel.state
     val context = LocalContext.current
 
-    var userName by remember { mutableStateOf(TextFieldValue("")) }
-    var userEmail by remember { mutableStateOf(TextFieldValue("")) }
-    var userBirthDay by remember { mutableStateOf(TextFieldValue("")) }
-    var userPassword by remember { mutableStateOf(TextFieldValue("")) }
-    var repeatedPassword by remember { mutableStateOf(TextFieldValue("")) }
-
-    var selectedDate by remember { mutableStateOf("") }
-
+    val selectedDate = remember { mutableStateOf(LocalDate.now().minusDays(3)) }
 
     val shouldNavigate by viewModel.navigateToNextScreen.collectAsState()
     val showFirstScreen by viewModel.showFirstScreen2.collectAsState()
@@ -117,7 +113,14 @@ fun signUpView(viewModel: signUpViewModel = hiltViewModel(), navController: NavC
                 is signUpViewModel.ValidationEvent.Success -> {
                     Toast.makeText(
                         context,
-                        "Registro Exitoso",
+                        "Registro Exitoso :D",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+                is signUpViewModel.ValidationEvent.Failed -> {
+                    Toast.makeText(
+                        context,
+                        event.errorMessage, // Usa el mensaje de error de la clase Failed
                         Toast.LENGTH_LONG
                     ).show()
                 }
@@ -161,6 +164,20 @@ fun signUpView(viewModel: signUpViewModel = hiltViewModel(), navController: NavC
                 putText(text = "Registro", color = verdeFuerte, fontSize = 58.sp)
                 Spacer(modifier = Modifier.height(32.dp))
                 putTextField(
+                    value = state.name,
+                    onValueChange = {viewModel.onEvent(RegistrationFormEvent.NameChanged(it))},
+                    isError = state.nameError, placeHolder = "Nombre de Usuario",
+                    icon = Icons.Outlined.AccountCircle,
+                    visualTransformation = VisualTransformation.None,
+                    keyboardType = KeyboardType.Email)
+                if (state.nameError != null) {
+                    Text(
+                        text = state.nameError,
+                        color = Color.Red
+                    )
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+                putTextField(
                     value = state.email,
                     onValueChange = {viewModel.onEvent(RegistrationFormEvent.EmailChanged(it))},
                     isError = state.emailError, placeHolder = "Correo",
@@ -201,35 +218,63 @@ fun signUpView(viewModel: signUpViewModel = hiltViewModel(), navController: NavC
                         color = Color.Red
                     )
                 }
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth()
+                Spacer(modifier = Modifier.height(8.dp))
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Checkbox(
-                        checked = state.acceptedTerms,
-                        onCheckedChange = {
-                            viewModel.onEvent(RegistrationFormEvent.AcceptTerms(it))
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Checkbox(
+                                checked = state.acceptedTerms,
+                                onCheckedChange = { viewModel.onEvent(RegistrationFormEvent.AcceptTerms(it)) }
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Tengo más de 18 años",
+                                modifier = Modifier.align(Alignment.CenterVertically) // Alineación vertical del texto
+                            )
                         }
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(text = "Acepto")
+                        if (state.termsError != null) {
+                            Text(
+                                text = state.termsError,
+                                color = Color.Red
+                            )
+                        }
+                    }
                 }
-                if (state.termsError != null) {
-                    Text(
-                        text = state.termsError,
-                        color = Color.Red,
-                    )
-                }
-
                 Button(
                     onClick = {
                         viewModel.onEvent(RegistrationFormEvent.Submit)
                     },
-                    modifier = Modifier.align(Alignment.End)
+                    modifier = Modifier
+                        .height(50.dp), // Altura del botón
+                    colors = ButtonDefaults.buttonColors(containerColor = rojoSangre)
+
                 ) {
-                    Text(text = "Submit")
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center,
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp) // Padding horizontal para el contenido
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.signup_vector),
+                            contentDescription = "Icono de Registrarse",
+                            modifier = Modifier.size(24.dp) // Tamaño del ícono
+                        )
+                        Spacer(Modifier.width(8.dp)) // Espacio entre el ícono y el texto
+                        Text(
+                            text = "Registrarse",
+                            fontSize = 16.sp
+                        )
+                    }
                 }
+
             }
         }
     }
@@ -291,8 +336,6 @@ fun DatePickerNice() {
     val dateFormatter = DateTimeFormatter.ofPattern("dd MMMM, yyyy")
     var isDialogOpen by remember { mutableStateOf(false) }
 
-    // Suponemos que CalendarDialog es un composable que muestra un diálogo
-    // y utiliza calendarState para manejar su estado.
     CalendarDialog(
         state = calendarState,
         selection = CalendarSelection.Date { date ->
@@ -305,7 +348,6 @@ fun DatePickerNice() {
     )
 
     // TextField que muestra la fecha y abre el diálogo al hacer clic
-    //TODO Controlar la logica cuando se introduce la fecha a mano en vez de con el calendario
     TextField(
         value = dateFormatter.format(selectedDate.value),
         onValueChange = { /* No hacer nada para prevenir la edición */ },
