@@ -116,6 +116,7 @@ fun signUpView(viewModel: signUpViewModel = hiltViewModel(), navController: NavC
                         "Registro Exitoso :D",
                         Toast.LENGTH_LONG
                     ).show()
+                    navController.navigate("secondScreens")
                 }
                 is signUpViewModel.ValidationEvent.Failed -> {
                     Toast.makeText(

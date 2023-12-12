@@ -119,8 +119,41 @@ fun LoginView(loginViewModel : loginViewModel = viewModel(), navController: NavC
                 Text(text = "¿Has Olvidado la contraseña?")
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(
+                    onClick = {
+                        //loginViewModel.updateCredentials(userEmail.text, password.text)
+                        loginViewModel.signInWithEmail(userEmail.text,password.text){
+                            navController.navigate("homePage")
+                        }
+                    },
+                    modifier = Modifier
+                        .height(50.dp) // Altura del botón
+                        .width(300.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = verdeFuerte)
+
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center,
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp) // Padding horizontal para el contenido
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(R.drawable.login_vector),
+                            contentDescription = "Icono de Iniciar Sesión",
+                            modifier = Modifier.size(24.dp) // Tamaño del ícono
+                        )
+                        Spacer(Modifier.width(8.dp)) // Espacio entre el ícono y el texto
+                        Text(
+                            text = "Iniciar Sesión",
+                            fontSize = 16.sp
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                Button(
                     onClick = onSignInClick,
                     modifier = Modifier
+                        .width(300.dp)
                         .height(50.dp), // Altura del botón
                     colors = ButtonDefaults.buttonColors(containerColor = verdeFuerte)
 
@@ -144,33 +177,11 @@ fun LoginView(loginViewModel : loginViewModel = viewModel(), navController: NavC
                     }
                 }
 
+
+
             }
         }
 
-        Row(
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                //.fillMaxWidth()
-                .padding(16.dp),
-
-        ){
-            Button(
-                onClick = {
-                    //loginViewModel.updateCredentials(userEmail.text, password.text)
-                    loginViewModel.signInWithEmail(userEmail.text,password.text){ //TODO A esto de iniciar sesión con el usuario y contraseña hay que echarle un ojo, muy poco MVVM
-                        navController.navigate("homePage")
-                    }
-                          },
-                colors = ButtonDefaults.buttonColors(verdeFuerte),
-                shape = CircleShape,
-                modifier = Modifier
-                    .size(75.dp),
-
-                ) {
-                Icon(imageVector = Icons.Outlined.ArrowForward, contentDescription = "Avanzar")
-            }
-            Spacer(modifier = Modifier.height(150.dp))
-        }
 
         Row (
             modifier = Modifier
