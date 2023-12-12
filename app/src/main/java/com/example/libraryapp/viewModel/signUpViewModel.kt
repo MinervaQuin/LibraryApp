@@ -40,8 +40,6 @@ class signUpViewModel @Inject constructor(
     private val validationEventChannel = Channel<ValidationEvent>()
     val validationEvents = validationEventChannel.receiveAsFlow()
 
-    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
-
     private var _navigateToNextScreen = MutableStateFlow(false)
     var navigateToNextScreen = _navigateToNextScreen.asStateFlow()
 

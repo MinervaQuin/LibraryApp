@@ -27,7 +27,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.ArrowForward
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.Lock
@@ -35,6 +38,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
@@ -49,12 +53,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
@@ -67,8 +75,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.libraryapp.model.RegistrationFormEvent
 import com.example.libraryapp.model.firebaseAuth.GoogleAuthUiClient
 import com.example.libraryapp.model.firebaseAuth.SignInState
+import com.example.libraryapp.viewModel.signUpViewModel
 import com.google.android.gms.auth.api.identity.Identity
 import kotlinx.coroutines.launch
 
@@ -83,7 +93,7 @@ fun LoginView(viewModel : loginViewModel, navController: NavController){
 
 
     val context = LocalContext.current
-
+    val formState = viewModel.formState
 
 
     val coroutineScope = rememberCoroutineScope()
@@ -136,6 +146,28 @@ fun LoginView(viewModel : loginViewModel, navController: NavController){
         }
     }
 
+    LaunchedEffect(key1 = context) {
+        viewModel.validationEvents.collect { event ->
+            when (event) {
+                is signUpViewModel.ValidationEvent.Success -> {
+                    Toast.makeText(
+                        context,
+                        "Registro Exitoso",
+                        Toast.LENGTH_LONG
+                    ).show()
+                    navController.navigate("secondScreens")
+                }
+                is signUpViewModel.ValidationEvent.Failed -> {
+                    Toast.makeText(
+                        context,
+                        event.errorMessage, // Usa el mensaje de error de la clase Failed
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
+        }
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
         // Colocamos la imagen de fondo
         Image(
@@ -161,22 +193,44 @@ fun LoginView(viewModel : loginViewModel, navController: NavController){
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-
-                InputField(value = userEmail, onChange = {userEmail = it}, label = "Correo", icon = Icons.Outlined.Email)
-
+                putTextField(
+                    value = formState.email,
+                    onValueChange = {viewModel.onEvent(RegistrationFormEvent.EmailChanged(it))},
+                    isError = formState.emailError, placeHolder = "Correo",
+                    icon = Icons.Outlined.AccountCircle,
+                    visualTransformation = VisualTransformation.None,
+                    keyboardType = KeyboardType.Email)
+                if (formState.emailError != null) {
+                    Text(
+                        text = formState.emailError,
+                        color = Color.Red
+                    )
+                }
                 Spacer(modifier = Modifier.height(8.dp))
-
-                InputField(value = password, onChange = {password = it}, label = "Contraseña", icon = Icons.Outlined.Lock, visualTransformation = PasswordVisualTransformation())
+                putTextField(
+                    value = formState.password,
+                    onValueChange = {viewModel.onEvent(RegistrationFormEvent.PasswordChanged(it))},
+                    isError = formState.passwordError, placeHolder = "Contraseña",
+                    icon = Icons.Outlined.Lock,
+                    visualTransformation = PasswordVisualTransformation(),
+                    keyboardType = KeyboardType.Password)
+                if (formState.passwordError != null) {
+                    Text(
+                        text = formState.passwordError,
+                        color = Color.Red,
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(text = "¿Has Olvidado la contraseña?")
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(
                     onClick = {
-                        //loginViewModel.updateCredentials(userEmail.text, password.text)
+                        /*
                         viewModel.signInWithEmail(userEmail.text,password.text){
                             navController.navigate("homePage")
-                        }
+                        }*/
+                        viewModel.onEvent(RegistrationFormEvent.Submit)
                     },
                     modifier = Modifier
                         .height(50.dp) // Altura del botón
@@ -285,39 +339,6 @@ fun putText(
             lineHeight = 50.sp,
             color = color
         )
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun InputField(
-    value: TextFieldValue,
-    onChange: (TextFieldValue) -> Unit,
-    modifier: Modifier = Modifier,
-    label: String,
-    icon: ImageVector,
-    visualTransformation: VisualTransformation = VisualTransformation.None
-) {
-    TextField(
-        value = value,
-        onValueChange = onChange,
-        label = { Text(text = label) },
-        shape = RoundedCornerShape(20.dp),
-        colors = TextFieldDefaults.textFieldColors(
-            disabledTextColor = Color.Transparent,
-            focusedIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent,
-            disabledIndicatorColor = Color.Transparent
-        ),
-        leadingIcon = {
-            Icon(
-                imageVector = icon,
-                contentDescription = null
-            )
-        },
-        visualTransformation = visualTransformation,
-        modifier = modifier,
-
     )
 }
 

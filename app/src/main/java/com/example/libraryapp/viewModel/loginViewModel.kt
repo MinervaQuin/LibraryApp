@@ -25,11 +25,15 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 import java.util.concurrent.CancellationException
 import javax.inject.Inject
 
@@ -45,8 +49,8 @@ class loginViewModel @Inject constructor(
 ): ViewModel() {
 
 
-    var userEmail: String = ""
-    var userPassword: String = ""
+    private val validationEventChannel = Channel<signUpViewModel.ValidationEvent>()
+    val validationEvents = validationEventChannel.receiveAsFlow()
 
     private val _state = MutableStateFlow(SignInState())
     val state = _state.asStateFlow()
@@ -95,51 +99,59 @@ class loginViewModel @Inject constructor(
         val termsResult = validateTerms.execute(formState.acceptedTerms)
 
         val hasError = listOf(
-            nameResult,
             emailResult,
-            passwordResult,
-            repeatedPasswordResult,
-            termsResult
+            passwordResult
         ).any { !it.successful }
 
         if(hasError) {
             formState = formState.copy(
-                nameError = nameResult.errorMessage,
                 emailError = emailResult.errorMessage,
-                passwordError = passwordResult.errorMessage,
-                repeatedPasswordError = repeatedPasswordResult.errorMessage,
-                termsError = termsResult.errorMessage
+                passwordError = passwordResult.errorMessage
             )
+            Log.d("LoginView", "No exito")
             return
         }
         viewModelScope.launch {
             //validationEventChannel.send(ValidationEvent.Success)
         }
+        signInWithEmail(formState.email, formState.password)
     }
 
     fun resetState() {
         _state.update { SignInState() }
     }
 
-     fun signInWithEmail(email: String, passworld: String, home: () -> Unit) = viewModelScope.launch{
-         try {
-             auth.signInWithEmailAndPassword(email, passworld)
-                 .addOnCompleteListener { task ->
-                     if (task.isSuccessful) {
-                         Log.d("Login Email", "LOGEADO PUTO")
-                         home()
-                     } else {
-                         // Imprimir el mensaje de error en caso de fallo
-                         val errorMessage = task.exception?.message ?: "Error desconocido"
-                         Log.d("Login Email", "Error al iniciar sesión: $errorMessage")
-                     }
-                 }
-         } catch (e: Exception) {
-             Log.d("Login Email", "Error de excepción: ${e.message}")
-         }
-         catch (e: Exception){
-             Log.d("Login Email", "${e.message}")
-         }
+    fun signInWithEmail(email: String, password: String) = viewModelScope.launch {
+        try {
+            auth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        Log.d("Login Email", "LOGEADO PUTO")
+
+                        // Lanzar una nueva coroutine para enviar un evento
+                        viewModelScope.launch {
+                            validationEventChannel.send(signUpViewModel.ValidationEvent.Success)
+                        }
+                    } else {
+                        val errorMessage = task.exception?.message ?: "Error desconocido"
+                        Log.d("Login Email", "Error al iniciar sesión: $errorMessage")
+                        // Lanzar una nueva coroutine para enviar un evento
+                        viewModelScope.launch {
+                            validationEventChannel.send(signUpViewModel.ValidationEvent.Failed(errorMessage))
+                        }
+                    }
+                }
+        } catch (e: Exception) {
+            Log.d("Login Email", "Error de excepción: ${e.message}")
+            viewModelScope.launch {
+                validationEventChannel.send(signUpViewModel.ValidationEvent.Failed(e.message ?: "Error desconocido"))
+            }
+        }
+    }
+
+    sealed class ValidationEvent {
+        object Success: ValidationEvent()
+        data class Failed(val errorMessage: String) : ValidationEvent()
     }
 
 }

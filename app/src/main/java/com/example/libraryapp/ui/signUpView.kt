@@ -113,7 +113,7 @@ fun signUpView(viewModel: signUpViewModel = hiltViewModel(), navController: NavC
                 is signUpViewModel.ValidationEvent.Success -> {
                     Toast.makeText(
                         context,
-                        "Registro Exitoso :D",
+                        "Registro Exitoso",
                         Toast.LENGTH_LONG
                     ).show()
                     navController.navigate("secondScreens")
