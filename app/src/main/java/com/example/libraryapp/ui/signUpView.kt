@@ -1,6 +1,8 @@
 package com.example.libraryapp.ui
 
 
+import android.util.Log
+import android.widget.CheckBox
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -60,15 +62,26 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.AlertDialogDefaults.shape
 import androidx.compose.runtime.collectAsState
 import androidx.compose.foundation.shape.*
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.libraryapp.model.RegistrationFormEvent
 import kotlinx.coroutines.flow.collect
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun signUpView(viewModel: signUpViewModel = hiltViewModel(), navController: NavController){
 
@@ -81,7 +94,7 @@ fun signUpView(viewModel: signUpViewModel = hiltViewModel(), navController: NavC
     var userEmail by remember { mutableStateOf(TextFieldValue("")) }
     var userBirthDay by remember { mutableStateOf(TextFieldValue("")) }
     var userPassword by remember { mutableStateOf(TextFieldValue("")) }
-    var userPasswordConfirm by remember { mutableStateOf(TextFieldValue("")) }
+    var repeatedPassword by remember { mutableStateOf(TextFieldValue("")) }
 
     var selectedDate by remember { mutableStateOf("") }
 
@@ -133,85 +146,143 @@ fun signUpView(viewModel: signUpViewModel = hiltViewModel(), navController: NavC
             contentScale = ContentScale.Crop // Ajusta la imagen al tamaño del Box, recortando si es necesario
         )
 
-        Row (
+        Row(
             modifier = Modifier
                 .align(Alignment.Center)
                 //.fillMaxWidth()
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
-        ){
+        ) {
 
-            Column (
+            Column(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
-            ){
+            ) {
                 putText(text = "Registro", color = verdeFuerte, fontSize = 58.sp)
-
-                if(showFirstScreen){
-                    Spacer(modifier = Modifier.height(8.dp))
-                    InputField(value = userName, onChange = {userName = it}, isError = state.emailError != null , label = "Nombre de Usuario", icon = Icons.Outlined.AccountCircle)
-                    Spacer(modifier = Modifier.height(8.dp))
-                    InputField(value = userEmail, onChange = {userEmail = it}, label = "Correo", icon = Icons.Outlined.Email)
-                    Spacer(modifier = Modifier.height(8.dp))
-                    DatePickerNice()
+                Spacer(modifier = Modifier.height(32.dp))
+                putTextField(
+                    value = state.email,
+                    onValueChange = {viewModel.onEvent(RegistrationFormEvent.EmailChanged(it))},
+                    isError = state.emailError, placeHolder = "Correo",
+                    icon = Icons.Outlined.AccountCircle,
+                    visualTransformation = VisualTransformation.None,
+                    keyboardType = KeyboardType.Email)
+                if (state.emailError != null) {
+                    Text(
+                        text = state.emailError,
+                        color = Color.Red
+                    )
                 }
-                else{
-                    InputField(value = userPassword, onChange = {userPassword = it}, label = "Contraseña", icon = Icons.Outlined.Lock, visualTransformation = PasswordVisualTransformation())
-                    Spacer(modifier = Modifier.height(8.dp))
-                    InputField(value = userPasswordConfirm, onChange = {userPasswordConfirm = it}, label = "Confirmar contraseña", icon = Icons.Outlined.Lock, visualTransformation = PasswordVisualTransformation())
-                    Row(
-                        modifier = Modifier
+                Spacer(modifier = Modifier.height(16.dp))
+                putTextField(
+                    value = state.password,
+                    onValueChange = {viewModel.onEvent(RegistrationFormEvent.PasswordChanged(it))},
+                    isError = state.passwordError, placeHolder = "Contraseña",
+                    icon = Icons.Outlined.Lock,
+                    visualTransformation = PasswordVisualTransformation(),
+                    keyboardType = KeyboardType.Password)
+                if (state.passwordError != null) {
+                    Text(
+                        text = state.passwordError,
+                        color = Color.Red,
+                    )
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+                putTextField(
+                    value = state.repeatedPassword,
+                    onValueChange = {viewModel.onEvent(RegistrationFormEvent.RepeatedPasswordChanged(it))},
+                    isError = state.repeatedPasswordError, placeHolder = "Repetir Contraseña",
+                    icon = Icons.Outlined.Lock,
+                    visualTransformation = PasswordVisualTransformation(),
+                    keyboardType = KeyboardType.Password)
+                if (state.repeatedPasswordError != null) {
+                    Text(
+                        text = state.repeatedPasswordError,
+                        color = Color.Red
+                    )
+                }
+                Spacer(modifier = Modifier.height(16.dp))
 
-                            .padding(16.dp),
-                    ) {
-                        Button(
-                            onClick = { viewModel.registerUser(userEmail.text, userPassword.text) },
-                            modifier = Modifier
-
-                                .height(50.dp),
-                            colors = ButtonDefaults.buttonColors(verdeFuerte),
-                            shape = CircleShape,
-                        ) {
-                            Text("Registrarse", modifier = Modifier.padding(8.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Checkbox(
+                        checked = state.acceptedTerms,
+                        onCheckedChange = {
+                            viewModel.onEvent(RegistrationFormEvent.AcceptTerms(it))
                         }
-
-                    }
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(text = "Acepto")
                 }
-                Spacer(modifier = Modifier.height(8.dp))
+                if (state.termsError != null) {
+                    Text(
+                        text = state.termsError,
+                        color = Color.Red,
+                    )
+                }
 
-
-            }
-        }
-        if(showFirstScreen){
-            Row(
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    //.fillMaxWidth()
-                    .padding(16.dp),
-
-                ){
                 Button(
-                    onClick = { viewModel.changeScreen() },
-                    colors = ButtonDefaults.buttonColors(verdeFuerte),
-                    shape = CircleShape,
-                    modifier = Modifier
-                        .size(75.dp),
-
-                    ) {
-                    Icon(imageVector = Icons.Outlined.ArrowForward, contentDescription = "Avanzar")
+                    onClick = {
+                        viewModel.onEvent(RegistrationFormEvent.Submit)
+                    },
+                    modifier = Modifier.align(Alignment.End)
+                ) {
+                    Text(text = "Submit")
                 }
-                Spacer(modifier = Modifier.height(150.dp))
             }
         }
-        else{
-
-        }
-
-        
     }
 }
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
+@Composable
+fun putTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    isError: String?,
+    placeHolder: String,
+    icon: ImageVector,
+    visualTransformation: VisualTransformation,
+    keyboardType: KeyboardType
+) {
+    val keyboardController = LocalSoftwareKeyboardController.current
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
 
-
+        isError = isError != null,
+        modifier = Modifier
+            .width(300.dp)
+            .height(55.dp),
+        placeholder = {
+            Text(text = placeHolder)
+        },
+        keyboardOptions = KeyboardOptions(
+            keyboardType = keyboardType,
+            imeAction = ImeAction.Done
+        ),
+        keyboardActions = KeyboardActions(
+            onDone = {
+                keyboardController?.hide() // Oculta el teclado
+            }
+        ),
+        colors = TextFieldDefaults.textFieldColors(
+            textColor = Color.Black,
+            disabledTextColor = Color.Transparent,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent,
+            disabledIndicatorColor = Color.Transparent
+        ),
+        shape = RoundedCornerShape(16.dp),
+        leadingIcon = {
+            Icon(
+                imageVector = icon,
+                contentDescription = "Icono de cuenta" // Descripción para accesibilidad
+            )
+        },
+        visualTransformation = visualTransformation
+    )
+}
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DatePickerNice() {

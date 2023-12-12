@@ -72,7 +72,6 @@ class signUpViewModel @Inject constructor(
                 submitData()
             }
         }
-
     }
 
 
