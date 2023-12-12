@@ -57,6 +57,8 @@ class CategoryViewModel @Inject constructor(
         private set
     var selectedCategory by mutableStateOf<String>("")
         private set
+    var selectedShort by mutableStateOf<String>("Precio ascendente")
+        private set
     init {
         // Inicializa la lista de libros con datos de prueba o desde algún origen de datos
         categories = listOf("Todas Las Categorias","Imprescindibles","Ficción", "No Ficción", "Infantil","Misterio", "Romance",
@@ -95,6 +97,7 @@ class CategoryViewModel @Inject constructor(
         selectedCategory = newCategory
         viewModelScope.launch {
             updatebooks(selectedCategory)
+            updateShort(selectedShort)
         }
         ShoppingCart.setSelectedCategory(newCategory)
     }
@@ -104,7 +107,28 @@ class CategoryViewModel @Inject constructor(
             updatebooks(selectedCategory)
             filtrados = filtrados.filter { it.price >= low }.toTypedArray()
             filtrados = filtrados.filter { it.price <= high }.toTypedArray()
+            updateShort(selectedShort)
         }
+    }
+
+    fun updateShort(short :String) {
+        selectedShort = short
+        if (selectedShort=="Precio ascendente"){
+            filtrados = filtrados.sortedBy { it.price }.toTypedArray()
+        }
+        if (selectedShort=="Precio descendente"){
+            filtrados = filtrados.sortedByDescending { it.price }.toTypedArray()
+        }
+        if (selectedShort=="Mas valorados"){
+            filtrados = filtrados.sortedByDescending { it.score }.toTypedArray()
+        }
+        if (selectedShort=="Título A-Z"){
+            filtrados = filtrados.sortedBy { it.title }.toTypedArray()
+        }
+        if (selectedShort=="Título Z-A"){
+            filtrados = filtrados.sortedByDescending { it.title }.toTypedArray()
+        }
+
     }
 
 }

@@ -158,9 +158,10 @@ fun CategoryView (navController: NavController, ViewModel: CategoryViewModel,cat
                 }
             }
         }
-        Row(
+        Box(
             modifier = Modifier
-                .align(alignment = Alignment.CenterHorizontally)
+                .fillMaxWidth()
+                .height(35.dp)
         ){
             BookCategoriesDropdown(
                 categories = ViewModel.categories,
@@ -172,12 +173,13 @@ fun CategoryView (navController: NavController, ViewModel: CategoryViewModel,cat
             Box(
                 modifier = Modifier
                     .padding(horizontal = 10.dp)
-                    .width(149.dp)
+                    .width(160.dp)
                     .height(35.dp)
                     .clickable {
                         showDialog = true
                     }
                     .border(width = 1.dp, color = Color(0xFF000000))
+                    .align(alignment = Alignment.CenterEnd)
             ){
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -194,9 +196,63 @@ fun CategoryView (navController: NavController, ViewModel: CategoryViewModel,cat
         if (showDialog) {
             filtrado(ViewModel,onDismiss = { showDialog = false })
         }
+        booksortDropdown(
+            selectedShort= ViewModel.selectedShort,
+            onShortSelected = { short ->
+                ViewModel.updateShort(short)
+            }
+        )
 
         for (i in 0 until ViewModel.filtrados.size){
             BookPreviewWide(ViewModel.filtrados[i],navController, ViewModel)
+        }
+    }
+}
+
+@Composable
+fun booksortDropdown(
+    selectedShort: String?,
+    onShortSelected: (String) -> Unit,
+) {
+    val categories = listOf("Precio ascendente", "Precio descendente", "Mas valorados", "Título A-Z", "Título Z-A")
+    var expanded by remember { mutableStateOf(false) }
+    Box(
+        modifier = Modifier
+            .padding(start = 10.dp, top = 10.dp, end = 10.dp)
+            .fillMaxWidth()
+            .height(35.dp)
+            .clickable {
+                expanded = !expanded
+            }
+            .border(width = 1.dp, color = Color(0xFF000000))
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxSize()
+            //               .padding(16.dp)
+        ) {
+            Spacer(modifier = Modifier.width(8.dp))
+            Icon(imageVector = Icons.Default.List, contentDescription = null)
+            Text(text = selectedShort?: "Select Short")
+        }
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 10.dp)
+                .background(MaterialTheme.colorScheme.background)
+        ) {
+            categories.forEach { category ->
+                DropdownMenuItem(
+                    text = { Text(text = category)},
+                    onClick = {
+                        onShortSelected(category)
+                        expanded = false
+                    }
+                )
+            }
         }
     }
 }
@@ -280,7 +336,7 @@ fun BookCategoriesDropdown(
     Box(
         modifier = Modifier
             .padding(horizontal = 10.dp)
-            .width(149.dp)
+            .width(160.dp)
             .height(35.dp)
             .clickable {
                 expanded = !expanded
