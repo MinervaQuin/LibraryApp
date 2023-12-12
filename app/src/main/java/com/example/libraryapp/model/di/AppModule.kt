@@ -2,6 +2,12 @@ package com.example.libraryapp.model.di
 
 import android.content.Context
 import com.example.libraryapp.model.FirestoreRepository
+import com.example.libraryapp.model.emailValidationUseCase.ValidateEmail
+import com.example.libraryapp.model.emailValidationUseCase.ValidatePassword
+import com.example.libraryapp.model.emailValidationUseCase.ValidateRepeatedPassword
+import com.example.libraryapp.model.emailValidationUseCase.ValidateTerms
+import com.example.libraryapp.model.emailValidationUseCase.ValidateUserName
+import com.example.libraryapp.model.firebaseAuth.EmailAuthUiClient
 import com.example.libraryapp.model.firebaseAuth.FirestoreRepositoryImpl
 import com.example.libraryapp.model.firebaseAuth.GoogleAuthUiClient
 import com.example.libraryapp.model.firebaseAuth.UserData
@@ -55,6 +61,25 @@ class AppModule {
 
     @Provides
     @Singleton
+    fun provideValidateEmail(): ValidateEmail = ValidateEmail()
+
+    @Provides
+    @Singleton
+    fun provideValidatePassword(): ValidatePassword = ValidatePassword()
+
+    @Provides
+    @Singleton
+    fun provideValidateRepeatedPassword(): ValidateRepeatedPassword = ValidateRepeatedPassword()
+
+    @Provides
+    @Singleton
+    fun provideValidateTerms(): ValidateTerms = ValidateTerms()
+
+    @Provides
+    @Singleton
+    fun provideValidateUserName(): ValidateUserName = ValidateUserName()
+    @Provides
+    @Singleton
     fun provideFirestoreRepository(
         firebaseFirestore: FirebaseFirestore,
         firebaseAuth: FirebaseAuth,
@@ -62,4 +87,10 @@ class AppModule {
         tapClient: SignInClient,
         @ApplicationContext appContext: Context
     ): FirestoreRepository = FirestoreRepositoryImpl(firebaseFirestore, firebaseAuth, storage, tapClient, appContext)
+
+    @Provides
+    @Singleton
+    fun provideEmailAuthUiClient(auth: FirebaseAuth): EmailAuthUiClient {
+        return EmailAuthUiClient(auth)
+    }
 }

@@ -1,13 +1,16 @@
 package com.example.libraryapp.model.firebaseAuth
 
 import android.content.Context
+import android.util.Log
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
+import com.google.firebase.auth.userProfileChangeRequest
 import kotlinx.coroutines.tasks.await
 import java.util.concurrent.CancellationException
+import javax.inject.Inject
 
-class EmailAuthUiClient (
+class EmailAuthUiClient @Inject constructor(
     //need a context?
     private val auth: FirebaseAuth
 ){
@@ -34,12 +37,16 @@ class EmailAuthUiClient (
         }
     }
 
-    suspend fun registerUser(email: String, password: String): Result<String> {
+    suspend fun registerUser(email: String, password: String, username: String): Result<Unit> {
         return try {
-            auth.createUserWithEmailAndPassword(email, password).await()
-            Result.success("Registro exitoso")
+            val authResult = auth.createUserWithEmailAndPassword(email, password).await()
+            val userProfileChangeRequest = userProfileChangeRequest {
+                displayName = username
+            }
+            authResult.user?.updateProfile(userProfileChangeRequest)?.await()
+            Result.success(Unit) // Devuelve Unit en caso de éxito
         } catch (e: Exception) {
-            Result.failure(e)
+            Result.failure(e) // Devuelve la excepción en caso de error
         }
     }
 

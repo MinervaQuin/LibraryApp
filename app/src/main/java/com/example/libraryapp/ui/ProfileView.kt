@@ -46,13 +46,14 @@ import com.example.libraryapp.theme.red
 import com.example.libraryapp.theme.white
 import com.example.libraryapp.viewModel.profileViewModel
 import android.Manifest
-import android.content.Context
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
 import androidx.compose.ui.layout.ContentScale
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+
 
 @Composable
 fun ProfileScreen(
@@ -65,7 +66,6 @@ fun ProfileScreen(
     val context = LocalContext.current
     var imageUri by remember { mutableStateOf<Uri?>(null) }
     var showImagePickerDialog by remember { mutableStateOf(false) }
-
 
     val REQUEST_CAMERA_PERMISSION = 1 //TODO Esta variable me da que hay que cambiarla, huele a chapuza
     /*
@@ -140,6 +140,26 @@ fun ProfileScreen(
         )
     }
 
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = { isGranted: Boolean ->
+            if (isGranted) {
+                // Permiso concedido, proceder con la acción
+                imageUri = viewModel.createImageUri(context)
+                imageUri?.let { uri ->
+                    takePictureLauncher.launch(uri)
+                }
+            } else {
+                // Permiso denegado, mostrar un mensaje
+                Toast.makeText(
+                    context,
+                    "No se puede abrir la cámara",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+    )
+
     if (showImagePickerDialog) {
         AlertDialog(
             onDismissRequest = { showImagePickerDialog = false },
@@ -155,27 +175,18 @@ fun ProfileScreen(
             },
             dismissButton = {
                 TextButton(onClick = {
-                    val cameraPermission = ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA)
-                    if (cameraPermission != PackageManager.PERMISSION_GRANTED) {
-                        ActivityCompat.requestPermissions(
-                            context as Activity,
-                            arrayOf(Manifest.permission.CAMERA),
-                            REQUEST_CAMERA_PERMISSION
-                        )
-
-                    }
-                    if (cameraPermission == PackageManager.PERMISSION_GRANTED){
-                        imageUri = viewModel.createImageUri(context)
-                        imageUri?.let { uri ->
-                            takePictureLauncher.launch(uri)
+                    when (PackageManager.PERMISSION_GRANTED) {
+                        ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) -> {
+                            // Permiso ya concedido, proceder con la acción
+                            imageUri = viewModel.createImageUri(context)
+                            imageUri?.let { uri ->
+                                takePictureLauncher.launch(uri)
+                            }
                         }
-                    }
-                    else{
-                        Toast.makeText(
-                            context,
-                            "No se puede abrir la cámara",
-                            Toast.LENGTH_LONG
-                        ).show()
+                        else -> {
+                            // Solicitar permiso
+                            permissionLauncher.launch(Manifest.permission.CAMERA)
+                        }
                     }
                     showImagePickerDialog = false
                 }) {
@@ -253,9 +264,10 @@ fun ProfileScreen(
                     Toast.LENGTH_LONG
                 ).show()
                 viewModel.viewModelScope.launch {
-                    delay(500)
+                    delay(1000)
                 }
                 navController.navigate("firstScreens")
+                //navController.popBackStack()
             },
             modifier = Modifier
                 .height(40.dp)
@@ -270,3 +282,4 @@ fun ProfileScreen(
 
     }
 }
+

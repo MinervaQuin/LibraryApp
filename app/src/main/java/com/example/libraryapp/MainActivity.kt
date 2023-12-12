@@ -61,6 +61,7 @@ import com.example.libraryapp.viewModel.autoresViewModel
 import com.example.libraryapp.viewModel.homeViewModel
 import com.example.libraryapp.viewModel.loginViewModel
 import com.example.libraryapp.viewModel.profileViewModel
+import com.example.libraryapp.viewModel.signUpViewModel
 import com.example.libraryapp.viewModel.topBarViewModel
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.tasks.Task
@@ -73,6 +74,7 @@ import com.google.firebase.firestore.firestore
 import com.google.zxing.integration.android.IntentIntegrator
 //import com.google.zxing.integration.android.IntentIntegrator
 import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 
 
@@ -95,7 +97,6 @@ class MainActivity : ComponentActivity() {
             val navController = rememberNavController()
             val homeViewModel : homeViewModel = hiltViewModel()
             val topBarViewModel: topBarViewModel = hiltViewModel()
-
             NavHost(navController = navController, startDestination = "firstScreens"){
 
                 navigation(
@@ -104,14 +105,7 @@ class MainActivity : ComponentActivity() {
                 ){
                     composable("login") {
 
-                        val viewModel = viewModel<loginViewModel>()
-                        val state by viewModel.state.collectAsStateWithLifecycle()
-
-                        LaunchedEffect(key1 = Unit){
-                            if(googleAuthUiClient.getSignedInUser() != null){
-                                navController.navigate("secondScreens")
-                            }
-                        }
+                        val viewModel : loginViewModel = hiltViewModel()
 
                         val launcher = rememberLauncherForActivityResult(
                             contract = ActivityResultContracts.StartIntentSenderForResult(),
@@ -142,22 +136,17 @@ class MainActivity : ComponentActivity() {
 
                         LoginView(
                             navController = navController,
-                            state = state,
-                            onSignInClick = {
-                                lifecycleScope.launch {
-                                    val signInIntentSender = googleAuthUiClient.signIn()
-                                    launcher.launch(
-                                        IntentSenderRequest.Builder(
-                                            signInIntentSender ?: return@launch
-                                        ).build()
-                                    )
-                                }
-                            }
-
+                            viewModel = viewModel
                         )
                     }
 
-                    composable("signUp") { signUpView(navController = navController)}
+                    composable("signUp") {
+                        //val viewModel: signUpViewModel = hiltViewModel()
+                        signUpView(
+                            navController = navController
+                        )
+
+                    }
                 }
 
                 navigation(
@@ -190,6 +179,22 @@ class MainActivity : ComponentActivity() {
                                         viewModel = homeViewModel,
                                         navController = navController
                                     )
+                                }
+                            }
+                        )
+                    }
+                    composable("AutoresDestination") {
+                        val viewModel : autoresViewModel = hiltViewModel()
+                        Scaffold(
+                            bottomBar = { BottomBar(navController = navController) },
+                            topBar = { TopBar(navController = navController, topBarViewModel)},
+                            content = { paddingValues ->
+                                Column(
+                                    modifier = Modifier
+                                        .padding(paddingValues)
+                                        .fillMaxSize()
+                                ) {
+                                    autoresView(navController, viewModel)
                                 }
                             }
                         )
@@ -312,22 +317,7 @@ class MainActivity : ComponentActivity() {
 
                 //fuera del grafo
 
-                composable("AutoresDestination") {
-                    val viewModel : autoresViewModel = hiltViewModel()
-                    Scaffold(
-                        bottomBar = { BottomBar(navController = navController) },
-                        topBar = { TopBar(navController = navController, topBarViewModel)},
-                        content = { paddingValues ->
-                            Column(
-                                modifier = Modifier
-                                    .padding(paddingValues)
-                                    .fillMaxSize()
-                            ) {
-                                autoresView(navController, viewModel)
-                            }
-                        }
-                    )
-                }
+
 
                 composable("SearchScreen"){
                     Scaffold(

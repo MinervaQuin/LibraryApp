@@ -48,7 +48,7 @@ class homeViewModel @Inject constructor(
             CollectionSamples("Blog", GreenAppOpacity, "https://previews.123rf.com/images/olegdudko/olegdudko1712/olegdudko171201274/90967469-libros-y-computadora-port%C3%A1til.jpg","5"),
             CollectionSamples("Premiados", GreenAppOpacity, "https://phantom-expansion.unidadeditorial.es/ca3e81ca6c16010e5d1fc2367d9a004a/crop/0x22/552x756/resize/640/assets/multimedia/imagenes/2022/02/28/16460499793522.jpg","Imprescindibles"),
             CollectionSamples("eBooks", rositaGracioso, "https://cdn.computerhoy.com/sites/navi.axelspringer.es/public/media/image/2018/11/ereader.jpg?tf=3840x","7"),
-            CollectionSamples("Autores", GreenAppOpacity, "https://cdn.zendalibros.com/wp-content/uploads/arturo-perez-reverte-1.jpg","8")
+            CollectionSamples("Autores", GreenAppOpacity, "https://cdn.zendalibros.com/wp-content/uploads/arturo-perez-reverte-1.jpg","AutoresDestination")
         )
     )
     val largeCollectionSamplesArray = MutableStateFlow<List<LongCollectionSamples>>(
@@ -63,7 +63,7 @@ class homeViewModel @Inject constructor(
 
     val carouselImageArray = MutableStateFlow<List<carouselImage>>(
         listOf(
-            carouselImage(R.drawable.carrusel1, "cosa"),
+            carouselImage(R.drawable.carousel_img_1, "cosa"),
             carouselImage(R.drawable.carrusel2, "Cosa2"),
             carouselImage(R.drawable.carrusel3, "Cosa3")
         )

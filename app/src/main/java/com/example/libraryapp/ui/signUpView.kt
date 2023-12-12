@@ -1,6 +1,9 @@
 package com.example.libraryapp.ui
 
 
+import android.util.Log
+import android.widget.CheckBox
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
@@ -59,38 +62,69 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.AlertDialogDefaults.shape
 import androidx.compose.runtime.collectAsState
 import androidx.compose.foundation.shape.*
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.libraryapp.model.RegistrationFormEvent
+import com.example.libraryapp.ui.theme.rojoSangre
+import com.example.libraryapp.ui.theme.rositaGracioso
+import kotlinx.coroutines.flow.collect
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun signUpView(signUpViewModel: signUpViewModel = viewModel(), navController: NavController){
-    //@TODO Sustituir el fondo por vectores animados
+fun signUpView(viewModel: signUpViewModel = hiltViewModel(), navController: NavController){
+
     val image = painterResource(R.drawable.vector_sign_up)
 
-    var userName by remember { mutableStateOf(TextFieldValue("")) }
-    var userEmail by remember { mutableStateOf(TextFieldValue("")) }
-    var userBirthDay by remember { mutableStateOf(TextFieldValue("")) }
-    var userPassword by remember { mutableStateOf(TextFieldValue("")) }
-    var userPasswordConfirm by remember { mutableStateOf(TextFieldValue("")) }
+    val state = viewModel.state
+    val context = LocalContext.current
 
-    var selectedDate by remember { mutableStateOf("") }
+    val selectedDate = remember { mutableStateOf(LocalDate.now().minusDays(3)) }
 
-
-
-    val loading by signUpViewModel.loading.collectAsState()
-    val message by signUpViewModel.message.collectAsState()
-    //TODO Ver diferencias entre observeAsState() y collectAsState() y entender cual es mejor
-    val shouldNavigate by signUpViewModel.navigateToNextScreen.collectAsState()
-    val showFirstScreen by signUpViewModel.showFirstScreen2.collectAsState()
+    val shouldNavigate by viewModel.navigateToNextScreen.collectAsState()
+    val showFirstScreen by viewModel.showFirstScreen2.collectAsState()
 
     LaunchedEffect(shouldNavigate) {
         if (shouldNavigate == true) {
             navController.navigate("login") {
                 // Configuraciones adicionales de navegación si las necesitas
                 popUpTo("seconScreens") { inclusive = true }
+            }
+        }
+    }
+
+    LaunchedEffect(key1 = context) {
+        viewModel.validationEvents.collect { event ->
+            when (event) {
+                is signUpViewModel.ValidationEvent.Success -> {
+                    Toast.makeText(
+                        context,
+                        "Registro Exitoso",
+                        Toast.LENGTH_LONG
+                    ).show()
+                    navController.navigate("secondScreens")
+                }
+                is signUpViewModel.ValidationEvent.Failed -> {
+                    Toast.makeText(
+                        context,
+                        event.errorMessage, // Usa el mensaje de error de la clase Failed
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
             }
         }
     }
@@ -102,7 +136,7 @@ fun signUpView(signUpViewModel: signUpViewModel = viewModel(), navController: Na
                 popUpTo("signUp") { inclusive = true }
             }
         }else{
-            signUpViewModel.changeScreen()
+            viewModel.changeScreen()
         }
 
     }
@@ -116,85 +150,185 @@ fun signUpView(signUpViewModel: signUpViewModel = viewModel(), navController: Na
             contentScale = ContentScale.Crop // Ajusta la imagen al tamaño del Box, recortando si es necesario
         )
 
-        Row (
+        Row(
             modifier = Modifier
                 .align(Alignment.Center)
                 //.fillMaxWidth()
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
-        ){
+        ) {
 
-            Column (
+            Column(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
-            ){
+            ) {
                 putText(text = "Registro", color = verdeFuerte, fontSize = 58.sp)
-
-                if(showFirstScreen){
-                    Spacer(modifier = Modifier.height(8.dp))
-                    InputField(value = userName, onChange = {userName = it}, label = "Nombre de Usuario", icon = Icons.Outlined.AccountCircle)
-                    Spacer(modifier = Modifier.height(8.dp))
-                    InputField(value = userEmail, onChange = {userEmail = it}, label = "Correo", icon = Icons.Outlined.Email)
-                    Spacer(modifier = Modifier.height(8.dp))
-                    DatePickerNice()
+                Spacer(modifier = Modifier.height(32.dp))
+                putTextField(
+                    value = state.name,
+                    onValueChange = {viewModel.onEvent(RegistrationFormEvent.NameChanged(it))},
+                    isError = state.nameError, placeHolder = "Nombre de Usuario",
+                    icon = Icons.Outlined.AccountCircle,
+                    visualTransformation = VisualTransformation.None,
+                    keyboardType = KeyboardType.Email)
+                if (state.nameError != null) {
+                    Text(
+                        text = state.nameError,
+                        color = Color.Red
+                    )
                 }
-                else{
-                    InputField(value = userPassword, onChange = {userPassword = it}, label = "Contraseña", icon = Icons.Outlined.Lock, visualTransformation = PasswordVisualTransformation())
-                    Spacer(modifier = Modifier.height(8.dp))
-                    InputField(value = userPasswordConfirm, onChange = {userPasswordConfirm = it}, label = "Confirmar contraseña", icon = Icons.Outlined.Lock, visualTransformation = PasswordVisualTransformation())
-                    Row(
-                        modifier = Modifier
-
-                            .padding(16.dp),
-                    ) {
-                        Button(
-                            onClick = { signUpViewModel.registerUser(userEmail.text, userPassword.text) },
-                            modifier = Modifier
-
-                                .height(50.dp),
-                            colors = ButtonDefaults.buttonColors(verdeFuerte),
-                            shape = CircleShape,
-                        ) {
-                            Text("Registrarse", modifier = Modifier.padding(8.dp))
-                        }
-
-                    }
+                Spacer(modifier = Modifier.height(16.dp))
+                putTextField(
+                    value = state.email,
+                    onValueChange = {viewModel.onEvent(RegistrationFormEvent.EmailChanged(it))},
+                    isError = state.emailError, placeHolder = "Correo",
+                    icon = Icons.Outlined.AccountCircle,
+                    visualTransformation = VisualTransformation.None,
+                    keyboardType = KeyboardType.Email)
+                if (state.emailError != null) {
+                    Text(
+                        text = state.emailError,
+                        color = Color.Red
+                    )
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+                putTextField(
+                    value = state.password,
+                    onValueChange = {viewModel.onEvent(RegistrationFormEvent.PasswordChanged(it))},
+                    isError = state.passwordError, placeHolder = "Contraseña",
+                    icon = Icons.Outlined.Lock,
+                    visualTransformation = PasswordVisualTransformation(),
+                    keyboardType = KeyboardType.Password)
+                if (state.passwordError != null) {
+                    Text(
+                        text = state.passwordError,
+                        color = Color.Red,
+                    )
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+                putTextField(
+                    value = state.repeatedPassword,
+                    onValueChange = {viewModel.onEvent(RegistrationFormEvent.RepeatedPasswordChanged(it))},
+                    isError = state.repeatedPasswordError, placeHolder = "Repetir Contraseña",
+                    icon = Icons.Outlined.Lock,
+                    visualTransformation = PasswordVisualTransformation(),
+                    keyboardType = KeyboardType.Password)
+                if (state.repeatedPasswordError != null) {
+                    Text(
+                        text = state.repeatedPasswordError,
+                        color = Color.Red
+                    )
                 }
                 Spacer(modifier = Modifier.height(8.dp))
-
-
-            }
-        }
-        if(showFirstScreen){
-            Row(
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    //.fillMaxWidth()
-                    .padding(16.dp),
-
-                ){
-                Button(
-                    onClick = { signUpViewModel.changeScreen() },
-                    colors = ButtonDefaults.buttonColors(verdeFuerte),
-                    shape = CircleShape,
-                    modifier = Modifier
-                        .size(75.dp),
-
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                    Icon(imageVector = Icons.Outlined.ArrowForward, contentDescription = "Avanzar")
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Checkbox(
+                                checked = state.acceptedTerms,
+                                onCheckedChange = { viewModel.onEvent(RegistrationFormEvent.AcceptTerms(it)) }
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Tengo más de 18 años",
+                                modifier = Modifier.align(Alignment.CenterVertically) // Alineación vertical del texto
+                            )
+                        }
+                        if (state.termsError != null) {
+                            Text(
+                                text = state.termsError,
+                                color = Color.Red
+                            )
+                        }
+                    }
                 }
-                Spacer(modifier = Modifier.height(150.dp))
+                Button(
+                    onClick = {
+                        viewModel.onEvent(RegistrationFormEvent.Submit)
+                    },
+                    modifier = Modifier
+                        .height(50.dp), // Altura del botón
+                    colors = ButtonDefaults.buttonColors(containerColor = rojoSangre)
+
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center,
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp) // Padding horizontal para el contenido
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.signup_vector),
+                            contentDescription = "Icono de Registrarse",
+                            modifier = Modifier.size(24.dp) // Tamaño del ícono
+                        )
+                        Spacer(Modifier.width(8.dp)) // Espacio entre el ícono y el texto
+                        Text(
+                            text = "Registrarse",
+                            fontSize = 16.sp
+                        )
+                    }
+                }
+
             }
         }
-        else{
-
-        }
-
-        
     }
 }
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
+@Composable
+fun putTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    isError: String?,
+    placeHolder: String,
+    icon: ImageVector,
+    visualTransformation: VisualTransformation,
+    keyboardType: KeyboardType
+) {
+    val keyboardController = LocalSoftwareKeyboardController.current
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
 
-
+        isError = isError != null,
+        modifier = Modifier
+            .width(300.dp)
+            .height(55.dp),
+        placeholder = {
+            Text(text = placeHolder)
+        },
+        keyboardOptions = KeyboardOptions(
+            keyboardType = keyboardType,
+            imeAction = ImeAction.Done
+        ),
+        keyboardActions = KeyboardActions(
+            onDone = {
+                keyboardController?.hide() // Oculta el teclado
+            }
+        ),
+        colors = TextFieldDefaults.textFieldColors(
+            textColor = Color.Black,
+            disabledTextColor = Color.Transparent,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent,
+            disabledIndicatorColor = Color.Transparent
+        ),
+        shape = RoundedCornerShape(16.dp),
+        leadingIcon = {
+            Icon(
+                imageVector = icon,
+                contentDescription = "Icono de cuenta" // Descripción para accesibilidad
+            )
+        },
+        visualTransformation = visualTransformation
+    )
+}
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DatePickerNice() {
@@ -203,8 +337,6 @@ fun DatePickerNice() {
     val dateFormatter = DateTimeFormatter.ofPattern("dd MMMM, yyyy")
     var isDialogOpen by remember { mutableStateOf(false) }
 
-    // Suponemos que CalendarDialog es un composable que muestra un diálogo
-    // y utiliza calendarState para manejar su estado.
     CalendarDialog(
         state = calendarState,
         selection = CalendarSelection.Date { date ->
@@ -217,7 +349,6 @@ fun DatePickerNice() {
     )
 
     // TextField que muestra la fecha y abre el diálogo al hacer clic
-    //TODO Controlar la logica cuando se introduce la fecha a mano en vez de con el calendario
     TextField(
         value = dateFormatter.format(selectedDate.value),
         onValueChange = { /* No hacer nada para prevenir la edición */ },
@@ -251,82 +382,9 @@ fun DatePickerNice() {
             }
     )
 }
-
-
-    /*
-    Button(
-        onClick = {
-        calendarState.show()
-                  },
-        shape = RoundedCornerShape(20.dp),
-        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE7E0EC)), // Color de fondo similar al de los TextField
-        modifier = Modifier.size(width = 275.dp, height = 53.dp),
-
-        )
-    {
-        // El Text ahora muestra la fecha seleccionada formateada
-        Row(
-            modifier = Modifier.fillMaxWidth(), // Asegúrate de que el Row ocupe el ancho completo del botón
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.aligned(Alignment.Start)
-        ) {
-            Icon(
-                imageVector = Icons.Default.DateRange, // Usa tu icono deseado
-                contentDescription = "Select Date", // Descripción para accesibilidad
-                modifier = Modifier.padding(end= 8.dp), // Espacio entre el icono y el texto
-                tint = Color.Black // Establece el color del ícono a negro
-            )
-            Text(
-                text = dateFormatter.format(selectedDate.value),
-                color = Color(0xFF49454F) // Asegúrate de que el color del texto sea visible contra el color de fondo del botón
-            )
-        }
-    }*/
-
-
-
-
-/*
-@Composable
-fun DatePickerDemo(onDateSelected: (String) -> Unit) {
-    val context = LocalContext.current
-    val calendar = remember { Calendar.getInstance() }
-    val year = calendar.get(Calendar.YEAR)
-    val month = calendar.get(Calendar.MONTH)
-    val day = calendar.get(Calendar.DAY_OF_MONTH)
-
-    // rememberDatePickerDialog es una función de extensión para recordar el DatePickerDialog
-    val datePickerDialog = rememberDatePickerDialog(year, month, day) { _, year, month, day ->
-        // Los meses en Calendar empiezan desde 0, por lo que se suma 1 para obtener la representación correcta
-        onDateSelected("$day/${month + 1}/$year")
-    }
-
-    Button(onClick = { datePickerDialog.show() }) {
-        Text(text = "Select your birth date")
-    }
-}
-
-// Función de extensión para recordar el DatePickerDialog y evitar la recreación en cada recomposición
-@Composable
-private fun rememberDatePickerDialog(
-    year: Int,
-    month: Int,
-    day: Int,
-    onDateSet: (DatePicker, Int, Int, Int) -> Unit
-): DatePickerDialog {
-    val context = LocalContext.current
-    return remember {
-        DatePickerDialog(context, onDateSet, year, month, day).apply {
-            // Configuraciones adicionales del DatePickerDialog pueden ir aquí si es necesario
-        }
-    }
-}
-*/
-
-
 @Preview(showBackground = true)
 @Composable
 fun signUpViewPreview() {
     val navController = rememberNavController()
-    signUpView(navController = navController)
+    //signUpView(navController = navController)
 }

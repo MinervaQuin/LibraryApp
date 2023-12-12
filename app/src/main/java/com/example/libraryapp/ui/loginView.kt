@@ -2,6 +2,10 @@ package com.example.libraryapp.ui
 
 
 import android.widget.Toast
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -23,7 +27,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.ArrowForward
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.Lock
@@ -31,23 +38,31 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
@@ -55,29 +70,101 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
 import com.example.libraryapp.theme.*
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.libraryapp.model.RegistrationFormEvent
+import com.example.libraryapp.model.firebaseAuth.GoogleAuthUiClient
 import com.example.libraryapp.model.firebaseAuth.SignInState
+import com.example.libraryapp.viewModel.signUpViewModel
+import com.google.android.gms.auth.api.identity.Identity
+import kotlinx.coroutines.launch
 
 @Composable
-fun LoginView(loginViewModel : loginViewModel = viewModel(), navController: NavController,state: SignInState, onSignInClick: () -> Unit){
-    //@TODO: En vez de 1 solo elemento como fondo, hacer que sean 3 con animación de movimiento
+fun LoginView(viewModel : loginViewModel, navController: NavController){
     val image = painterResource(R.drawable.fondo_login)
     val googleIconImageVector = ImageVector.vectorResource(id = R.drawable.vector_google)
-
 
 
     var userEmail by remember { mutableStateOf(TextFieldValue("")) }
     var password by remember { mutableStateOf(TextFieldValue("")) }
 
+
     val context = LocalContext.current
-    LaunchedEffect(key1 = state.signInError){
+    val formState = viewModel.formState
+
+
+    val coroutineScope = rememberCoroutineScope()
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartIntentSenderForResult(),
+        onResult = { result ->
+            if(result.resultCode == ComponentActivity.RESULT_OK) {
+                coroutineScope.launch {
+                    val signInResult = viewModel.googleAuthUiClient.signInWithIntent(
+                        intent = result.data ?: return@launch
+                    )
+                    viewModel.onSignInResult(signInResult)
+                }
+            }
+        }
+    )
+
+    val state by viewModel.state.collectAsState()
+
+    LaunchedEffect(key1 = state.signInError) {
         state.signInError?.let { error ->
             Toast.makeText(
                 context,
                 error,
                 Toast.LENGTH_LONG
             ).show()
+        }
+    }
+
+
+    LaunchedEffect(key1 = Unit){
+        if(viewModel.googleAuthUiClient.getSignedInUser() != null){
+            navController.navigate("secondScreens")
+        }
+    }
+
+
+
+    LaunchedEffect(key1 = state.isSignInSuccessful) {
+        if(state.isSignInSuccessful) {
+            Toast.makeText(
+                context,
+                "Sesión Iniciada",
+                Toast.LENGTH_LONG
+            ).show()
+
+            navController.navigate("secondScreens")
+            viewModel.resetState()
+        }
+    }
+
+    LaunchedEffect(key1 = context) {
+        viewModel.validationEvents.collect { event ->
+            when (event) {
+                is signUpViewModel.ValidationEvent.Success -> {
+                    Toast.makeText(
+                        context,
+                        "Registro Exitoso",
+                        Toast.LENGTH_LONG
+                    ).show()
+                    navController.navigate("secondScreens")
+                }
+                is signUpViewModel.ValidationEvent.Failed -> {
+                    Toast.makeText(
+                        context,
+                        event.errorMessage, // Usa el mensaje de error de la clase Failed
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
         }
     }
 
@@ -106,21 +193,83 @@ fun LoginView(loginViewModel : loginViewModel = viewModel(), navController: NavC
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-
-
-                //TODO Hacer que al darle al enter cambie el focus en vez de poner un puto enter
-                InputField(value = userEmail, onChange = {userEmail = it}, label = "Correo", icon = Icons.Outlined.Email)
-
+                putTextField(
+                    value = formState.email,
+                    onValueChange = {viewModel.onEvent(RegistrationFormEvent.EmailChanged(it))},
+                    isError = formState.emailError, placeHolder = "Correo",
+                    icon = Icons.Outlined.AccountCircle,
+                    visualTransformation = VisualTransformation.None,
+                    keyboardType = KeyboardType.Email)
+                if (formState.emailError != null) {
+                    Text(
+                        text = formState.emailError,
+                        color = Color.Red
+                    )
+                }
                 Spacer(modifier = Modifier.height(8.dp))
-
-                InputField(value = password, onChange = {password = it}, label = "Contraseña", icon = Icons.Outlined.Lock, visualTransformation = PasswordVisualTransformation())
+                putTextField(
+                    value = formState.password,
+                    onValueChange = {viewModel.onEvent(RegistrationFormEvent.PasswordChanged(it))},
+                    isError = formState.passwordError, placeHolder = "Contraseña",
+                    icon = Icons.Outlined.Lock,
+                    visualTransformation = PasswordVisualTransformation(),
+                    keyboardType = KeyboardType.Password)
+                if (formState.passwordError != null) {
+                    Text(
+                        text = formState.passwordError,
+                        color = Color.Red,
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(text = "¿Has Olvidado la contraseña?")
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(
-                    onClick = onSignInClick,
+                    onClick = {
+                        /*
+                        viewModel.signInWithEmail(userEmail.text,password.text){
+                            navController.navigate("homePage")
+                        }*/
+                        viewModel.onEvent(RegistrationFormEvent.Submit)
+                    },
                     modifier = Modifier
+                        .height(50.dp) // Altura del botón
+                        .width(300.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = verdeFuerte)
+
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center,
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp) // Padding horizontal para el contenido
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(R.drawable.login_vector),
+                            contentDescription = "Icono de Iniciar Sesión",
+                            modifier = Modifier.size(24.dp) // Tamaño del ícono
+                        )
+                        Spacer(Modifier.width(8.dp)) // Espacio entre el ícono y el texto
+                        Text(
+                            text = "Iniciar Sesión",
+                            fontSize = 16.sp
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                Button(
+                    onClick = {
+                        coroutineScope.launch {
+                            val signInIntentSender = viewModel.googleAuthUiClient.signIn()
+                            launcher.launch(
+                                IntentSenderRequest.Builder(
+                                    signInIntentSender ?: return@launch
+                                ).build()
+                            )
+                        }
+                    },
+                    modifier = Modifier
+                        .width(300.dp)
                         .height(50.dp), // Altura del botón
                     colors = ButtonDefaults.buttonColors(containerColor = verdeFuerte)
 
@@ -144,33 +293,11 @@ fun LoginView(loginViewModel : loginViewModel = viewModel(), navController: NavC
                     }
                 }
 
+
+
             }
         }
 
-        Row(
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                //.fillMaxWidth()
-                .padding(16.dp),
-
-        ){
-            Button(
-                onClick = {
-                    //loginViewModel.updateCredentials(userEmail.text, password.text)
-                    loginViewModel.signInWithEmail(userEmail.text,password.text){ //TODO A esto de iniciar sesión con el usuario y contraseña hay que echarle un ojo, muy poco MVVM
-                        navController.navigate("homePage")
-                    }
-                          },
-                colors = ButtonDefaults.buttonColors(verdeFuerte),
-                shape = CircleShape,
-                modifier = Modifier
-                    .size(75.dp),
-
-                ) {
-                Icon(imageVector = Icons.Outlined.ArrowForward, contentDescription = "Avanzar")
-            }
-            Spacer(modifier = Modifier.height(150.dp))
-        }
 
         Row (
             modifier = Modifier
@@ -212,39 +339,6 @@ fun putText(
             lineHeight = 50.sp,
             color = color
         )
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun InputField(
-    value: TextFieldValue,
-    onChange: (TextFieldValue) -> Unit,
-    modifier: Modifier = Modifier,
-    label: String,
-    icon: ImageVector,
-    visualTransformation: VisualTransformation = VisualTransformation.None
-) {
-    TextField(
-        value = value,
-        onValueChange = onChange,
-        label = { Text(text = label) },
-        shape = RoundedCornerShape(20.dp),
-        colors = TextFieldDefaults.textFieldColors(
-            disabledTextColor = Color.Transparent,
-            focusedIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent,
-            disabledIndicatorColor = Color.Transparent
-        ),
-        leadingIcon = {
-            Icon(
-                imageVector = icon,
-                contentDescription = null
-            )
-        },
-        visualTransformation = visualTransformation,
-        modifier = modifier,
-
     )
 }
 

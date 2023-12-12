@@ -35,6 +35,7 @@ class profileViewModel @Inject constructor(
         viewModelScope.launch {
             _userData.value = firestoreRepository.getuser()
         }
+
     }
 
     // Función para subir imagen
@@ -89,5 +90,7 @@ class profileViewModel @Inject constructor(
 
         }
     }
+
+
 }
 
