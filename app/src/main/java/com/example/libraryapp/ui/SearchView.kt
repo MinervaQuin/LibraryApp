@@ -121,10 +121,6 @@ fun BookScreen(
             ) {
                 items(items = books) {
                     BookItem(it, modifier = Modifier, navController, searchViewModel)
-
-                    if (it != null) {
-                        Log.d("Firestore", it.title)
-                    }
                 }
             }
             Spacer(modifier = Modifier.height(55.dp))

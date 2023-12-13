@@ -14,8 +14,11 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.tasks.await
 import java.lang.NullPointerException
+import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.ZoneId
+import java.time.ZoneOffset
 import java.util.Date
 import java.util.concurrent.CancellationException
 import java.util.regex.Pattern
@@ -86,7 +89,7 @@ class FirestoreRepositoryImpl @Inject constructor(
                 .await()
 
             for (document in querySnapshot.documents) {
-                document.getString("title")?.let { Log.d("Firestore", it) }
+//                document.getString("title")?.let { Log.d("Firestore", it) }
                 var book = document.toObject(Book::class.java)
                 if (book != null) {
                     book.ref = document.id
@@ -182,7 +185,7 @@ class FirestoreRepositoryImpl @Inject constructor(
                 Array.add(autor)
 
             }
-            Log.d("Firestore", Array.size.toString())
+//            Log.d("Firestore", Array.size.toString())
             Array
         } catch (e: Exception) {
             Log.d("FirestoreRepository", "getAllBooks failed with ", e)
@@ -236,8 +239,8 @@ class FirestoreRepositoryImpl @Inject constructor(
 //                    review.score = document.getDouble("score") ?: 0.0
 
                     val timestamp = document.getTimestamp("date")
-                    val localDate = timestamp?.toDate()?.toInstant()?.atZone(ZoneId.systemDefault())?.toLocalDate()
-                    review.date = localDate
+                    val localDateTime = timestamp?.let { timestampToLocalDateTime(it) }
+                    review.date = localDateTime
 
                     reviews.add(review)
                 }
@@ -268,7 +271,7 @@ class FirestoreRepositoryImpl @Inject constructor(
                 // Obtener el valor del campo "userId" del documento
                 val userIdFromDocument = document.getString("userId")
                 if (userIdFromDocument.equals(userId)) {
-                    Log.d("firebase", "Este usuario tiene una review")
+                    Log.d("FiretoreRepository", "Este usuario tiene una review")
                     if (userIdFromDocument != null) {
                         review = Review(
                             document.id!!,
@@ -283,8 +286,8 @@ class FirestoreRepositoryImpl @Inject constructor(
 //                        review.score = document.getDouble("score") !!
 
                         val timestamp = document.getTimestamp("date")
-                        val localDate = timestamp?.toDate()?.toInstant()?.atZone(ZoneId.systemDefault())?.toLocalDate()
-                        review.date = localDate
+                        val localDateTime = timestamp?.let { timestampToLocalDateTime(it) }
+                        review.date = localDateTime
 
                     }
                 }
@@ -294,31 +297,28 @@ class FirestoreRepositoryImpl @Inject constructor(
         } catch (e: Exception) {
             // Manejar la excepción, por ejemplo, imprimir un mensaje de error
             e.printStackTrace()
-            Log.d("firebase", "Este usuario no tiene review")
+            Log.d("FiretoreRepository", "Este usuario no tiene review")
             null // Devolver una lista vacía en caso de error
         }
     }
 
 
     override suspend fun updateReview(bookId: String, reviewId: String, newData: Map<String, Any>) {
-        // Referencia al documento que deseas actualizar
         val usuarioRef = firebaseFirestore.collection("books").document(bookId).collection("reviews").document(reviewId)
 
         var timestamp = localDateToTimestamp(LocalDate.now())
-        // Actualiza el campo específico con el nuevo valor
+        val timestamp2: Timestamp = Timestamp.now()
         usuarioRef
             .update(newData)
             .addOnSuccessListener {
-                // La actualización fue exitosa
             }
             .addOnFailureListener { e ->
-                // Ocurrió un error al actualizar
                 println("Error al actualizar campo: $e")
             }
         usuarioRef
-            .update("date", timestamp)
+            .update("date", timestamp2)
             .addOnSuccessListener {
-                // La actualización fue exitosa
+                Log.d("FiretoreRepository", "fecha: " + timestamp2)
             }
             .addOnFailureListener { e ->
                 // Ocurrió un error al actualizar
@@ -346,13 +346,14 @@ class FirestoreRepositoryImpl @Inject constructor(
         try {
             val firestore = FirebaseFirestore.getInstance()
 
+            val timestamp: Timestamp = Timestamp.now()
             // Preparar los datos del objeto Review para Firestore
             val reviewData = hashMapOf(
                 "userId" to review.userId,
                 "userName" to review.userName,
                 "score" to review.score,
                 "description" to review.description,
-                "date" to localDateToTimestamp(review.date) // Convierte LocalDate a Timestamp
+                "date" to timestamp // Convierte LocalDate a Timestamp
             )
             Log.d("firebase", "Valores de reviewData: $reviewData")
             firestore.collection("books").document(bookId).collection("reviews").add(reviewData as Map<String, Any>)
@@ -490,9 +491,17 @@ class FirestoreRepositoryImpl @Inject constructor(
     }
 
     fun convertLocalDateToTimestamp(localDate: LocalDate): Timestamp {
-        val zoneId = ZoneId.systemDefault()
-        val epochMillis = localDate.atStartOfDay(zoneId).toInstant().toEpochMilli()
-        return Timestamp(epochMillis / 1000, ((epochMillis % 1000) * 1_000_000).toInt())
+//        val zoneId = ZoneId.systemDefault()
+//        val localDateTime = localDate.atStartOfDay(zoneId).toLocalDateTime()
+//        val epochMillis = localDateTime.atZone(zoneId).toInstant().toEpochMilli()
+//        return Timestamp(epochMillis / 1000, ((epochMillis % 1000) * 1_000_000).toInt())
+        val timestamp: Timestamp = Timestamp.now()
+
+// Puedes utilizar el timestamp como desees, por ejemplo, para almacenarlo en Firebase Firestore
+// o para mostrar la fecha y hora actual
+        println("Timestamp actual: $timestamp")
+        return timestamp
+
     }
 
 
@@ -549,8 +558,10 @@ class FirestoreRepositoryImpl @Inject constructor(
                             )
 
                             val timestamp = document.getTimestamp("date")
-                            val localDate = timestamp?.toDate()?.toInstant()?.atZone(ZoneId.systemDefault())?.toLocalDate()
-                            review.date = localDate
+                            val localDateTime = timestamp?.let { timestampToLocalDateTime(it) }
+//                            Log.d("Reviews","NUEVA HORA: " + localDateTime)
+
+                            review.date = localDateTime
 
                             reviewList.add(review)
                         }catch (e: NullPointerException){
@@ -576,7 +587,14 @@ class FirestoreRepositoryImpl @Inject constructor(
             continuation.resume(emptyList())
         }
     }
-    
+
+    fun timestampToLocalDateTime(timestamp: Timestamp): LocalDateTime {
+        val instant: Instant = Instant.ofEpochMilli(timestamp.toDate().time)
+        return LocalDateTime.ofInstant(instant, ZoneId.systemDefault())
+    }
+
+
+
     override suspend fun getuser(): UserData? {
         return auth.currentUser?.run {
             UserData(

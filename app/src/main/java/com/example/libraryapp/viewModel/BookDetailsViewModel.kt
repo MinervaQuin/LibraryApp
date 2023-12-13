@@ -75,7 +75,7 @@ class BookDetailsViewModel @Inject constructor(
                         userName = _userData!!.value!!.userName?: "user",
                         score = _bookUiState.value.reviewScore.toDouble(),
                         description = _bookUiState.value.comment,
-                        date = LocalDate.now()
+                        date = LocalDateTime.now()
                     )
 
                     firestoreRepository.upLoadReview(bookId= libraryAppState.getBookId(), review = newReview)
@@ -166,20 +166,22 @@ class BookDetailsViewModel @Inject constructor(
     }
 
 
-    fun getFormattedTimeAgo(commentDateTime: LocalDate?): String {
-        val commentCast = LocalDateTime.of(commentDateTime, LocalTime.MIDNIGHT)
+    fun getFormattedTimeAgo(commentDateTime: LocalDateTime?): String {
 
         val currentDateTime = LocalDateTime.now()
-        val difference = Duration.between(commentCast, currentDateTime)
+        val difference = Duration.between(commentDateTime, currentDateTime)
 
-        return when {
-            difference.seconds < 60 -> "hace un momento"
-            difference.toMinutes() < 60 -> "hace ${difference.toMinutes()} minutos"
-            difference.toHours() < 24 -> "hace ${difference.toHours()} horas"
-            commentCast.toLocalDate() == currentDateTime.toLocalDate() -> "hoy"
-            else -> commentCast.format(
-                DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+        if (commentDateTime != null) {
+            return when {
+                difference.seconds < 60 -> "hace un momento"
+                difference.toMinutes() < 60 -> "hace ${difference.toMinutes()} minutos"
+                difference.toHours() < 24 -> "hace ${difference.toHours()} horas"
+                commentDateTime.toLocalDate() == currentDateTime.toLocalDate() -> "hoy"
+                else -> commentDateTime.format(
+                    DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+            }
         }
+        return "Error"
     }
 
     fun getReviewFromUser(): Review? {

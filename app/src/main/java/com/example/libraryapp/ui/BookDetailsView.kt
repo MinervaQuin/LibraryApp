@@ -116,7 +116,9 @@ fun BookDetailsScreen(
                 .verticalScroll(rememberScrollState())
         ) {
             for (review in reviews) {
+                Log.d("Reviews", "AAAAAA")
                 if (review != null) {
+                    Log.d("Reviews", review.userName +" : " + review.date.toString())
                     UserReview(review, bookDetailsViewModel = bookDetailsViewModel)
                 }
             }
@@ -183,7 +185,6 @@ fun UserReview(
 
     val maxLines = 3
     val isTextLong = review.description.length > 150
-    Log.d("firebase", "isTextlong: " + isTextLong)
 
     Column(modifier = Modifier.padding(10.dp)) {
         Row {
