@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavHostController
 import com.example.libraryapp.R
 import com.example.libraryapp.model.resources.Book
 import com.example.libraryapp.model.firebaseAuth.FirestoreRepository
@@ -117,6 +118,10 @@ class homeViewModel @Inject constructor(
             Log.e("Firestore", "Error en getBooksStringMatch", e)
             return emptyList()
         }
+    }
+
+    fun setNewNavController(new: NavHostController){
+        libraryAppState.setNavController(new)
     }
 
 

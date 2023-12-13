@@ -106,10 +106,9 @@ fun HomeView(
     val collectionsArray by viewModel.collectionArray.collectAsState()
     val largeCollectionSamplesArray by viewModel.largeCollectionSamplesArray.collectAsState()
     val carouselImageArray by viewModel.carouselImageArray.collectAsState()
-    val searchViewModel : SearchViewModel = hiltViewModel()
 
     SearchAppBarHP(
-        searchViewModel = searchViewModel,
+        homeViewModel=viewModel,
         navController = navController
     )
 
@@ -374,7 +373,7 @@ fun LargeCollectionBox(collection: LongCollectionSamples, navController: NavCont
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
-fun SearchAppBarHP(searchViewModel: SearchViewModel,
+fun SearchAppBarHP(homeViewModel: homeViewModel,
                    navController: NavHostController)
 {
     var searchString by remember { mutableStateOf("") }
@@ -389,7 +388,8 @@ fun SearchAppBarHP(searchViewModel: SearchViewModel,
 
             keyboardActions = KeyboardActions(
                 onDone = {
-                    searchViewModel.setSearchedString(searchString)
+                    homeViewModel.libraryAppState.setSearchedString(searchString)
+
                     navController.navigate("SearchScreen")
                 }
             ),
@@ -399,8 +399,8 @@ fun SearchAppBarHP(searchViewModel: SearchViewModel,
             singleLine = true,
             leadingIcon = {
                 IconButton(onClick = {
-                    searchViewModel.setNewNavController(navController)
-                    searchViewModel.initiateScan(context)
+                    homeViewModel.setNewNavController(navController)
+                    homeViewModel.initiateScan(context)
                 }) {
                     Icon(
                         painter = painterResource(id = R.drawable.upc_scan),
@@ -412,7 +412,8 @@ fun SearchAppBarHP(searchViewModel: SearchViewModel,
             trailingIcon = {
 
                 IconButton(onClick = {
-                    searchViewModel.setSearchedString(searchString)
+                    homeViewModel.libraryAppState.setSearchedString(searchString)
+
                     navController.navigate("SearchScreen")
                 }) { // Ir a pagina de scan codigo de barras
 

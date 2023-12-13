@@ -32,7 +32,9 @@ class SearchViewModel @Inject constructor(
     val booksLoaded: LiveData<Boolean> get() = _booksLoaded
 
     init {
+        setSearchedString(libraryAppState.getSearchedString())
         viewModelScope.launch {
+
             getBooksStringMatch(libraryAppState.getSearchedString())
             _booksLoaded.postValue(true)
         }

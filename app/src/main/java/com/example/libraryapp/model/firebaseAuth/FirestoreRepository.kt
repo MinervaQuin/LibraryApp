@@ -42,7 +42,6 @@ interface FirestoreRepository {
 
     suspend fun uploadBookToFirestore()
     suspend fun addNewAttribute()
-    suspend fun deleteReviews()
     suspend fun getReviewsFromABook(bookId: String): List<Review?>
     suspend fun getReviewFromUserId(bookId: String, userId: String): Review?
     suspend fun updateReview(bookId: String, reviewId: String, newData: Map<String, Any>)

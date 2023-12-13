@@ -93,7 +93,7 @@ class FirestoreRepositoryImpl @Inject constructor(
                 }
                 bookArray.add(book)
             }
-            Log.d("Firestore", bookArray.size.toString())
+//            Log.d("Firestore", bookArray.size.toString())
             bookArray
         } catch (e: Exception) {
             Log.d("FirestoreRepository", "getAllBooks failed with ", e)
@@ -110,14 +110,13 @@ class FirestoreRepositoryImpl @Inject constructor(
 
             allBooks.forEach { book ->
                 if (isBookMatching(book, pattern)) {
-                    Log.d("FirestoreRepository", "Coincidencia encontrada")
+//                    Log.d("FirestoreRepository", "Coincidencia encontrada")
                     bookArray.add(book)
                 } else {
-                    Log.d("FirestoreRepository", "No se encontró coincidencia")
+//                    Log.d("FirestoreRepository", "No se encontró coincidencia")
                 }
             }
             bookArray
-
 
             return bookArray
         } catch (e: Exception) {
@@ -523,89 +522,6 @@ class FirestoreRepositoryImpl @Inject constructor(
     }
 
 
-
-    //    reviews: List<String> = List(5) { "$it" },
-    val opiniones: List<String> = listOf(
-    "Este libro es una joya, una trama cautivadora de principio a fin.",
-    "Los personajes son tan vívidos que sientes que podrías conocerlos en la vida real.",
-    "Increíblemente bien escrito, cada palabra está cuidadosamente elegida.",
-    "La trama te mantiene en vilo, imposible de dejar de leer.",
-    "Una historia con giros inesperados que te mantienen sorprendido.",
-    "El mensaje profundo del libro me hizo reflexionar sobre la vida.",
-    "El estilo del autor es único y refrescante, una delicia para los amantes de la buena escritura.",
-    "Me encantó cómo la historia aborda temas actuales de manera inteligente.",
-    "Los diálogos son tan auténticos que puedes escuchar a los personajes hablar.",
-    "Un libro que te deja con una sensación duradera después de leer la última página.",
-    "La descripción de los escenarios es tan vívida que sentí que estaba allí.",
-    "Este libro es una montaña rusa emocional, te hace reír y llorar en un instante.",
-    "La narrativa es envolvente, te sumerge por completo en el universo del autor.",
-    "Recomendaría este libro a cualquiera que busque una lectura fascinante y conmovedora.",
-    "La trama y los personajes se quedan contigo mucho después de cerrar el libro; una experiencia inolvidable.",
-    )
-
-    val users: List<String> = listOf(
-        "Isabella",
-        "Liam",
-        "Sophia",
-        "Noah",
-        "Mia",
-        "Ethan",
-        "Olivia",
-        "Oliver",
-        "Ava",
-        "Aiden",
-        "Emma",
-        "Jackson",
-        "Aria",
-        "Lucas",
-        "Harper",
-        "Benjamin",
-        "Grace",
-        "Mason",
-        "Amelia",
-        "Caleb",
-        "Lily",
-        "Henry",
-        "Stella",
-        "Samuel",
-        "Zoe",
-        "Leo",
-        "Natalie",
-        "Alexander",
-        "Penelope",
-        "James",
-        "Eleanor",
-        "Milo",
-        "Aurora",
-        "Sebastian",
-        "Luna",
-        "Owen",
-        "Hazel",
-        "Felix",
-        "Isla",
-        "Wyatt",
-        "Eva",
-        "Graham",
-        "Nova",
-        "Dylan",
-        "Ivy",
-        "Arthur",
-        "Ayla",
-        "Maxwell",
-        "Nora",
-        "Zachary",
-        "Clara",
-        "Julian",
-        "Elise",
-        "Carter",
-        "Violet",
-        "Theodore",
-        "Aubrey",
-        "Gabriel",
-        "Adeline",
-        "Oscar"
-    )
-
     override suspend fun getReviewsFromABook(bookId: String): List<Review?> = suspendCoroutine { continuation ->
         try {
             val reviewList: MutableList<Review?> = mutableListOf()
@@ -660,67 +576,7 @@ class FirestoreRepositoryImpl @Inject constructor(
             continuation.resume(emptyList())
         }
     }
-
-    override suspend fun deleteReviews(){
-        try {
-
-            var count = 3;
-            val db = FirebaseFirestore.getInstance()
-            val mainCollectionPath = "books"
-
-// Obtener todos los documentos de la colección principal
-            val mainCollectionRef = db.collection(mainCollectionPath)
-
-            mainCollectionRef.get()
-                .addOnSuccessListener { mainDocuments ->
-                    for (mainDocument in mainDocuments) {
-                        val mainDocumentId = mainDocument.id
-
-                        // Obtener la subcolección para cada documento principal
-                        val subcollectionPath = "reviews"
-                        val subcollectionRef = mainCollectionRef.document(mainDocumentId).collection(subcollectionPath)
-
-                        subcollectionRef.get()
-                            .addOnSuccessListener { subDocuments ->
-                                for (subDocument in subDocuments) {
-                                        // Aquí puedes actualizar cada documento añadiendo un nuevo campo
-                                        val updatedData = hashMapOf(
-                                            "description" to opiniones[Random.nextInt(0, 15)],
-//                                            "userName" to users[count],
-                                            "userId" to "$count",
-                                            "score" to Random.nextInt(0, 5).toDouble()
-
-                                            // Puedes añadir más campos según tus necesidades
-                                        )
-                                        count++
-                                        subcollectionRef.document(subDocument.id).update(updatedData as Map<String, Any>)
-                                            .addOnSuccessListener {
-                                                Log.d("Firestore", "Documento actualizado con éxito")
-                                            }
-                                            .addOnFailureListener { e ->
-                                                Log.e("Firestore", "Error al actualizar documento", e)
-                                            }
-
-                                }
-                            }
-                            .addOnFailureListener { e ->
-                                // Manejar errores al obtener documentos de la subcolección
-                                Log.d("Reviews","Error al obtener documentos de la subcolección: $e")
-                            }
-                    }
-                }
-                .addOnFailureListener { e ->
-                    // Manejar errores al obtener documentos de la colección principal
-                    Log.d("Reviews","Error al obtener documentos de la colección principal: $e")
-                }
-
-
-        }catch (e: Exception){
-
-        }
-
-    }
-
+    
     override suspend fun getuser(): UserData? {
         return auth.currentUser?.run {
             UserData(
