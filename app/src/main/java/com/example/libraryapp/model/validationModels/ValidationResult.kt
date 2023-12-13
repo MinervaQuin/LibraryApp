@@ -1,4 +1,4 @@
-package com.example.libraryapp.model.emailValidationUseCase
+package com.example.libraryapp.model.validationModels
 
 data class ValidationResult(
     val successful: Boolean,

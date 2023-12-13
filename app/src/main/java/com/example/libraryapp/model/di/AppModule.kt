@@ -2,11 +2,11 @@ package com.example.libraryapp.model.di
 
 import android.content.Context
 import com.example.libraryapp.model.firebaseAuth.FirestoreRepository
-import com.example.libraryapp.model.emailValidationUseCase.ValidateEmail
-import com.example.libraryapp.model.emailValidationUseCase.ValidatePassword
-import com.example.libraryapp.model.emailValidationUseCase.ValidateRepeatedPassword
-import com.example.libraryapp.model.emailValidationUseCase.ValidateTerms
-import com.example.libraryapp.model.emailValidationUseCase.ValidateUserName
+import com.example.libraryapp.model.validationModels.emailValidationUseCase.ValidateEmail
+import com.example.libraryapp.model.validationModels.emailValidationUseCase.ValidatePassword
+import com.example.libraryapp.model.validationModels.emailValidationUseCase.ValidateRepeatedPassword
+import com.example.libraryapp.model.validationModels.emailValidationUseCase.ValidateTerms
+import com.example.libraryapp.model.validationModels.emailValidationUseCase.ValidateUserName
 import com.example.libraryapp.model.firebaseAuth.EmailAuthUiClient
 import com.example.libraryapp.model.firebaseAuth.FirebaseStorageImpl
 import com.example.libraryapp.model.firebaseAuth.FirebaseStorageRepository

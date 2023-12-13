@@ -1,8 +1,6 @@
 package com.example.libraryapp.ui
 
 
-import android.util.Log
-import android.widget.CheckBox
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -16,13 +14,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.outlined.AccountCircle
-import androidx.compose.material.icons.outlined.ArrowForward
-import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -38,11 +33,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.libraryapp.R
 import com.example.libraryapp.theme.verdeFuerte
 import com.example.libraryapp.viewModel.signUpViewModel
@@ -59,11 +52,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.AlertDialogDefaults.shape
 import androidx.compose.runtime.collectAsState
 import androidx.compose.foundation.shape.*
 import androidx.compose.foundation.text.KeyboardActions
@@ -77,12 +68,9 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.libraryapp.model.RegistrationFormEvent
+import com.example.libraryapp.model.validationModels.emailValidationUseCase.RegistrationFormEvent
 import com.example.libraryapp.ui.theme.rojoSangre
-import com.example.libraryapp.ui.theme.rositaGracioso
-import kotlinx.coroutines.flow.collect
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -385,6 +373,6 @@ fun DatePickerNice() {
 @Preview(showBackground = true)
 @Composable
 fun signUpViewPreview() {
-    val navController = rememberNavController()
-    //signUpView(navController = navController)
+
+
 }
