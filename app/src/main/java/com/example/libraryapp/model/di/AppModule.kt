@@ -15,6 +15,11 @@ import com.example.libraryapp.model.firebaseAuth.GoogleAuthUiClient
 import com.example.libraryapp.model.firebaseAuth.OrdersFirebaseRepository
 import com.example.libraryapp.model.firebaseAuth.OrdersFirebaseRepositoryImpl
 import com.example.libraryapp.model.firebaseAuth.UserData
+import com.example.libraryapp.model.validationModels.shipmentValidationUseCase.ValidateAdress
+import com.example.libraryapp.model.validationModels.shipmentValidationUseCase.ValidateDNI
+import com.example.libraryapp.model.validationModels.shipmentValidationUseCase.ValidateName
+import com.example.libraryapp.model.validationModels.shipmentValidationUseCase.ValidatePhoneNumber
+import com.example.libraryapp.model.validationModels.shipmentValidationUseCase.ValidateZipCode
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.auth.api.identity.SignInClient
 import com.google.firebase.auth.FirebaseAuth
@@ -115,4 +120,24 @@ class AppModule {
     ): OrdersFirebaseRepository{
         return OrdersFirebaseRepositoryImpl(firestore, firebaseAuth)
     }
+
+    @Provides
+    @Singleton
+    fun provideValidateAdress(): ValidateAdress = ValidateAdress()
+
+    @Provides
+    @Singleton
+    fun provideValidateDNI(): ValidateDNI = ValidateDNI()
+
+    @Provides
+    @Singleton
+    fun provideValidatePhoneNumber(): ValidatePhoneNumber = ValidatePhoneNumber()
+
+    @Provides
+    @Singleton
+    fun provideValidateZipCode(): ValidateZipCode = ValidateZipCode()
+
+    @Provides
+    @Singleton
+    fun provideValidateName(): ValidateName = ValidateName()
 }
