@@ -134,9 +134,9 @@ fun BookPreview (obra: Book, navController: NavController, viewModel: CategoryVi
             modifier= Modifier
                 .fillMaxWidth()
                 .align(Alignment.BottomCenter)
-                .padding(16.dp)
+                .padding(12.dp)
         ){
-            Text(text = "Añadir al carrito")
+            Text(text = "Añadir a la cesta")
         }
     }
 }
