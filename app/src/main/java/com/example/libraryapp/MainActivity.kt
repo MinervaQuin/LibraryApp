@@ -42,6 +42,7 @@ import com.example.libraryapp.ui.LoginView
 import com.example.libraryapp.ui.MapScreen
 import com.example.libraryapp.ui.PaymentGateway
 import com.example.libraryapp.ui.ProfileScreen
+import com.example.libraryapp.ui.ShipmentGateway
 import com.example.libraryapp.ui.autoresView
 import com.example.libraryapp.ui.signUpView
 import com.example.libraryapp.ui.theme.BookDetailsScreen
@@ -90,7 +91,7 @@ class MainActivity : ComponentActivity() {
             val topBarViewModel: topBarViewModel = hiltViewModel()
             val cartViewModel: CartViewModel = hiltViewModel()
             ShoppingCart.init(cartViewModel)
-            NavHost(navController = navController, startDestination = "Payment"){
+            NavHost(navController = navController, startDestination = "firstScreens"){
 
                 navigation(
                     startDestination = "login",
@@ -378,6 +379,28 @@ class MainActivity : ComponentActivity() {
                                         .fillMaxSize()
                                 ) {
                                     PaymentGateway()
+                                }
+                            }
+                        )
+                    }
+                }
+                composable("Shipment"){
+                    ModalNavigationDrawer(
+                        drawerContent = {
+                            // Contenido del cajón (drawer)
+                            ModalDrawerSheet(modifier = Modifier.width(250.dp)
+                            ){ drawer(navController = navController, drawerState = drawerState,topBarViewModel)}
+                        },drawerState = drawerState,){
+                        Scaffold(
+                            bottomBar = { BottomBar(navController = navController) },
+                            topBar = { TopBar(navController = navController, drawerState)},
+                            content = { paddingValues ->
+                                Column(
+                                    modifier = Modifier
+                                        .padding(paddingValues)
+                                        .fillMaxSize()
+                                ) {
+                                    ShipmentGateway(navController = navController)
                                 }
                             }
                         )
