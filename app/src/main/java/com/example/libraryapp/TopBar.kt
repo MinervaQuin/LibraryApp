@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.ModalDrawer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Info
@@ -25,9 +26,11 @@ import androidx.compose.material.icons.outlined.Book
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.ShoppingCart
+import androidx.compose.material.rememberDrawerState
 import androidx.compose.material3.DismissibleDrawerSheet
 import androidx.compose.material3.DismissibleNavigationDrawer
 import androidx.compose.material3.Divider
+import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -37,7 +40,6 @@ import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -56,6 +58,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import com.example.libraryapp.theme.gray
 import com.example.libraryapp.ui.theme.GreenAppOpacity
@@ -76,17 +79,74 @@ data class NavigationItem(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopBar(navController: NavController, viewModel: topBarViewModel) {
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+fun TopBar(navController: NavController,drawerState: DrawerState) {
     val scope = rememberCoroutineScope()
-
-    var selectedItem by remember { mutableStateOf<NavigationItem?>(null) }
     var isOnCartScreen by remember { mutableStateOf(false) }
+    TopAppBar(
+        colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = GreenAppOpacity),
+        modifier = Modifier
+            .zIndex(1f),
+        title = {
+            Text(
+                text = "Palabras en Papel",
+                fontSize = 20.sp,
+                color = gray,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentSize(Alignment.Center)
+            )
+        },
+        navigationIcon = {
+            IconButton(
+                onClick = {
+                    // Navega al destino del carrito
+                    scope.launch {
+                        if (drawerState.currentValue  == DrawerValue.Closed) {
+                            drawerState.open()
+                        } else {
+                            drawerState.close()
+                        }
+                    }
 
+                }
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Menu,
+                    contentDescription = "Menú",
+                    tint = if(drawerState.currentValue  == DrawerValue.Closed) gray else white,
+                    modifier = Modifier.size(32.dp)
+                )
+
+            }
+        },
+        actions = {
+            IconButton(
+                onClick = {
+                    // Navega al destino del menú hamburguesa
+                    navController.navigate("cartDestination")
+                }
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ShoppingCart,
+                    contentDescription = "Carrito",
+                    tint = if (isOnCartScreen) white else gray,
+                    modifier = Modifier.size(32.dp)
+                )
+            }
+        },
+    )
+}
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun drawer( navController: NavController, drawerState: DrawerState, viewModel: topBarViewModel){
+    viewModel.getProfileImage()
+    var isOnCartScreen by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+    var selectedItem by remember { mutableStateOf<NavigationItem?>(null) }
     val userData by viewModel.userData.collectAsState()
-
     val profilePictureUrl by  viewModel.profilePictureUrl.collectAsState()
-
     val items = listOf(
         NavigationItem(
             title = "Perfil",
@@ -137,8 +197,6 @@ fun TopBar(navController: NavController, viewModel: topBarViewModel) {
             route = "ayuda",
         ),
     )
-
-
     DisposableEffect(navController) {
         val listener = NavController.OnDestinationChangedListener { _, destination, _ ->
             selectedItem = when {
@@ -196,143 +254,80 @@ fun TopBar(navController: NavController, viewModel: topBarViewModel) {
             }
     }
 
-
-    DismissibleNavigationDrawer(drawerContent = {
-
-            DismissibleDrawerSheet {
-                Spacer(modifier = Modifier.height(55.dp))
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    // Agrega aquí la lógica para mostrar la foto de perfil del usuario
-                    // Puedes usar AsyncImage, Image, u otros componentes según tus necesidades
-                    AsyncImage(
-                        model = profilePictureUrl,
-                        contentDescription = "Profile Picture",
-                        modifier = Modifier
-                            .size(70.dp)
-                            .clip(CircleShape)
-                            .border(width = 2.dp, color = Color.Black, CircleShape)
-                            .clickable {
-                                navController.navigate("Profile")
-                            },
-                        contentScale = ContentScale.Crop
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    // Agrega el nombre del usuario debajo de la imagen
-                    Text(text = userData?.userName?: "Cargando", fontSize = 16.sp, color = gray)
-
-                }
-                Divider(modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 30.dp, end = 30.dp), color = gray, thickness = 1.dp)
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(bottom = 65.dp),
-                    contentPadding = PaddingValues(3.dp)
-                ) {
-                    items.forEachIndexed { index, item ->
-                        item {
-                            NavigationDrawerItem(
-                                label = { Text(text = item.title) },
-                                selected = item == selectedItem,
-                                onClick = {
-                                    if(item.title != "Perfil" && item.title != "Cesta" && item.title != "Ayuda"){
-                                        ShoppingCart.setSelectedCategory(item.title)
-                                    }
-                                    navController.navigate(item.route)
-                                    scope.launch {
-                                        drawerState.close()
-                                    }
-                                },
-                                icon = {
-                                    Icon(
-                                        imageVector = if (item == selectedItem) {
-                                            item.selectedIcon
-                                        } else item.unselectedIcon,
-                                        contentDescription = item.title,
-                                        tint = gray
-                                    )
-                                },
-                                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
-                            )
-                            if (index == 1) {
-                                Divider(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(start = 30.dp, end = 30.dp),
-                                    color = gray,
-                                    thickness = 1.dp,
-
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-    },
-        drawerState = drawerState,
-        gesturesEnabled = drawerState.isOpen,
+    Spacer(modifier = Modifier.height(20.dp))
+    Column(
         modifier = Modifier
-            .width(250.dp)
-
+            .fillMaxWidth()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-    }
-    TopAppBar(
-        colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = GreenAppOpacity),
-        title = {
-            Text(
-                text = "Palabras en Papel",
-                fontSize = 20.sp,
-                color = gray,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentSize(Alignment.Center)
-            )
-        },
-        navigationIcon = {
-            IconButton(
-                onClick = {
-                    // Navega al destino del carrito
+        // Agrega aquí la lógica para mostrar la foto de perfil del usuario
+        // Puedes usar AsyncImage, Image, u otros componentes según tus necesidades
+        AsyncImage(
+            model = profilePictureUrl,
+            contentDescription = "Profile Picture",
+            modifier = Modifier
+                .size(70.dp)
+                .clip(CircleShape)
+                .border(width = 2.dp, color = Color.Black, CircleShape)
+                .clickable {
+                    navController.navigate("Profile")
                     scope.launch {
-                        if (drawerState.currentValue  == DrawerValue.Closed) {
-                            drawerState.open()
-                        } else {
+                        drawerState.close()
+                    }
+                },
+            contentScale = ContentScale.Crop
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        // Agrega el nombre del usuario debajo de la imagen
+        Text(text = userData?.userName?: "Error", fontSize = 16.sp, color = gray)
+
+    }
+    Divider(modifier = Modifier
+        .fillMaxWidth()
+        .padding(start = 30.dp, end = 30.dp), color = gray, thickness = 1.dp)
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+        //.padding(bottom = 65.dp),
+        //contentPadding = PaddingValues(3.dp)
+    ) {
+        items.forEachIndexed { index, item ->
+            item {
+                NavigationDrawerItem(
+                    label = { Text(text = item.title) },
+                    selected = item == selectedItem,
+                    onClick = {
+                        if(item.title != "Perfil" && item.title != "Cesta" && item.title != "Ayuda"){
+                            ShoppingCart.setSelectedCategory(item.title)
+                        }
+                        navController.navigate(item.route)
+                        scope.launch {
                             drawerState.close()
                         }
-                        viewModel.getProfileImage()
-                    }
-
-                }
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Menu,
-                    contentDescription = "Menú",
-                    tint = if(drawerState.currentValue  == DrawerValue.Closed) gray else white,
-                    modifier = Modifier.size(32.dp),
-
+                    },
+                    icon = {
+                        Icon(
+                            imageVector = if (item == selectedItem) {
+                                item.selectedIcon
+                            } else item.unselectedIcon,
+                            contentDescription = item.title,
+                            tint = gray
+                        )
+                    },
+                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                 )
+                if (index == 1) {
+                    Divider(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 30.dp, end = 30.dp),
+                        color = gray,
+                        thickness = 1.dp,
 
-            }
-        },
-        actions = {
-            IconButton(
-                onClick = {
-                    // Navega al destino del menú hamburguesa
-                    navController.navigate("cartDestination")
+                        )
                 }
-            ) {
-                Icon(
-                    imageVector = Icons.Default.ShoppingCart,
-                    contentDescription = "Carrito",
-                    tint = if (isOnCartScreen) white else gray,
-                    modifier = Modifier.size(32.dp)
-                )
             }
-        },
-    )
+        }
+    }
 }
