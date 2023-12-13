@@ -223,7 +223,7 @@ fun TopBar(navController: NavController, viewModel: topBarViewModel) {
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     // Agrega el nombre del usuario debajo de la imagen
-                    Text(text = userData?.userName?: "Error", fontSize = 16.sp, color = gray)
+                    Text(text = userData?.userName?: "Cargando", fontSize = 16.sp, color = gray)
 
                 }
                 Divider(modifier = Modifier

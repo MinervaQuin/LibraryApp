@@ -61,18 +61,12 @@ fun ProfileScreen(
     navController : NavController
 ){
     val userData by viewModel.userData.collectAsState()
-    val imageUrl = remember { mutableStateOf("") }
 
     val context = LocalContext.current
     var imageUri by remember { mutableStateOf<Uri?>(null) }
     var showImagePickerDialog by remember { mutableStateOf(false) }
 
-    val REQUEST_CAMERA_PERMISSION = 1 //TODO Esta variable me da que hay que cambiarla, huele a chapuza
-    /*
-    Aviso a navegantes, este código es más frágil y volátil que el gobierno actual
-    cuando lo escribí, solo Dios y yo sabíamos como funcionaba, ahora solo Dios
-    lo tiene claro, por favor, no intenteis "refactorizar" ni mucho menos "hacerlo más eficiente"
-     */
+    val logoutCompleted by viewModel.logoutCompleted.collectAsState()
 
     val imageUrlState = remember { mutableStateOf("") }
 
@@ -196,6 +190,13 @@ fun ProfileScreen(
         )
     }
 
+    if (logoutCompleted == true) {
+        Toast.makeText(context, "Sesión Cerrada", Toast.LENGTH_LONG).show()
+        navController.navigate("firstScreens")
+        // Restablecer el estado para evitar navegaciones repetidas
+        viewModel.resetLogoutCompleted()
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -258,15 +259,7 @@ fun ProfileScreen(
         Button(
             onClick = {
                 viewModel.logMeOutPLEASE()
-                Toast.makeText(
-                    context,
-                    "Sesión Cerrada",
-                    Toast.LENGTH_LONG
-                ).show()
-                viewModel.viewModelScope.launch {
-                    delay(1000)
-                }
-                navController.navigate("firstScreens")
+
                 //navController.popBackStack()
             },
             modifier = Modifier
