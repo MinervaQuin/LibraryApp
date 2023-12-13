@@ -81,118 +81,7 @@ data class NavigationItem(
 @Composable
 fun TopBar(navController: NavController,drawerState: DrawerState) {
     val scope = rememberCoroutineScope()
-    var selectedItem by remember { mutableStateOf<NavigationItem?>(null) }
     var isOnCartScreen by remember { mutableStateOf(false) }
-
-    val items = listOf(
-        NavigationItem(
-            title = "Perfil",
-            selectedIcon = Icons.Filled.Person,
-            unselectedIcon = Icons.Outlined.Person,
-            route = "profile"
-        ),
-        NavigationItem(
-            title = "Cesta",
-            selectedIcon = Icons.Filled.ShoppingCart,
-            unselectedIcon = Icons.Outlined.ShoppingCart,
-            route = "cartDestination",
-        ),
-        NavigationItem(
-            title = "Imprescindibles",
-            selectedIcon = Icons.Filled.Book,
-            unselectedIcon = Icons.Outlined.Book,
-            route = "Category",
-        ),
-        NavigationItem(
-            title = "Ficción",
-            selectedIcon = Icons.Filled.Book,
-            unselectedIcon = Icons.Outlined.Book,
-            route = "Category"
-        ),
-        NavigationItem(
-            title = "No Ficción",
-            selectedIcon = Icons.Filled.Book,
-            unselectedIcon = Icons.Outlined.Book,
-            route = "Category"
-        ),
-        NavigationItem(
-            title = "Infantil",
-            selectedIcon = Icons.Filled.Book,
-            unselectedIcon = Icons.Outlined.Book,
-            route = "Category"
-        ),
-        NavigationItem(
-            title = "Cómic y Manga",
-            selectedIcon = Icons.Filled.Book,
-            unselectedIcon = Icons.Outlined.Book,
-            route = "Category"
-        ),
-        NavigationItem(
-            title = "Ayuda",
-            selectedIcon = Icons.Filled.Info,
-            unselectedIcon = Icons.Outlined.Info,
-            route = "ayuda",
-        ),
-    )
-
-
-    DisposableEffect(navController) {
-        val listener = NavController.OnDestinationChangedListener { _, destination, _ ->
-            selectedItem = when {
-                destination.route == "Category" -> {
-                    val currentCategory = ShoppingCart.getSelectedCategory()
-                    items.find { it.title == currentCategory }
-                }
-
-                items.any { it.route == destination.route } -> {
-                    items.find { it.route == destination.route }
-                }
-
-                else -> null
-            }
-            isOnCartScreen = destination.route == "cartDestination"
-        }
-        navController.addOnDestinationChangedListener(listener)
-
-        onDispose {
-            navController.removeOnDestinationChangedListener(listener)
-        }
-    }
-
-    LaunchedEffect(ShoppingCart.getSelectedCategory(), navController) {
-        snapshotFlow { navController.currentBackStackEntry?.destination?.route }
-            .collect { currentRoute ->
-                selectedItem = when {
-                    items.any { it.route == currentRoute } -> {
-                        items.find { it.route == currentRoute }
-                    }
-
-                    currentRoute == "Category" -> {
-                        val currentCategory = ShoppingCart.getSelectedCategory()
-                        items.find { it.title == currentCategory }
-                    }
-
-                    else -> null
-                }
-                isOnCartScreen = currentRoute == "cartDestination"
-            }
-
-        // Añade un paso adicional para limpiar selectedItem si no estamos en una ruta de item
-        if (!items.any { it.route == navController.currentBackStackEntry?.destination?.route }) {
-            selectedItem = null
-        }
-    }
-
-    LaunchedEffect(ShoppingCart.getSelectedCategory()) {
-        snapshotFlow { ShoppingCart.getSelectedCategory() }
-            .collect { newCategory ->
-                // Opcional: Si deseas actualizar selectedItem basado en la categoría después de verificar la ruta.
-                if (navController.currentBackStackEntry?.destination?.route == "Category") {
-                    selectedItem = items.find { it.title == newCategory }
-                }
-            }
-    }
-
     TopAppBar(
         colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = GreenAppOpacity),
         modifier = Modifier
@@ -253,6 +142,7 @@ fun TopBar(navController: NavController,drawerState: DrawerState) {
 @Composable
 fun drawer( navController: NavController, drawerState: DrawerState, viewModel: topBarViewModel){
     viewModel.getProfileImage()
+    var isOnCartScreen by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     var selectedItem by remember { mutableStateOf<NavigationItem?>(null) }
     val userData by viewModel.userData.collectAsState()
@@ -307,8 +197,64 @@ fun drawer( navController: NavController, drawerState: DrawerState, viewModel: t
             route = "ayuda",
         ),
     )
+    DisposableEffect(navController) {
+        val listener = NavController.OnDestinationChangedListener { _, destination, _ ->
+            selectedItem = when {
+                destination.route == "Category" -> {
+                    val currentCategory = ShoppingCart.getSelectedCategory()
+                    items.find { it.title == currentCategory }
+                }
 
-    //Spacer(modifier = Modifier.height(55.dp))
+                items.any { it.route == destination.route } -> {
+                    items.find { it.route == destination.route }
+                }
+
+                else -> null
+            }
+            isOnCartScreen = destination.route == "cartDestination"
+        }
+        navController.addOnDestinationChangedListener(listener)
+
+        onDispose {
+            navController.removeOnDestinationChangedListener(listener)
+        }
+    }
+
+    LaunchedEffect(ShoppingCart.getSelectedCategory(), navController) {
+        snapshotFlow { navController.currentBackStackEntry?.destination?.route }
+            .collect { currentRoute ->
+                selectedItem = when {
+                    items.any { it.route == currentRoute } -> {
+                        items.find { it.route == currentRoute }
+                    }
+
+                    currentRoute == "Category" -> {
+                        val currentCategory = ShoppingCart.getSelectedCategory()
+                        items.find { it.title == currentCategory }
+                    }
+
+                    else -> null
+                }
+                isOnCartScreen = currentRoute == "cartDestination"
+            }
+
+        // Añade un paso adicional para limpiar selectedItem si no estamos en una ruta de item
+        if (!items.any { it.route == navController.currentBackStackEntry?.destination?.route }) {
+            selectedItem = null
+        }
+    }
+
+    LaunchedEffect(ShoppingCart.getSelectedCategory()) {
+        snapshotFlow { ShoppingCart.getSelectedCategory() }
+            .collect { newCategory ->
+                // Opcional: Si deseas actualizar selectedItem basado en la categoría después de verificar la ruta.
+                if (navController.currentBackStackEntry?.destination?.route == "Category") {
+                    selectedItem = items.find { it.title == newCategory }
+                }
+            }
+    }
+
+    Spacer(modifier = Modifier.height(20.dp))
     Column(
         modifier = Modifier
             .fillMaxWidth()

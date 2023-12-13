@@ -12,14 +12,20 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.Button
+import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalDrawerSheet
+import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
@@ -77,6 +83,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         ShoppingCart.init()
         setContent {
+            val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
             val navController = rememberNavController()
             val homeViewModel : homeViewModel = hiltViewModel()
             val topBarViewModel: topBarViewModel = hiltViewModel()
@@ -109,137 +116,184 @@ class MainActivity : ComponentActivity() {
                     route = "secondScreens"
                 ){
                     composable("homePage"){
-                        Scaffold(
-                            bottomBar = { BottomBar(navController = navController) },
-                            topBar = { TopBar(navController = navController, topBarViewModel) },
-                            content = { paddingValues ->
-                                Column(
-                                    modifier = Modifier
-                                        .padding(paddingValues)
-                                        .fillMaxSize()
-                                ){
-                                    HomeView(
-                                        userData = googleAuthUiClient.getSignedInUser(),
-                                        onSignOut = {
-                                            lifecycleScope.launch {
-                                                googleAuthUiClient.signOut()
-                                                Toast.makeText(
-                                                    applicationContext,
-                                                    "Sesión Cerrada",
-                                                    Toast.LENGTH_LONG
-                                                ).show()
-                                                navController.popBackStack()
-                                            }
-                                        },
-                                        viewModel = homeViewModel,
-                                        navController = navController
-                                    )
+                        ModalNavigationDrawer(
+                            drawerContent = {
+                                // Contenido del cajón (drawer)
+                                ModalDrawerSheet(modifier = Modifier.width(250.dp)
+                                ){ drawer(navController = navController, drawerState = drawerState,topBarViewModel)}
+                            },drawerState = drawerState,){
+                            Scaffold(
+                                bottomBar = { BottomBar(navController = navController) },
+                                topBar = { TopBar(navController = navController, drawerState) },
+                                content = { paddingValues ->
+                                    Column(
+                                        modifier = Modifier
+                                            .padding(paddingValues)
+                                            .fillMaxSize()
+                                    ){
+                                        HomeView(
+                                            userData = googleAuthUiClient.getSignedInUser(),
+                                            onSignOut = {
+                                                lifecycleScope.launch {
+                                                    googleAuthUiClient.signOut()
+                                                    Toast.makeText(
+                                                        applicationContext,
+                                                        "Sesión Cerrada",
+                                                        Toast.LENGTH_LONG
+                                                    ).show()
+                                                    navController.popBackStack()
+                                                }
+                                            },
+                                            viewModel = homeViewModel,
+                                            navController = navController
+                                        )
+                                    }
                                 }
-                            }
-                        )
+                            )
+                        }
                     }
                     composable("AutoresDestination") {
                         val viewModel : autoresViewModel = hiltViewModel()
-                        Scaffold(
-                            bottomBar = { BottomBar(navController = navController) },
-                            topBar = { TopBar(navController = navController, topBarViewModel)},
-                            content = { paddingValues ->
-                                Column(
-                                    modifier = Modifier
-                                        .padding(paddingValues)
-                                        .fillMaxSize()
-                                ) {
-                                    autoresView(navController, viewModel)
+                        ModalNavigationDrawer(
+                            drawerContent = {
+                                // Contenido del cajón (drawer)
+                                ModalDrawerSheet(modifier = Modifier.width(250.dp)
+                                ){ drawer(navController = navController, drawerState = drawerState,topBarViewModel)}
+                            },drawerState = drawerState,){
+                            Scaffold(
+                                bottomBar = { BottomBar(navController = navController) },
+                                topBar = { TopBar(navController = navController,drawerState)},
+                                content = { paddingValues ->
+                                    Column(
+                                        modifier = Modifier
+                                            .padding(paddingValues)
+                                            .fillMaxSize()
+                                    ) {
+                                        autoresView(navController, viewModel)
+                                    }
                                 }
-                            }
-                        )
+                            )
+                        }
                     }
 
                     composable("cartDestination") {
                         // Contenido de la pantalla del carrito
                         val cartViewModel : CartViewModel = ShoppingCart.getViewModelInstance()
-                        Scaffold(
-                            bottomBar = { BottomBar(navController = navController) },
-                            topBar = { TopBar(navController = navController, topBarViewModel) },
-                            content = { paddingValues ->
-                                Column(
-                                    modifier = Modifier
-                                        .padding(paddingValues)
-                                        .fillMaxSize()
-                                ) {
-                                    // Resto de tu contenido aquí
-                                    // Puedes agregar tus componentes, como Cart(navController, viewModel), dentro de este Column
-                                    Cart(navController, cartViewModel)
+                        ModalNavigationDrawer(
+                            drawerContent = {
+                                // Contenido del cajón (drawer)
+                                ModalDrawerSheet(modifier = Modifier.width(250.dp)
+                                ){ drawer(navController = navController, drawerState = drawerState,topBarViewModel)}
+                            },drawerState = drawerState,){
+                            Scaffold(
+                                bottomBar = { BottomBar(navController = navController) },
+                                topBar = { TopBar(navController = navController,drawerState)},
+                                content = { paddingValues ->
+                                    Column(
+                                        modifier = Modifier
+                                            .padding(paddingValues)
+                                            .fillMaxSize()
+                                    ) {
+                                        Cart(navController, cartViewModel)
+                                    }
                                 }
-                            }
-                        )
+                            )
+                        }
                     }
                     composable("Category") {
                         val viewModel : CategoryViewModel = hiltViewModel()
                         // Contenido de la pantalla del carrito
-                        Scaffold(
-                            bottomBar = { BottomBar(navController = navController) },
-                            topBar = { TopBar(navController = navController, topBarViewModel)},
-                            content = { paddingValues ->
-                                Column(
-                                    modifier = Modifier
-                                        .padding(paddingValues)
-                                        .fillMaxSize()
-                                ) {
-                                    CategoryView(navController,viewModel,ShoppingCart.getSelectedCategory())
+                        ModalNavigationDrawer(
+                            drawerContent = {
+                                // Contenido del cajón (drawer)
+                                ModalDrawerSheet(modifier = Modifier.width(250.dp)
+                                ){ drawer(navController = navController, drawerState = drawerState,topBarViewModel)}
+                            },drawerState = drawerState,){
+                            Scaffold(
+                                bottomBar = { BottomBar(navController = navController) },
+                                topBar = { TopBar(navController = navController, drawerState)},
+                                content = { paddingValues ->
+                                    Column(
+                                        modifier = Modifier
+                                            .padding(paddingValues)
+                                            .fillMaxSize()
+                                    ) {
+                                        CategoryView(navController,viewModel,ShoppingCart.getSelectedCategory())
+                                    }
                                 }
-                            }
-                        )
+                            )
+
+                        }
                     }
                     composable("AuthorDestination") {
                         val viewModel : AuthorViewModel = hiltViewModel()
-                        // Contenido de la pantalla del carrito
-                        Scaffold(
-                            bottomBar = { BottomBar(navController = navController) },
-                            topBar = { TopBar(navController = navController, topBarViewModel)},
-                            content = { paddingValues ->
-                                Column(
-                                    modifier = Modifier
-                                        .padding(paddingValues)
-                                        .fillMaxSize()
-                                ) {
-                                    AutorScreen(navController, viewModel)
-                                }
-                            }
-                        )
+                        ModalNavigationDrawer(
+                            drawerContent = {
+                                // Contenido del cajón (drawer)
+                                ModalDrawerSheet(modifier = Modifier.width(250.dp)
+                                ){ drawer(navController = navController, drawerState = drawerState,topBarViewModel)}
+                            },drawerState = drawerState,){
+                                Scaffold(
+                                    bottomBar = { BottomBar(navController = navController) },
+                                    topBar = { TopBar(navController = navController,drawerState)},
+                                    content = { paddingValues ->
+                                        Column(
+                                            modifier = Modifier
+                                                .padding(paddingValues)
+                                                .fillMaxSize()
+                                        ) {
+                                            AutorScreen(navController, viewModel)
+                                        }
+                                    }
+                                )
+                        }
                     }
 
                     composable("maps"){
-                        Scaffold(
-                            bottomBar = { BottomBar(navController = navController) },
-                            topBar = { TopBar(navController = navController, topBarViewModel)},
-                            content = { paddingValues ->
-                                Column(
-                                    modifier = Modifier
-                                        .padding(paddingValues)
-                                        .fillMaxSize()
-                                ) {
-                                    MapScreen()
+                        ModalNavigationDrawer(
+                            drawerContent = {
+                                // Contenido del cajón (drawer)
+                                ModalDrawerSheet(modifier = Modifier.width(250.dp)
+                                ){ drawer(navController = navController, drawerState = drawerState,topBarViewModel)}
+                            },drawerState = drawerState,){
+                            Scaffold(
+                                bottomBar = { BottomBar(navController = navController) },
+                                topBar = { TopBar(navController = navController, drawerState)},
+                                content = { paddingValues ->
+                                    Column(
+                                        modifier = Modifier
+                                            .padding(paddingValues)
+                                            .fillMaxSize()
+                                    ) {
+                                        MapScreen()
+                                    }
                                 }
-                            }
-                        )
+                            )
+                        }
                     }
 
                     composable("profile"){
                         val viewModel : profileViewModel = hiltViewModel()
-                        Scaffold(
-                            bottomBar = { BottomBar(navController = navController) },
-                            topBar = { TopBar(navController = navController, topBarViewModel)},
-                            content = { paddingValues ->
-                                Column(
-                                    modifier = Modifier
-                                        .padding(paddingValues)
-                                        .fillMaxSize()
-                                ) {
-                                    ProfileScreen(viewModel, navController = navController)
-                                }
-                            }
-                        )
+                        ModalNavigationDrawer(
+                            drawerContent = {
+                                // Contenido del cajón (drawer)
+                                ModalDrawerSheet(modifier = Modifier.width(250.dp)
+                                ){ drawer(navController = navController, drawerState = drawerState,topBarViewModel)}
+                            },drawerState = drawerState,){
+                                Scaffold(
+                                    bottomBar = { BottomBar(navController = navController) },
+                                    topBar = { TopBar(navController = navController, drawerState)},
+                                    content = { paddingValues ->
+                                        Column(
+                                            modifier = Modifier
+                                                .padding(paddingValues)
+                                                .fillMaxSize()
+                                        ) {
+                                            ProfileScreen(viewModel, navController = navController)
+                                        }
+                                    }
+                                )
+                        }
                     }
 
 
@@ -247,19 +301,26 @@ class MainActivity : ComponentActivity() {
                 //composable("signUp") { signUpView(navController = navController)}
 
                     composable("bookDetailsView"){
-                        Scaffold(
-                            bottomBar = { BottomBar(navController = navController) },
-                            topBar = { TopBar(navController = navController, topBarViewModel)},
-                            content = { paddingValues ->
-                                Column(
-                                    modifier = Modifier
-                                        .padding(paddingValues)
-                                        .fillMaxSize()
-                                ) {
-                                    BookDetailsScreen(navController = navController)
+                        ModalNavigationDrawer(
+                            drawerContent = {
+                                // Contenido del cajón (drawer)
+                                ModalDrawerSheet(modifier = Modifier.width(250.dp)
+                                ){ drawer(navController = navController, drawerState = drawerState,topBarViewModel)}
+                            },drawerState = drawerState,){
+                            Scaffold(
+                                bottomBar = { BottomBar(navController = navController) },
+                                topBar = { TopBar(navController = navController, drawerState)},
+                                content = { paddingValues ->
+                                    Column(
+                                        modifier = Modifier
+                                            .padding(paddingValues)
+                                            .fillMaxSize()
+                                    ) {
+                                        BookDetailsScreen(navController = navController)
+                                    }
                                 }
-                            }
-                        )
+                            )
+                        }
                     }
                     composable("addReviewView"){
     //                    AddReview(navController= navController)
@@ -275,19 +336,26 @@ class MainActivity : ComponentActivity() {
 
 
                 composable("SearchScreen"){
-                    Scaffold(
-                        bottomBar = { BottomBar(navController = navController) },
-                        topBar = { TopBar(navController = navController, topBarViewModel)},
-                        content = { paddingValues ->
-                            Column(
-                                modifier = Modifier
-                                    .padding(paddingValues)
-                                    .fillMaxSize()
-                            ) {
-                                BookScreen(navController = navController)
+                    ModalNavigationDrawer(
+                        drawerContent = {
+                            // Contenido del cajón (drawer)
+                            ModalDrawerSheet(modifier = Modifier.width(250.dp)
+                            ){ drawer(navController = navController, drawerState = drawerState,topBarViewModel)}
+                        },drawerState = drawerState,){
+                        Scaffold(
+                            bottomBar = { BottomBar(navController = navController) },
+                            topBar = { TopBar(navController = navController, drawerState)},
+                            content = { paddingValues ->
+                                Column(
+                                    modifier = Modifier
+                                        .padding(paddingValues)
+                                        .fillMaxSize()
+                                ) {
+                                    BookScreen(navController = navController)
+                                }
                             }
-                        }
-                    )
+                        )
+                    }
                 }
             }
         }
