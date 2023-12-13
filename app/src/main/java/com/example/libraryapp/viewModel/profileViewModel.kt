@@ -4,12 +4,15 @@ import android.content.Context
 import android.net.Uri
 import android.os.Environment
 import androidx.core.content.FileProvider
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.libraryapp.model.firebaseAuth.FirestoreRepository
 import com.example.libraryapp.model.firebaseAuth.FirebaseStorageRepository
 import com.example.libraryapp.model.firebaseAuth.UserData
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -32,6 +35,9 @@ class profileViewModel @Inject constructor(
     private var _userData = MutableStateFlow<UserData?>(null)
     val userData = _userData.asStateFlow()
 
+
+    private var _logoutCompleted = MutableStateFlow(false)
+    var logoutCompleted = _logoutCompleted.asStateFlow()
 
     init {
         viewModelScope.launch {
@@ -89,8 +95,13 @@ class profileViewModel @Inject constructor(
     fun logMeOutPLEASE(){
         viewModelScope.launch {
             firestoreRepository.signOut()
-
+            _logoutCompleted.value = true
+            delay(1000)
+            _logoutCompleted.value = false
         }
+    }
+    fun resetLogoutCompleted() {
+        _logoutCompleted.value = false
     }
 
 
