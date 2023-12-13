@@ -11,6 +11,7 @@ import com.example.libraryapp.R
 import com.example.libraryapp.model.resources.Book
 import com.example.libraryapp.model.firebaseAuth.FirestoreRepository
 import com.example.libraryapp.model.LibraryAppState
+import com.example.libraryapp.model.firebaseAuth.OrdersFirebaseRepository
 import com.example.libraryapp.model.resources.CollectionSamples
 import com.example.libraryapp.model.resources.LongCollectionSamples
 import com.example.libraryapp.model.resources.carouselImage
@@ -27,7 +28,8 @@ import javax.inject.Inject
 @HiltViewModel
 class homeViewModel @Inject constructor(
     private val firestoreRepository: FirestoreRepository,
-    val libraryAppState: LibraryAppState
+    val libraryAppState: LibraryAppState,
+    private val ordersFirebase: OrdersFirebaseRepository
 ): ViewModel(){
 
     private val _isFallo = MutableLiveData<Boolean>()
@@ -138,6 +140,14 @@ class homeViewModel @Inject constructor(
     //porbar si añade libros al carrito
     suspend fun getBook(isbn: String): Book? {
         return firestoreRepository.getBook(isbn)
+    }
+    fun fetchOrders() {
+        viewModelScope.launch {
+            val orders = ordersFirebase.downloadOrders()
+            orders.forEach { order ->
+                Log.d("FetchOrders", "Order ID: ${order.orderId}, Books Ordered: ${order.booksOrdered}, Order Date: ${order.orderDate}, Total: ${order.total}, Shipment Address: ${order.shipmentAdress}")
+            }
+        }
     }
 }
 

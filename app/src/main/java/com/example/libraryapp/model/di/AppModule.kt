@@ -12,6 +12,8 @@ import com.example.libraryapp.model.firebaseAuth.FirebaseStorageImpl
 import com.example.libraryapp.model.firebaseAuth.FirebaseStorageRepository
 import com.example.libraryapp.model.firebaseAuth.FirestoreRepositoryImpl
 import com.example.libraryapp.model.firebaseAuth.GoogleAuthUiClient
+import com.example.libraryapp.model.firebaseAuth.OrdersFirebaseRepository
+import com.example.libraryapp.model.firebaseAuth.OrdersFirebaseRepositoryImpl
 import com.example.libraryapp.model.firebaseAuth.UserData
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.auth.api.identity.SignInClient
@@ -103,5 +105,14 @@ class AppModule {
     @Singleton
     fun provideEmailAuthUiClient(auth: FirebaseAuth, storageRepository: FirebaseStorageRepository): EmailAuthUiClient {
         return EmailAuthUiClient(auth,storageRepository)
+    }
+
+    @Provides
+    @Singleton
+    fun provideOrdersRepository(
+        firestore: FirebaseFirestore,
+        firebaseAuth: FirebaseAuth
+    ): OrdersFirebaseRepository{
+        return OrdersFirebaseRepositoryImpl(firestore, firebaseAuth)
     }
 }

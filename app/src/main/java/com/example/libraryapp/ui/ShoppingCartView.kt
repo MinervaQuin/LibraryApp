@@ -304,7 +304,9 @@ fun ActionButton(cartViewModel: CartViewModel, navController: NavController) {
                 cartViewModel.cartItems.value.isNotEmpty()
             ) {
                 // Navegar a la pantalla de compra (no implementada)
-                Toast.makeText(context, "No implementado", Toast.LENGTH_SHORT).show()
+                cartViewModel.buy()
+                Toast.makeText(context, "Pedido Realizado", Toast.LENGTH_SHORT).show()
+
             }
         },
         colors = ButtonDefaults.buttonColors(white),

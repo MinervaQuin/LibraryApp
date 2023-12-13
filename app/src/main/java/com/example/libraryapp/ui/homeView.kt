@@ -160,6 +160,7 @@ fun HomeView(
                 //viewModel.getReviewsAndLog("B9svfDJglRgEPyN6wSAh")
                 //viewModel.uploadReviewTest()
                 //viewModel.tryUpload()
+                viewModel.fetchOrders()
             }) {
                 Text(text = "Probar el Coso")
             }

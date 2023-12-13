@@ -81,12 +81,14 @@ class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        ShoppingCart.init()
+
         setContent {
             val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
             val navController = rememberNavController()
             val homeViewModel : homeViewModel = hiltViewModel()
             val topBarViewModel: topBarViewModel = hiltViewModel()
+            val cartViewModel: CartViewModel = hiltViewModel()
+            ShoppingCart.init(cartViewModel)
             NavHost(navController = navController, startDestination = "firstScreens"){
 
                 navigation(

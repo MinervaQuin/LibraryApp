@@ -1,17 +1,23 @@
 package com.example.libraryapp.viewModel
 
+import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.libraryapp.model.firebaseAuth.OrdersFirebaseRepository
+import com.example.libraryapp.model.firebaseAuth.OrdersFirebaseRepositoryImpl
 import com.example.libraryapp.model.resources.Book
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class CartViewModel @Inject constructor(
+    private val ordersFirebase: OrdersFirebaseRepository
 ) : ViewModel() {
 
     private val _cartItems = mutableMapOf<Book, Int>()
@@ -86,4 +92,15 @@ class CartViewModel @Inject constructor(
         PICK_UP,
         HOME_DELIVERY
     }
+    val currentCartItems = cartItems.value
+    fun buy() {
+        viewModelScope.launch {
+            val cartData = cartItems.value
+            ordersFirebase.uploadCartData(cartData)
+            _cartItems.clear()
+            updateCartItems()
+        }
+
+    }
 }
+

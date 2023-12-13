@@ -193,7 +193,7 @@ fun ProfileScreen(
     if (logoutCompleted == true) {
         Toast.makeText(context, "Sesión Cerrada", Toast.LENGTH_LONG).show()
         navController.navigate("firstScreens")
-        // Restablecer el estado para evitar navegaciones repetidas
+
         viewModel.resetLogoutCompleted()
     }
 
