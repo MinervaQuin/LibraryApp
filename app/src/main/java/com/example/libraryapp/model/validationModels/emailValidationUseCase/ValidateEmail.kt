@@ -1,6 +1,7 @@
-package com.example.libraryapp.model.emailValidationUseCase
+package com.example.libraryapp.model.validationModels.emailValidationUseCase
 
 import android.util.Patterns
+import com.example.libraryapp.model.validationModels.ValidationResult
 
 class ValidateEmail {
 

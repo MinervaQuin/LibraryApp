@@ -1,20 +1,18 @@
 package com.example.libraryapp.viewModel
 
-import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.libraryapp.model.RegistrationFormEvent
-import com.example.libraryapp.model.emailValidationUseCase.ValidateEmail
-import com.example.libraryapp.model.emailValidationUseCase.ValidatePassword
-import com.example.libraryapp.model.emailValidationUseCase.ValidateRepeatedPassword
-import com.example.libraryapp.model.emailValidationUseCase.ValidateTerms
-import com.example.libraryapp.model.emailValidationUseCase.ValidateUserName
+import com.example.libraryapp.model.validationModels.emailValidationUseCase.RegistrationFormEvent
+import com.example.libraryapp.model.validationModels.emailValidationUseCase.ValidateEmail
+import com.example.libraryapp.model.validationModels.emailValidationUseCase.ValidatePassword
+import com.example.libraryapp.model.validationModels.emailValidationUseCase.ValidateRepeatedPassword
+import com.example.libraryapp.model.validationModels.emailValidationUseCase.ValidateTerms
+import com.example.libraryapp.model.validationModels.emailValidationUseCase.ValidateUserName
 import com.example.libraryapp.model.firebaseAuth.EmailAuthUiClient
 import com.example.libraryapp.model.resources.registrationFormState
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

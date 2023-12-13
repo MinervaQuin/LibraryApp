@@ -1,4 +1,4 @@
-package com.example.libraryapp.model
+package com.example.libraryapp.model.validationModels.emailValidationUseCase
 
 sealed class RegistrationFormEvent {
     data class NameChanged(val name: String): RegistrationFormEvent()
