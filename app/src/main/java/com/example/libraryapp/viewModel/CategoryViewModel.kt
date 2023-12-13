@@ -1,19 +1,15 @@
 package com.example.libraryapp.viewModel
 
-import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import com.example.libraryapp.model.resources.Author
 import com.example.libraryapp.model.resources.Book
 import androidx.compose.runtime.*
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.example.libraryapp.model.FirestoreRepository
+import com.example.libraryapp.model.firebaseAuth.FirestoreRepository
 import com.example.libraryapp.model.LibraryAppState
 import com.example.libraryapp.model.resources.Collection
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject

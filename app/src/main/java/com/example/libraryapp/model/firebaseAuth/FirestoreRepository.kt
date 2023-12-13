@@ -1,4 +1,4 @@
-package com.example.libraryapp.model
+package com.example.libraryapp.model.firebaseAuth
 
 import android.content.Context
 import android.net.Uri
@@ -48,8 +48,7 @@ interface FirestoreRepository {
     suspend fun updateReview(bookId: String, reviewId: String, newData: Map<String, Any>)
 
     suspend fun getuser(): UserData?
-    suspend fun uploadImageToFirebase(imageUri: Uri, onSuccess: (String) -> Unit, onFailure: (Exception) -> Unit)
-    suspend fun getProfileImageUrl(userId: String): String
+
     suspend fun signOut()
     suspend fun uploadBookScore(bookId: String, newScore: Int)
 }

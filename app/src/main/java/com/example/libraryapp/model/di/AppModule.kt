@@ -1,13 +1,15 @@
 package com.example.libraryapp.model.di
 
 import android.content.Context
-import com.example.libraryapp.model.FirestoreRepository
+import com.example.libraryapp.model.firebaseAuth.FirestoreRepository
 import com.example.libraryapp.model.emailValidationUseCase.ValidateEmail
 import com.example.libraryapp.model.emailValidationUseCase.ValidatePassword
 import com.example.libraryapp.model.emailValidationUseCase.ValidateRepeatedPassword
 import com.example.libraryapp.model.emailValidationUseCase.ValidateTerms
 import com.example.libraryapp.model.emailValidationUseCase.ValidateUserName
 import com.example.libraryapp.model.firebaseAuth.EmailAuthUiClient
+import com.example.libraryapp.model.firebaseAuth.FirebaseStorageImpl
+import com.example.libraryapp.model.firebaseAuth.FirebaseStorageRepository
 import com.example.libraryapp.model.firebaseAuth.FirestoreRepositoryImpl
 import com.example.libraryapp.model.firebaseAuth.GoogleAuthUiClient
 import com.example.libraryapp.model.firebaseAuth.UserData
@@ -90,7 +92,16 @@ class AppModule {
 
     @Provides
     @Singleton
-    fun provideEmailAuthUiClient(auth: FirebaseAuth): EmailAuthUiClient {
-        return EmailAuthUiClient(auth)
+    fun provideFirebaseStorageRepository(
+        firebaseAuth: FirebaseAuth,
+        storage: FirebaseStorage
+    ): FirebaseStorageRepository {
+        return FirebaseStorageImpl(firebaseAuth, storage)
+    }
+
+    @Provides
+    @Singleton
+    fun provideEmailAuthUiClient(auth: FirebaseAuth, storageRepository: FirebaseStorageRepository): EmailAuthUiClient {
+        return EmailAuthUiClient(auth,storageRepository)
     }
 }

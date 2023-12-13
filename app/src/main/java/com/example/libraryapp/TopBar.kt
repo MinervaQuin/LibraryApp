@@ -313,7 +313,8 @@ fun TopBar(navController: NavController, viewModel: topBarViewModel) {
                     imageVector = Icons.Default.Menu,
                     contentDescription = "Menú",
                     tint = if(drawerState.currentValue  == DrawerValue.Closed) gray else white,
-                    modifier = Modifier.size(32.dp)
+                    modifier = Modifier.size(32.dp),
+
                 )
 
             }

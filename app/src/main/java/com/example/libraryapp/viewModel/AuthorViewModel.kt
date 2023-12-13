@@ -1,13 +1,12 @@
 package com.example.libraryapp.viewModel
 
-import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.example.libraryapp.model.resources.Author
 import com.example.libraryapp.model.resources.Book
 import androidx.compose.runtime.*
 import androidx.lifecycle.viewModelScope
-import com.example.libraryapp.model.FirestoreRepository
+import com.example.libraryapp.model.firebaseAuth.FirestoreRepository
 import com.example.libraryapp.model.LibraryAppState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch

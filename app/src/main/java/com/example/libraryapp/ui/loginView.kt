@@ -87,11 +87,6 @@ fun LoginView(viewModel : loginViewModel, navController: NavController){
     val image = painterResource(R.drawable.fondo_login)
     val googleIconImageVector = ImageVector.vectorResource(id = R.drawable.vector_google)
 
-
-    var userEmail by remember { mutableStateOf(TextFieldValue("")) }
-    var password by remember { mutableStateOf(TextFieldValue("")) }
-
-
     val context = LocalContext.current
     val formState = viewModel.formState
 
@@ -152,7 +147,7 @@ fun LoginView(viewModel : loginViewModel, navController: NavController){
                 is signUpViewModel.ValidationEvent.Success -> {
                     Toast.makeText(
                         context,
-                        "Registro Exitoso",
+                        "Inicio Exitoso",
                         Toast.LENGTH_LONG
                     ).show()
                     navController.navigate("secondScreens")

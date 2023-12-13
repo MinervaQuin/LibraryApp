@@ -2,27 +2,20 @@ package com.example.libraryapp.viewModel
 
 import android.content.Context
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.ComponentActivity
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
-import com.example.libraryapp.MainActivity
-import com.example.libraryapp.model.FirestoreRepository
+import com.example.libraryapp.model.firebaseAuth.FirestoreRepository
 import com.example.libraryapp.model.LibraryAppState
-import com.example.libraryapp.model.resources.Author
 import com.example.libraryapp.model.resources.Book
 import com.google.zxing.integration.android.IntentIntegrator
 //import com.google.zxing.integration.android.IntentIntegrator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import javax.inject.Singleton
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(

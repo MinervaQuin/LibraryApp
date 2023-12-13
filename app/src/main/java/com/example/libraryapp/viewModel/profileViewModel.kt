@@ -6,7 +6,8 @@ import android.os.Environment
 import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.libraryapp.model.FirestoreRepository
+import com.example.libraryapp.model.firebaseAuth.FirestoreRepository
+import com.example.libraryapp.model.firebaseAuth.FirebaseStorageRepository
 import com.example.libraryapp.model.firebaseAuth.UserData
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,7 +23,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class profileViewModel @Inject constructor(
-    private val firestoreRepository: FirestoreRepository
+    private val firestoreRepository: FirestoreRepository,
+    private val firebaseStorage: FirebaseStorageRepository
 ): ViewModel(
 ) {
 
@@ -42,7 +44,7 @@ class profileViewModel @Inject constructor(
     fun uploadProfileImage(imageUri: Uri, onSuccess: (String) -> Unit, onFailure: (Exception) -> Unit) {
         viewModelScope.launch {
             try {
-                firestoreRepository.uploadImageToFirebase(imageUri, onSuccess, onFailure)
+                firebaseStorage.uploadImageToFirebase(imageUri, onSuccess, onFailure)
             } catch (e: Exception) {
                 onFailure(e)
             }
@@ -51,10 +53,10 @@ class profileViewModel @Inject constructor(
 
     fun getProfileImage(onSuccess: (String) -> Unit, onFailure: (Exception) -> Unit) {
         viewModelScope.launch {
-            val userId = firestoreRepository.authConection?.currentUser?.uid
+            val userId = firebaseStorage.authConection?.currentUser?.uid
             if (userId != null) {
                 try {
-                    val url = firestoreRepository.getProfileImageUrl(userId)
+                    val url = firebaseStorage.getProfileImageUrl(userId)
                     onSuccess(url)
                 } catch (e: Exception) {
                     val url = "https://i.imgur.com/xiL43UU.jpeg"
