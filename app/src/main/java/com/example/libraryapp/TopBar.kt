@@ -272,6 +272,9 @@ fun drawer( navController: NavController, drawerState: DrawerState, viewModel: t
                 .border(width = 2.dp, color = Color.Black, CircleShape)
                 .clickable {
                     navController.navigate("Profile")
+                    scope.launch {
+                        drawerState.close()
+                    }
                 },
             contentScale = ContentScale.Crop
         )
