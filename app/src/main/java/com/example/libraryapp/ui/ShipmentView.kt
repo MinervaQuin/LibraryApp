@@ -2,6 +2,7 @@ package com.example.libraryapp.ui
 
 
 
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -33,6 +35,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,6 +45,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
@@ -50,163 +54,245 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.example.libraryapp.model.validationModels.emailValidationUseCase.RegistrationFormEvent
+import com.example.libraryapp.model.validationModels.shipmentValidationUseCase.ShipmentAdressFormEvent
 import com.example.libraryapp.theme.gray
 import com.example.libraryapp.theme.green
 import com.example.libraryapp.theme.white
+import com.example.libraryapp.viewModel.shipmentViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun ShipmentGateway(navController: NavController) {
-    var recipientName by remember { mutableStateOf("") }
-    var recipientLastName by remember { mutableStateOf("") }
-    var address by remember { mutableStateOf("") }
-    var postalCode by remember { mutableStateOf("") }
-    var province by remember { mutableStateOf("") }
-    var city by remember { mutableStateOf("") }
-    var phoneNumber by remember { mutableStateOf("") }
+    val viewModel: shipmentViewModel = hiltViewModel()
+    val state = viewModel.state
 
-    var keyboardController by remember { mutableStateOf<SoftwareKeyboardController?>(null) }
+    val context = LocalContext.current
 
-    Text(
-        text = "¿Dónde quieres recibirlo?",
-        fontSize = 24.sp,
-        fontWeight = FontWeight.Bold,
-        color = gray,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 30.dp)
-            .wrapContentSize(Alignment.Center)
-    )
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Spacer(modifier = Modifier.height(40.dp))
 
-        ShipmentTextField(
-            value = recipientName,
-            onValueChange = { recipientName = it },
-            isError = null,
-            placeHolder = "Nombre del destinatario",
-            icon = Icons.Default.Person,
-            visualTransformation = VisualTransformation.None,
-            keyboardType = KeyboardType.Text
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        ShipmentTextField(
-            value = recipientLastName,
-            onValueChange = { recipientLastName = it },
-            isError = null,
-            placeHolder = "Apellidos del destinatario",
-            icon = Icons.Default.Person,
-            visualTransformation = VisualTransformation.None,
-            keyboardType = KeyboardType.Text
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        ShipmentTextField(
-            value = address,
-            onValueChange = { address = it },
-            isError = null,
-            placeHolder = "Dirección",
-            icon = Icons.Default.House,
-            visualTransformation = VisualTransformation.None,
-            keyboardType = KeyboardType.Text
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            // Colocar los TextField de "Código Postal" y "Provincia" en la misma fila
-            Box(
-                modifier = Modifier.width(142.dp)  // Ajusta el ancho como desees
-            ) {
-                ShipmentTextField(
-                    value = postalCode,
-                    onValueChange = { postalCode = it },
-                    isError = null,
-                    placeHolder = "Código Postal",
-                    icon = Icons.Default.ContactMail,
-                    visualTransformation = VisualTransformation.None,
-                    keyboardType = KeyboardType.Number
-                )
+    LaunchedEffect(key1 = context) {
+        viewModel.validationEvents.collect{event ->
+            when(event){
+                is shipmentViewModel.ValidationEvent.Success -> {
+                    Toast.makeText(
+                        context,
+                        "Registro Exitoso",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
             }
+        }
+    }
 
-            Spacer(modifier = Modifier.width(16.dp))
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize(), // Agregar padding vertical
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ){
+        item {
+            Text(
+                text = "¿Dónde quieres recibirlo?",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                color = gray,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 30.dp)
+                    .wrapContentSize(Alignment.Center)
+            )
+        }
 
-            Box(
-                modifier = Modifier.width(142.dp)  // Ajusta el ancho como desees
+
+        item {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                Spacer(modifier = Modifier.height(40.dp))
+
                 ShipmentTextField(
-                    value = province,
-                    onValueChange = { province = it },
-                    isError = null,
-                    placeHolder = "Provincia",
-                    icon = Icons.Default.MyLocation,
+                    value = state.name,
+                    onValueChange = { viewModel.onEvent(ShipmentAdressFormEvent.NameChanged(it))},
+                    isError = state.nameError,
+                    placeHolder = "Nombre del destinatario",
+                    icon = Icons.Default.Person,
                     visualTransformation = VisualTransformation.None,
                     keyboardType = KeyboardType.Text
                 )
-            }
-        }
+                if (state.nameError != null) {
+                    Text(
+                        text = state.nameError,
+                        color = Color.Red
+                    )
+                }
 
-        Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-        ShipmentTextField(
-            value = city,
-            onValueChange = { city = it },
-            isError = null,
-            placeHolder = "Ciudad",
-            icon = Icons.Default.LocationCity,
-            visualTransformation = VisualTransformation.None,
-            keyboardType = KeyboardType.Text
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Box(
-                modifier = Modifier.width(205.dp)  // Ajusta el ancho como desees
-            ) {
                 ShipmentTextField(
-                    value = phoneNumber,
-                    onValueChange = { phoneNumber = it },
-                    isError = null,
-                    placeHolder = "Teléfono",
-                    icon = Icons.Default.Phone,
+                    value = state.lastName,
+                    onValueChange = { viewModel.onEvent(ShipmentAdressFormEvent.NameChanged(it))},
+                    isError = state.lastNameError,
+                    placeHolder = "Apellidos del destinatario",
+                    icon = Icons.Default.Person,
                     visualTransformation = VisualTransformation.None,
-                    keyboardType = KeyboardType.Number
+                    keyboardType = KeyboardType.Text
                 )
+                if (state.lastNameError != null) {
+                    Text(
+                        text = state.lastNameError,
+                        color = Color.Red
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                ShipmentTextField(
+                    value = state.adress,
+                    onValueChange = { viewModel.onEvent(ShipmentAdressFormEvent.AdressChanged(it)) },
+                    isError = state.adressError,
+                    placeHolder = "Dirección",
+                    icon = Icons.Default.House,
+                    visualTransformation = VisualTransformation.None,
+                    keyboardType = KeyboardType.Text
+                )
+                if (state.adressError != null) {
+                    Text(
+                        text = state.adressError,
+                        color = Color.Red
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    // Colocar los TextField de "Código Postal" y "Provincia" en la misma fila
+                    Box(
+                        modifier = Modifier.width(142.dp)  // Ajusta el ancho como desees
+                    ) {
+                        ShipmentTextField(
+                            value = state.zipCode,
+                            onValueChange = { viewModel.onEvent(ShipmentAdressFormEvent.ZipCodeChanged(it)) },
+                            isError = state.zipCodeError,
+                            placeHolder = "Código Postal",
+                            icon = Icons.Default.ContactMail,
+                            visualTransformation = VisualTransformation.None,
+                            keyboardType = KeyboardType.Number
+                        )
+
+                    }
+
+                    Spacer(modifier = Modifier.width(16.dp))
+
+                    Box(
+                        modifier = Modifier.width(142.dp)  // Ajusta el ancho como desees
+                    ) {
+                        ShipmentTextField(
+                            value = state.province,
+                            onValueChange = { viewModel.onEvent(ShipmentAdressFormEvent.NameChanged(it)) },
+                            isError = state.provinceError,
+                            placeHolder = "Provincia",
+                            icon = Icons.Default.MyLocation,
+                            visualTransformation = VisualTransformation.None,
+                            keyboardType = KeyboardType.Text
+                        )
+
+                    }
+                }
+                if(state.provinceError != null || state.zipCodeError != null){
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center
+                    ){
+                        if (state.zipCodeError != null) {
+                            Text(
+                                text = state.zipCodeError,
+                                color = Color.Red
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(32.dp))
+                        if (state.provinceError != null) {
+                            Text(
+                                text = state.provinceError,
+                                color = Color.Red
+                            )
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+
+                ShipmentTextField(
+                    value = state.city,
+                    onValueChange = { viewModel.onEvent(ShipmentAdressFormEvent.NameChanged(it)) },
+                    isError = state.cityError,
+                    placeHolder = "Ciudad",
+                    icon = Icons.Default.LocationCity,
+                    visualTransformation = VisualTransformation.None,
+                    keyboardType = KeyboardType.Text
+                )
+                if (state.cityError != null) {
+                    Text(
+                        text = state.cityError,
+                        color = Color.Red
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Box(
+                        modifier = Modifier.width(205.dp)  // Ajusta el ancho como desees
+                    ) {
+                        ShipmentTextField(
+                            value = state.phoneNumber,
+                            onValueChange = { viewModel.onEvent(ShipmentAdressFormEvent.PhoneNumberChanged(it)) },
+                            isError = state.phoneNumberError,
+                            placeHolder = "Teléfono",
+                            icon = Icons.Default.Phone,
+                            visualTransformation = VisualTransformation.None,
+                            keyboardType = KeyboardType.Number
+                        )
+
+                    }
+                }
+                if (state.phoneNumberError != null) {
+                    Text(
+                        text = state.phoneNumberError,
+                        color = Color.Red
+                    )
+                }
+                Button(
+                    onClick = {
+                        // TODO:
+                        //navController.navigate("Payment")
+                        viewModel.onEvent(ShipmentAdressFormEvent.Submit)
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 80.dp, start = 30.dp, end = 30.dp)
+                        .height(40.dp),
+                    colors = ButtonDefaults.buttonColors(white),
+                    border = BorderStroke(2.dp, green)
+                ) {
+                    Text("Continuar", color = gray)
+                }
+                Spacer(modifier = Modifier.height(48.dp))
             }
         }
 
-        Button(
-            onClick = {
-                // TODO:
-                navController.navigate("Payment")
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 80.dp, start = 30.dp, end= 30.dp)
-                .height(40.dp),
-            colors = ButtonDefaults.buttonColors(white),
-            border = BorderStroke(2.dp, green)
-        ) {
-            Text("Continuar", color = gray)
-        }
     }
+
 }
 
 

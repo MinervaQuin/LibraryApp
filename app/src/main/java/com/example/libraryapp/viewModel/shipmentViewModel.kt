@@ -29,8 +29,10 @@ class shipmentViewModel @Inject constructor(
 ) : ViewModel() {
 
     var state by mutableStateOf(ShipmentFormState())
+
     private val validationEventChannel = Channel<ValidationEvent>()
     val validationEvents = validationEventChannel.receiveAsFlow()
+
     fun onEvent(event: ShipmentAdressFormEvent){
         when(event){
             is ShipmentAdressFormEvent.AdressChanged -> {
@@ -61,7 +63,7 @@ class shipmentViewModel @Inject constructor(
                 state = state.copy(event.city)
             }
             is ShipmentAdressFormEvent.Submit -> {
-                Log.d("shipmenadressformevent", "funciona")
+                submitData()
             }
         }
     }
@@ -91,6 +93,7 @@ class shipmentViewModel @Inject constructor(
         ).any { !it.successful }
 
         if(hasError){
+            Log.d("Hola", "adios")
             state = state.copy(
                 adressError = adressResult.errorMessage,
                 nameError = nameResult.errorMessage,
@@ -103,6 +106,7 @@ class shipmentViewModel @Inject constructor(
                 dniError = dniResult.errorMessage
 
             )
+            Log.d("Error: ", "${state.phoneNumberError}")
             return
         }
         viewModelScope.launch {
