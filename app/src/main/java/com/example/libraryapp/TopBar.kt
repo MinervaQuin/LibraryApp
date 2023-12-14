@@ -82,6 +82,18 @@ data class NavigationItem(
 fun TopBar(navController: NavController,drawerState: DrawerState) {
     val scope = rememberCoroutineScope()
     var isOnCartScreen by remember { mutableStateOf(false) }
+
+    DisposableEffect(navController) {
+        val listener = NavController.OnDestinationChangedListener { _, destination, _ ->
+            isOnCartScreen = destination.route == "cartDestination"
+        }
+        navController.addOnDestinationChangedListener(listener)
+
+        onDispose {
+            navController.removeOnDestinationChangedListener(listener)
+        }
+    }
+
     TopAppBar(
         colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = GreenAppOpacity),
         modifier = Modifier
