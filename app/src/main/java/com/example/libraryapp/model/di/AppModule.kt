@@ -46,22 +46,8 @@ class AppModule {
 
     @Provides
     @Singleton
-    fun provideUserData(): UserData {
-        // Obtiene los datos del usuario de alguna fuente
-        return UserData("userId", "userName", "userEmail")
-    }
-
-    @Provides
-    @Singleton
-    fun provideGoogleAuthUiClient(@ApplicationContext context: Context): GoogleAuthUiClient {
-        return GoogleAuthUiClient(
-            context = context,
-            oneTapClient = Identity.getSignInClient(context)
-        )
-    }
-    @Provides
-    @Singleton
     fun provideFirebaseStorage(): FirebaseStorage = FirebaseStorage.getInstance()
+
     @Provides
     @Singleton
     fun provideFirebaseAuth(): FirebaseAuth = FirebaseAuth.getInstance()
@@ -75,7 +61,14 @@ class AppModule {
     @Provides
     @Singleton
     fun provideValidateEmail(): ValidateEmail = ValidateEmail()
-
+    @Provides
+    @Singleton
+    fun provideGoogleAuthUiClient(@ApplicationContext context: Context): GoogleAuthUiClient {
+        return GoogleAuthUiClient(
+            context = context,
+            oneTapClient = Identity.getSignInClient(context)
+        )
+    }
     @Provides
     @Singleton
     fun provideValidatePassword(): ValidatePassword = ValidatePassword()
@@ -109,7 +102,12 @@ class AppModule {
     ): FirebaseStorageRepository {
         return FirebaseStorageImpl(firebaseAuth, storage)
     }
-
+    @Provides
+    @Singleton
+    fun provideUserData(): UserData {
+        // Obtiene los datos del usuario de alguna fuente
+        return UserData("userId", "userName", "userEmail")
+    }
     @Provides
     @Singleton
     fun provideEmailAuthUiClient(auth: FirebaseAuth, storageRepository: FirebaseStorageRepository): EmailAuthUiClient {

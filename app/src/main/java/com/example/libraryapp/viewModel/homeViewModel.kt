@@ -44,10 +44,10 @@ class homeViewModel @Inject constructor(
             CollectionSamples("Novedades", GreenAppOpacity, "https://m.media-amazon.com/images/I/6135vNR5sCL._AC_UF1000,1000_QL80_.jpg","Novedades"),
             CollectionSamples("Los más leídos", rositaGracioso, "https://1.bp.blogspot.com/-GXLyGMhWMJ8/XzqTBbp_udI/AAAAAAAAZaM/LyfXIxQZZgIjy62NFDuKEstQz_vs_Z9RwCNcBGAsYHQ/s1014/EbrMX4-XsAMyGlm.jpg","Populares"),
             CollectionSamples("Recomendados", rositaGracioso, "https://m.media-amazon.com/images/I/51a0PiL88RL._SY445_SX342_.jpg","Ficción"),
-            CollectionSamples("Promociones", GreenAppOpacity, "https://www.nationalgeographic.com.es/medio/2022/04/23/libros_b2d310d5_1280x852.jpg","4"),
+            CollectionSamples("Promociones", GreenAppOpacity, "https://www.nationalgeographic.com.es/medio/2022/04/23/libros_b2d310d5_1280x852.jpg","Promociones"),
             CollectionSamples("Blog", GreenAppOpacity, "https://previews.123rf.com/images/olegdudko/olegdudko1712/olegdudko171201274/90967469-libros-y-computadora-port%C3%A1til.jpg","5"),
             CollectionSamples("Premiados", GreenAppOpacity, "https://phantom-expansion.unidadeditorial.es/ca3e81ca6c16010e5d1fc2367d9a004a/crop/0x22/552x756/resize/640/assets/multimedia/imagenes/2022/02/28/16460499793522.jpg","Imprescindibles"),
-            CollectionSamples("eBooks", rositaGracioso, "https://cdn.computerhoy.com/sites/navi.axelspringer.es/public/media/image/2018/11/ereader.jpg?tf=3840x","7"),
+            CollectionSamples("eBooks", rositaGracioso, "https://cdn.computerhoy.com/sites/navi.axelspringer.es/public/media/image/2018/11/ereader.jpg?tf=3840x","eBook"),
             CollectionSamples("Autores", GreenAppOpacity, "https://cdn.zendalibros.com/wp-content/uploads/arturo-perez-reverte-1.jpg","AutoresDestination")
         )
     )
