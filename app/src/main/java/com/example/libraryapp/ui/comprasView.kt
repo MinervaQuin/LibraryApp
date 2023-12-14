@@ -135,7 +135,7 @@ fun orders(order: Order, viewModel : comprasViewModel){
             val books = viewModel.MapBook
             val book = books[order]
                 for (i in 0 until book!!.size){
-                    bookspreview(book[i])
+                    bookspreview(book[i],order.booksOrdered.get(book[i]!!.ref))
             }
         }
     }
@@ -143,8 +143,10 @@ fun orders(order: Order, viewModel : comprasViewModel){
 }
 
 @Composable
-fun bookspreview(book: Book?){
-    Column {
+fun bookspreview(book: Book?, cantidad: Int?){
+    Box(modifier= Modifier
+        .fillMaxWidth()
+    ){
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -190,6 +192,17 @@ fun bookspreview(book: Book?){
                 )
             }
         }
+        Text(
+            text = cantidad.toString(),
+            style = TextStyle(
+                fontSize = 12.sp,
+                fontWeight = FontWeight(400),
+                color = Color(0xCC010101),
+            ),
+            modifier = Modifier
+                .padding(25.dp)
+                .align(alignment = Alignment.CenterEnd)
+        )
     }
 
 }
