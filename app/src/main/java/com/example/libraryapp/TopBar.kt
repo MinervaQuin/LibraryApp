@@ -1,6 +1,7 @@
 package com.example.libraryapp
 
 
+import android.widget.Toast
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -17,11 +18,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.ModalDrawer
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.outlined.AccountBox
 import androidx.compose.material.icons.outlined.Book
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Person
@@ -56,6 +59,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
@@ -154,6 +158,7 @@ fun TopBar(navController: NavController,drawerState: DrawerState) {
 @Composable
 fun drawer( navController: NavController, drawerState: DrawerState, viewModel: topBarViewModel){
     viewModel.getProfileImage()
+    val context = LocalContext.current
     var isOnCartScreen by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     var selectedItem by remember { mutableStateOf<NavigationItem?>(null) }
@@ -171,6 +176,12 @@ fun drawer( navController: NavController, drawerState: DrawerState, viewModel: t
             selectedIcon = Icons.Filled.ShoppingCart,
             unselectedIcon = Icons.Outlined.ShoppingCart,
             route = "cartDestination",
+        ),
+        NavigationItem(
+            title = "Autores",
+            selectedIcon = Icons.Filled.AccountBox,
+            unselectedIcon = Icons.Outlined.AccountBox,
+            route = "AutoresDestination",
         ),
         NavigationItem(
             title = "Imprescindibles",
@@ -312,6 +323,9 @@ fun drawer( navController: NavController, drawerState: DrawerState, viewModel: t
                     onClick = {
                         if(item.title != "Perfil" && item.title != "Cesta" && item.title != "Ayuda"){
                             ShoppingCart.setSelectedCategory(item.title)
+                        }
+                        if(item.title == "Ayuda"){
+                            Toast.makeText(context, "No implementado", Toast.LENGTH_SHORT).show()
                         }
                         navController.navigate(item.route)
                         scope.launch {
