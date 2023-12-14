@@ -80,9 +80,10 @@ fun ShipmentGateway(navController: NavController) {
                 is shipmentViewModel.ValidationEvent.Success -> {
                     Toast.makeText(
                         context,
-                        "Registro Exitoso",
+                        "Datos Guardados",
                         Toast.LENGTH_LONG
                     ).show()
+                    navController.navigate("Payment")
                 }
             }
         }
@@ -136,7 +137,7 @@ fun ShipmentGateway(navController: NavController) {
 
                 ShipmentTextField(
                     value = state.lastName,
-                    onValueChange = { viewModel.onEvent(ShipmentAdressFormEvent.NameChanged(it))},
+                    onValueChange = { viewModel.onEvent(ShipmentAdressFormEvent.lastNameChanged(it))},
                     isError = state.lastNameError,
                     placeHolder = "Apellidos del destinatario",
                     icon = Icons.Default.Person,
@@ -197,7 +198,7 @@ fun ShipmentGateway(navController: NavController) {
                     ) {
                         ShipmentTextField(
                             value = state.province,
-                            onValueChange = { viewModel.onEvent(ShipmentAdressFormEvent.NameChanged(it)) },
+                            onValueChange = { viewModel.onEvent(ShipmentAdressFormEvent.provinceChanged(it)) },
                             isError = state.provinceError,
                             placeHolder = "Provincia",
                             icon = Icons.Default.MyLocation,
@@ -231,7 +232,7 @@ fun ShipmentGateway(navController: NavController) {
 
                 ShipmentTextField(
                     value = state.city,
-                    onValueChange = { viewModel.onEvent(ShipmentAdressFormEvent.NameChanged(it)) },
+                    onValueChange = { viewModel.onEvent(ShipmentAdressFormEvent.cityChanged(it)) },
                     isError = state.cityError,
                     placeHolder = "Ciudad",
                     icon = Icons.Default.LocationCity,
@@ -274,9 +275,9 @@ fun ShipmentGateway(navController: NavController) {
                 }
                 Button(
                     onClick = {
-                        // TODO:
-                        //navController.navigate("Payment")
+
                         viewModel.onEvent(ShipmentAdressFormEvent.Submit)
+
                     },
                     modifier = Modifier
                         .fillMaxWidth()

@@ -303,8 +303,9 @@ fun ActionButton(cartViewModel: CartViewModel, navController: NavController) {
             } else if (cartViewModel.cartState.value.deliveryOption == CartViewModel.DeliveryOption.HOME_DELIVERY &&
                 cartViewModel.cartItems.value.isNotEmpty()
             ) {
-                // Navegar a la pantalla de compra (no implementada)
+
                 navController.navigate("Shipment")
+
             }
         },
         colors = ButtonDefaults.buttonColors(white),

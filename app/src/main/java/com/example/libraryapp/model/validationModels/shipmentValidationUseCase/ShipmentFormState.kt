@@ -7,8 +7,6 @@ data class ShipmentFormState(
     val lastNameError: String? = null,
     val adress: String = "",
     val adressError: String? = null,
-    val country: String ="",
-    val countryError: String? = null,
     val zipCode: String = "",
     val zipCodeError: String? = null,
     val province: String = "",
@@ -17,6 +15,4 @@ data class ShipmentFormState(
     val cityError: String? = null,
     val phoneNumber: String = "",
     val phoneNumberError: String? = null,
-    val dni: String = "",
-    val dniError: String? = null
 )

@@ -403,7 +403,7 @@ class MainActivity : ComponentActivity() {
                                         .padding(paddingValues)
                                         .fillMaxSize()
                                 ) {
-                                    PaymentGateway()
+                                    PaymentGateway(navController)
                                 }
                             }
                         )

@@ -3,6 +3,7 @@ package com.example.libraryapp.model
 import androidx.navigation.NavHostController
 import com.example.libraryapp.model.resources.Author
 import com.example.libraryapp.model.resources.Book
+import com.example.libraryapp.model.validationModels.shipmentValidationUseCase.ValidatedShipmentAdress
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -16,7 +17,14 @@ class LibraryAppState @Inject constructor() {
     private var autorId: String? = null
     private var autor: Author? = null
 
+    private var _validatedShipmentAdress = ValidatedShipmentAdress()
 
+    fun setAdress(validatedShipmentAdress: ValidatedShipmentAdress){
+        _validatedShipmentAdress = validatedShipmentAdress
+    }
+    fun getAdress(): String{
+        return _validatedShipmentAdress.toString()
+    }
     fun setSearchedString(searchString: String){
         searchedString= searchString
     }
