@@ -323,11 +323,14 @@ fun drawer( navController: NavController, drawerState: DrawerState, viewModel: t
                     onClick = {
                         if(item.title != "Perfil" && item.title != "Cesta" && item.title != "Ayuda"){
                             ShoppingCart.setSelectedCategory(item.title)
+                            navController.navigate(item.route)
                         }
                         if(item.title == "Ayuda"){
                             Toast.makeText(context, "No implementado", Toast.LENGTH_SHORT).show()
                         }
-                        navController.navigate(item.route)
+                        else{
+                            navController.navigate(item.route)
+                        }
                         scope.launch {
                             drawerState.close()
                         }
