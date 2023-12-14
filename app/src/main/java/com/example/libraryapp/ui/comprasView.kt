@@ -1,6 +1,8 @@
 package com.example.libraryapp.ui
 
 import android.util.Log
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,6 +35,7 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.libraryapp.model.resources.Book
 import com.example.libraryapp.model.resources.Order
+import com.example.libraryapp.theme.green
 import com.example.libraryapp.ui.theme.GreenApp
 import com.example.libraryapp.viewModel.comprasViewModel
 
@@ -69,6 +72,7 @@ fun orders(order: Order, viewModel : comprasViewModel){
     Column {
         Box(
             modifier= Modifier.fillMaxWidth()
+                .border(width = 1.dp, color = Color(0xFF000000))
         ){
             Row(
                 modifier = Modifier
@@ -130,14 +134,17 @@ fun orders(order: Order, viewModel : comprasViewModel){
                     .align(alignment = Alignment.TopEnd)
             )
         }
-        if (open){
-            Log.d("","Entro")
-            val books = viewModel.MapBook
-            val book = books[order]
-                for (i in 0 until book!!.size){
-                    bookspreview(book[i],order.booksOrdered.get(book[i]!!.ref))
+
+            Column {
+                if (open){
+                    Log.d("","Entro")
+                    val books = viewModel.MapBook
+                    val book = books[order]
+                    for (i in 0 until book!!.size){
+                        bookspreview(book[i],order.booksOrdered.get(book[i]!!.ref))
+                    }
+                }
             }
-        }
     }
 
 }
@@ -146,6 +153,8 @@ fun orders(order: Order, viewModel : comprasViewModel){
 fun bookspreview(book: Book?, cantidad: Int?){
     Box(modifier= Modifier
         .fillMaxWidth()
+        .padding(end= 20.dp)
+        .border(width = 1.dp, color = Color(0xFF000000))
     ){
         Row(
             modifier = Modifier
