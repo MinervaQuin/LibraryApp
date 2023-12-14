@@ -91,7 +91,7 @@ class MainActivity : ComponentActivity() {
             val topBarViewModel: topBarViewModel = hiltViewModel()
             val cartViewModel: CartViewModel = hiltViewModel()
             ShoppingCart.init(cartViewModel)
-            NavHost(navController = navController, startDestination = "comprasView"){
+            NavHost(navController = navController, startDestination = "firstScreens"){
 
                 navigation(
                     startDestination = "login",
@@ -299,6 +299,29 @@ class MainActivity : ComponentActivity() {
                                 )
                         }
                     }
+                    composable("comprasView"){
+                        val viewModel : comprasViewModel = hiltViewModel()
+                        ModalNavigationDrawer(
+                            drawerContent = {
+                                // Contenido del cajón (drawer)
+                                ModalDrawerSheet(modifier = Modifier.width(250.dp)
+                                ){ drawer(navController = navController, drawerState = drawerState,topBarViewModel)}
+                            },drawerState = drawerState,){
+                            Scaffold(
+                                bottomBar = { BottomBar(navController = navController) },
+                                topBar = { TopBar(navController = navController, drawerState)},
+                                content = { paddingValues ->
+                                    Column(
+                                        modifier = Modifier
+                                            .padding(paddingValues)
+                                            .fillMaxSize()
+                                    ) {
+                                        comprasView(navController = navController, viewModel)
+                                    }
+                                }
+                            )
+                        }
+                    }
 
 
 
@@ -336,29 +359,7 @@ class MainActivity : ComponentActivity() {
                 }
 
                 //fuera del grafo
-                composable("comprasView"){
-                    val viewModel : comprasViewModel = hiltViewModel()
-                    ModalNavigationDrawer(
-                        drawerContent = {
-                            // Contenido del cajón (drawer)
-                            ModalDrawerSheet(modifier = Modifier.width(250.dp)
-                            ){ drawer(navController = navController, drawerState = drawerState,topBarViewModel)}
-                        },drawerState = drawerState,){
-                        Scaffold(
-                            bottomBar = { BottomBar(navController = navController) },
-                            topBar = { TopBar(navController = navController, drawerState)},
-                            content = { paddingValues ->
-                                Column(
-                                    modifier = Modifier
-                                        .padding(paddingValues)
-                                        .fillMaxSize()
-                                ) {
-                                    comprasView(navController = navController, viewModel)
-                                }
-                            }
-                        )
-                    }
-                }
+
 
 
                 composable("SearchScreen"){
