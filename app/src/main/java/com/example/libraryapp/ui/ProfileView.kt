@@ -241,7 +241,7 @@ fun ProfileScreen(
 
         Button(
             onClick = {
-                // TODO: cambiar correo
+                navController.navigate("comprasView")
             },
             modifier = Modifier
                 .fillMaxWidth()

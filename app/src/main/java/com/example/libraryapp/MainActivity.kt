@@ -44,6 +44,7 @@ import com.example.libraryapp.ui.PaymentGateway
 import com.example.libraryapp.ui.ProfileScreen
 import com.example.libraryapp.ui.ShipmentGateway
 import com.example.libraryapp.ui.autoresView
+import com.example.libraryapp.ui.comprasView
 import com.example.libraryapp.ui.signUpView
 import com.example.libraryapp.ui.theme.BookDetailsScreen
 import com.example.libraryapp.ui.theme.BookScreen
@@ -53,6 +54,7 @@ import com.example.libraryapp.viewModel.CartViewModel
 import com.example.libraryapp.viewModel.SearchViewModel
 import com.example.libraryapp.viewModel.ShoppingCart
 import com.example.libraryapp.viewModel.autoresViewModel
+import com.example.libraryapp.viewModel.comprasViewModel
 import com.example.libraryapp.viewModel.homeViewModel
 import com.example.libraryapp.viewModel.loginViewModel
 import com.example.libraryapp.viewModel.profileViewModel
@@ -297,6 +299,29 @@ class MainActivity : ComponentActivity() {
                                         }
                                     }
                                 )
+                        }
+                    }
+                    composable("comprasView"){
+                        val viewModel : comprasViewModel = hiltViewModel()
+                        ModalNavigationDrawer(
+                            drawerContent = {
+                                // Contenido del cajón (drawer)
+                                ModalDrawerSheet(modifier = Modifier.width(250.dp)
+                                ){ drawer(navController = navController, drawerState = drawerState,topBarViewModel)}
+                            },drawerState = drawerState,){
+                            Scaffold(
+                                bottomBar = { BottomBar(navController = navController) },
+                                topBar = { TopBar(navController = navController, drawerState)},
+                                content = { paddingValues ->
+                                    Column(
+                                        modifier = Modifier
+                                            .padding(paddingValues)
+                                            .fillMaxSize()
+                                    ) {
+                                        comprasView(navController = navController, viewModel)
+                                    }
+                                }
+                            )
                         }
                     }
 
