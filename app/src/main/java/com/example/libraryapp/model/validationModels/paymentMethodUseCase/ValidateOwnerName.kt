@@ -1,10 +1,9 @@
-package com.example.libraryapp.model.validationModels.shipmentValidationUseCase
+package com.example.libraryapp.model.validationModels.paymentMethodUseCase
 
 import com.example.libraryapp.model.validationModels.ValidationResult
 
-class ValidateName {
-
-    fun execute(name: String): ValidationResult{
+class ValidateOwnerName {
+    fun execute(name: String): ValidationResult {
         if(name.isBlank()){
             return ValidationResult(
                 successful = false,

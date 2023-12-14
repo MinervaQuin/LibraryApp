@@ -17,7 +17,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CartViewModel @Inject constructor(
-    private val ordersFirebase: OrdersFirebaseRepository
+
 ) : ViewModel() {
 
     private val _cartItems = mutableMapOf<Book, Int>()
@@ -92,15 +92,7 @@ class CartViewModel @Inject constructor(
         PICK_UP,
         HOME_DELIVERY
     }
-    val currentCartItems = cartItems.value
-    fun buy() {
-        viewModelScope.launch {
-            val cartData = cartItems.value
-            ordersFirebase.uploadCartData(cartData)
-            _cartItems.clear()
-            updateCartItems()
-        }
 
-    }
+
 }
 

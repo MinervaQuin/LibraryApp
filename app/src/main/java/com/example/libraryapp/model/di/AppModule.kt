@@ -15,6 +15,10 @@ import com.example.libraryapp.model.firebaseAuth.GoogleAuthUiClient
 import com.example.libraryapp.model.firebaseAuth.OrdersFirebaseRepository
 import com.example.libraryapp.model.firebaseAuth.OrdersFirebaseRepositoryImpl
 import com.example.libraryapp.model.firebaseAuth.UserData
+import com.example.libraryapp.model.validationModels.paymentMethodUseCase.ValidateCard
+import com.example.libraryapp.model.validationModels.paymentMethodUseCase.ValidateCvv
+import com.example.libraryapp.model.validationModels.paymentMethodUseCase.ValidateExpirationDate
+import com.example.libraryapp.model.validationModels.paymentMethodUseCase.ValidateOwnerName
 import com.example.libraryapp.model.validationModels.shipmentValidationUseCase.ValidateAdress
 import com.example.libraryapp.model.validationModels.shipmentValidationUseCase.ValidateDNI
 import com.example.libraryapp.model.validationModels.shipmentValidationUseCase.ValidateName
@@ -127,10 +131,6 @@ class AppModule {
 
     @Provides
     @Singleton
-    fun provideValidateDNI(): ValidateDNI = ValidateDNI()
-
-    @Provides
-    @Singleton
     fun provideValidatePhoneNumber(): ValidatePhoneNumber = ValidatePhoneNumber()
 
     @Provides
@@ -140,4 +140,22 @@ class AppModule {
     @Provides
     @Singleton
     fun provideValidateName(): ValidateName = ValidateName()
+
+    @Provides
+    @Singleton
+    fun provideValidateCard(): ValidateCard = ValidateCard()
+
+    @Provides
+    @Singleton
+    fun provideValidateCvv(): ValidateCvv = ValidateCvv()
+
+    @Provides
+    @Singleton
+    fun provideExpirationDate(): ValidateExpirationDate = ValidateExpirationDate()
+
+    @Provides
+    @Singleton
+    fun provideOwnerName(): ValidateOwnerName = ValidateOwnerName()
+
+
 }

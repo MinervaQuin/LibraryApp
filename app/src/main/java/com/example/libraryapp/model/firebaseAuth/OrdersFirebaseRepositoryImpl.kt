@@ -43,7 +43,7 @@ class OrdersFirebaseRepositoryImpl (
             booksOrdered = preparedCartData,
             orderDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date()),
             total = cartItems.entries.sumOf { (book, quantity) -> book.price * quantity },
-            shipmentAdress = "Tu dirección de envío aquí", // Ajustar según sea necesario
+            shipmentAdress = "Tu dirección de envío aquí",
             state = "En proceso"
         )
 
