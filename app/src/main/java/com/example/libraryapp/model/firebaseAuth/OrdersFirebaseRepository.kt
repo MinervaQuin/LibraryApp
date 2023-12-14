@@ -10,7 +10,7 @@ interface OrdersFirebaseRepository {
     val authConection: FirebaseAuth?
 
     suspend fun prepareCartData(cartItems: Map<Book, Int>): Map<String, Any>
-    suspend fun uploadCartData(cartItems: Map<Book, Int>)
+    suspend fun uploadCartData(cartItems: Map<Book, Int>, adress: String)
     suspend fun downloadOrders(): List<Order>
 
 }

@@ -51,6 +51,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.example.libraryapp.model.validationModels.paymentMethodUseCase.PaymentMethodFormEvent
 import com.example.libraryapp.model.validationModels.shipmentValidationUseCase.ShipmentAdressFormEvent
 import com.example.libraryapp.theme.gray
@@ -62,7 +63,7 @@ import com.example.libraryapp.viewModel.shipmentViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
-fun PaymentGateway(viewModel: PaymentViewModel = hiltViewModel()) {
+fun PaymentGateway(navController: NavController,viewModel: PaymentViewModel = hiltViewModel()) {
 
     val state = viewModel.state
 
@@ -74,10 +75,11 @@ fun PaymentGateway(viewModel: PaymentViewModel = hiltViewModel()) {
                 is PaymentViewModel.ValidationEvent.Success -> {
                     Toast.makeText(
                         context,
-                        "Datos Guardados",
+                        "Pedido realizado",
                         Toast.LENGTH_LONG
                     ).show()
-
+                    viewModel.buy()
+                    navController.navigate("homePage")
                 }
             }
         }

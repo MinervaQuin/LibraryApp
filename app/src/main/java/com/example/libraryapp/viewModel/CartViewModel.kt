@@ -93,6 +93,11 @@ class CartViewModel @Inject constructor(
         HOME_DELIVERY
     }
 
+    fun clearShoppingCart(){
+        _cartItems.clear()
+        updateCartItems()
+    }
+
 
 }
 

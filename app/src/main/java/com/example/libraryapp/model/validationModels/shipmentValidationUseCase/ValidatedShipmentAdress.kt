@@ -8,4 +8,8 @@ data class ValidatedShipmentAdress(
     val provinceResult: String = "",
     val cityResult: String = "",
     val phoneNumberResult: String = ""
-)
+){
+    override fun toString(): String {
+        return "$nameResult $lastNameResult, $addressResult, $zipCodeResult, $provinceResult, $cityResult"
+    }
+}

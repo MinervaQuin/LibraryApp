@@ -29,7 +29,7 @@ class shipmentViewModel @Inject constructor(
     private val validatePhoneNumber: ValidatePhoneNumber,
     private val validateAdress: ValidateAdress,
     private val libraryAppState: LibraryAppState,
-    private val ordersFirebase: OrdersFirebaseRepository
+
 ) : ViewModel() {
 
     var state by mutableStateOf(ShipmentFormState())
@@ -120,13 +120,5 @@ class shipmentViewModel @Inject constructor(
         object Success: ValidationEvent()
     }
 
-    fun buy() {
-        viewModelScope.launch {
-            val cartData = cartItems.value
-            ordersFirebase.uploadCartData(cartData)
-            _cartItems.clear()
-            updateCartItems()
-        }
 
-    }
 }

@@ -22,8 +22,8 @@ class LibraryAppState @Inject constructor() {
     fun setAdress(validatedShipmentAdress: ValidatedShipmentAdress){
         _validatedShipmentAdress = validatedShipmentAdress
     }
-    fun getAdress(): ValidatedShipmentAdress{
-        return _validatedShipmentAdress
+    fun getAdress(): String{
+        return _validatedShipmentAdress.toString()
     }
     fun setSearchedString(searchString: String){
         searchedString= searchString

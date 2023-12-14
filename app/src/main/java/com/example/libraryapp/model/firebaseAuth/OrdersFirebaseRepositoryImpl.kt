@@ -14,7 +14,7 @@ import java.util.Locale
 
 class OrdersFirebaseRepositoryImpl (
     private val db: FirebaseFirestore,
-    private val auth: FirebaseAuth
+    private val auth: FirebaseAuth,
 ): OrdersFirebaseRepository{
     override val dataBase: FirebaseFirestore?
         get() = db
@@ -31,7 +31,7 @@ class OrdersFirebaseRepositoryImpl (
 
     }
 
-    override suspend fun uploadCartData(cartItems: Map<Book, Int>) {
+    override suspend fun uploadCartData(cartItems: Map<Book, Int>, adress: String) {
         val preparedCartData = prepareCartData(cartItems)
         val orderId = System.currentTimeMillis().toString() // Ejemplo usando timestamp
         val orderRef = db.collection("users").document(auth.currentUser!!.uid)
@@ -43,7 +43,7 @@ class OrdersFirebaseRepositoryImpl (
             booksOrdered = preparedCartData,
             orderDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date()),
             total = cartItems.entries.sumOf { (book, quantity) -> book.price * quantity },
-            shipmentAdress = "Tu dirección de envío aquí",
+            shipmentAdress = adress,
             state = "En proceso"
         )
 

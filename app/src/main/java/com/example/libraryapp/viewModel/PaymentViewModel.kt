@@ -7,6 +7,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.libraryapp.model.LibraryAppState
+import com.example.libraryapp.model.firebaseAuth.OrdersFirebaseRepository
 import com.example.libraryapp.model.validationModels.paymentMethodUseCase.PaymentMethodFormEvent
 import com.example.libraryapp.model.validationModels.paymentMethodUseCase.PaymentMethodFormState
 import com.example.libraryapp.model.validationModels.paymentMethodUseCase.ValidateCard
@@ -25,11 +26,15 @@ class PaymentViewModel @Inject constructor(
     private val validateCard: ValidateCard,
     private val validateOwnerName: ValidateOwnerName,
     private val validateCvv: ValidateCvv,
-    private val validateExpirationDate: ValidateExpirationDate
+    private val validateExpirationDate: ValidateExpirationDate,
+    private val ordersFirebase: OrdersFirebaseRepository,
+
 ): ViewModel(){
 
-    fun coso() {
-        Log.d("PaymentViewModel", "${appState.getAdress()}")
+    companion object {
+        // Cambiar el acceso a la instancia del CartViewModel mediante el Singleton
+        val instance: CartViewModel
+            get() = ShoppingCart.getViewModelInstance()
     }
 
     var state by mutableStateOf(PaymentMethodFormState())
@@ -90,5 +95,14 @@ class PaymentViewModel @Inject constructor(
 
     sealed class ValidationEvent{
         object Success: ValidationEvent()
+    }
+
+    fun buy() {
+        viewModelScope.launch {
+            val cartData = instance.cartItems.value
+            ordersFirebase.uploadCartData(cartData, appState.getAdress())
+            instance.clearShoppingCart()
+        }
+
     }
 }
