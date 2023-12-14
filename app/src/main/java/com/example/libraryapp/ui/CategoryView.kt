@@ -80,6 +80,7 @@ import kotlinx.coroutines.launch
 @Composable
 @ExperimentalMaterialApi
 fun CategoryView (navController: NavController, ViewModel: CategoryViewModel,categoria: String ){
+
     //val selectedCategory by rememberUpdatedState(newValue = ViewModel.selectedCategory)
     //ViewModel.updateSelectedCategory(categoria)
     val executedOnce = remember { mutableSetOf<Boolean>() }

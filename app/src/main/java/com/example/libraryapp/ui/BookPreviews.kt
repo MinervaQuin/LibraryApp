@@ -57,10 +57,13 @@ fun BookPreview (obra: Book, navController: NavController, viewModel: CategoryVi
         .clickable {
             if (viewModel != null){
                 viewModel.setNewBook(obra)
+                viewModel.libraryAppState.setBookId(obra.ref)
+
             }
             else{
                 viewModel2!!.setNewBook(obra)
             }
+
             navController.navigate("BookDetailsView")
         }
     )
@@ -112,7 +115,7 @@ fun BookPreview (obra: Book, navController: NavController, viewModel: CategoryVi
             Row {
                 val rate = obra.score.toDouble()
                 val fillStars = Math.floor(rate / 2)
-                RatingBar (currentRating = fillStars)
+                RatingBar (currentRating = obra.score.toDouble())
 
 /*                val rate = obra.score.toDouble()
                 val fillStars = Math.floor (rate / 2)
@@ -202,7 +205,7 @@ fun BookPreviewWide (obra : Book, navController: NavController, viewModel: Categ
                 Row {
                     val rate = obra.score.toDouble()
                     val fillStars = Math.floor(rate / 2)
-                    RatingBar (currentRating = fillStars)
+                    RatingBar (currentRating = rate)
 /*                    val halfStars = rate % 2
                     val unfilledStars = 5 - (fillStars + halfStars)
                     iconpainter(R.drawable.openmoji_star, fillStars.toInt())

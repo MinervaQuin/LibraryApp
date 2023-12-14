@@ -65,6 +65,7 @@ class CategoryViewModel @Inject constructor(
     fun setNewBook(book: Book){
         libraryAppState.setBook(book)
     }
+
     suspend fun updatebooks(Categorias : String) {
             _loading.value = true
             if(Categorias == "Todas Las Categorias"){

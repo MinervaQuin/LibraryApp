@@ -466,7 +466,7 @@ fun BookLittleInfo(book: Book,navController: NavController, bookDetailsViewModel
             )
             Text(text = book.editorial)
             Text(text = book.isbn.toString())
-            RatingBar(currentRating = 4.0)
+            RatingBar(currentRating = book.score.toDouble())
 
             Text(
                 text = book.price.toString() + "€", modifier = Modifier.padding(end = 10.dp),
