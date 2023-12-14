@@ -35,6 +35,10 @@ class homeViewModel @Inject constructor(
     private val _isFallo = MutableLiveData<Boolean>()
     private var allBooks: List<Book?> = emptyList()
 
+    init {
+        initCarouselImageArray()
+    }
+
     var collectionArray = MutableStateFlow<List<CollectionSamples>>(
         listOf(
             CollectionSamples("Novedades", GreenAppOpacity, "https://m.media-amazon.com/images/I/6135vNR5sCL._AC_UF1000,1000_QL80_.jpg","Novedades"),
@@ -50,35 +54,35 @@ class homeViewModel @Inject constructor(
     val largeCollectionSamplesArray = MutableStateFlow<List<LongCollectionSamples>>(
         listOf(
             LongCollectionSamples("Cómic y Manga", rojoSangre, R.drawable.hmt_large, "Cómic y Manga", false),
-            LongCollectionSamples("Infantil", verdeFuerte, R.drawable.flecha2, "Infantil", false),
+            LongCollectionSamples("Infantil", verdeFuerte, R.drawable.diseno_sin_titulo, "Infantil", false),
             LongCollectionSamples("Todas las Categorías", rojoSangre, R.drawable.todas_categorias, "Todas Las Categorias", true),
             LongCollectionSamples("Prueba 4", rojoSangre, R.drawable.hmt_large, "Ruta2", true)
 
         )
     )
 
-    val carouselImageArray = MutableStateFlow<List<carouselImage>>(
-        listOf(
-            carouselImage(R.drawable.carousel_img_1, "cosa"),
-            carouselImage(R.drawable.carrusel2, "Cosa2"),
-            carouselImage(R.drawable.carrusel3, "Cosa3")
-        )
-    )
-
-    /*
-    fun tryUpload(){
-        val uri = Uri.parse("android.resource://com.example.libraryapp/${R.drawable.fotopredefinida}")
+    val carouselImageArray = MutableStateFlow<List<carouselImage>>(listOf(
+        carouselImage(R.drawable.brandom_sanderson, Book()),
+        carouselImage(R.drawable.joe_abercrombie, Book()),
+        carouselImage(R.drawable.carousel_img_1, Book())
+    ))
+    fun initCarouselImageArray() {
         viewModelScope.launch {
-            try {
-                firestoreRepository.uploadImageToFirebase(uri, onSuccess = {}, onFailure = {})
-            } catch (e: Exception) {
-                throw (e)
-            }
+            Log.d("Book", "Book1")
+            val book1 = firestoreRepository.getBook("rUzlXFXEA7yD43SaC2dK") // Llamada a la función suspendida
+            Log.d("Book", "Book2")
+            val book2 = firestoreRepository.getBook("Cr4CVFYQJbqV8J5H3VO6")
+            Log.d("Book", "Book3")
+            val book3 = firestoreRepository.getBook("BE9A9pSELYw3yUXZOp9")
+            val images = listOf(
+                carouselImage(R.drawable.brandom_sanderson, book1),
+                carouselImage(R.drawable.joe_abercrombie, book2),
+                carouselImage(R.drawable.carousel_img_1, book3)
+            )
+
+            carouselImageArray.value = images
         }
     }
-*/
-
-
 
     fun initiateScan(context: Context) {
         viewModelScope.launch {

@@ -138,18 +138,7 @@ class MainActivity : ComponentActivity() {
                                             .fillMaxSize()
                                     ){
                                         HomeView(
-                                            userData = googleAuthUiClient.getSignedInUser(),
-                                            onSignOut = {
-                                                lifecycleScope.launch {
-                                                    googleAuthUiClient.signOut()
-                                                    Toast.makeText(
-                                                        applicationContext,
-                                                        "Sesión Cerrada",
-                                                        Toast.LENGTH_LONG
-                                                    ).show()
-                                                    navController.popBackStack()
-                                                }
-                                            },
+
                                             viewModel = homeViewModel,
                                             navController = navController
                                         )

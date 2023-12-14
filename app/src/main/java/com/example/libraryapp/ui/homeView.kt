@@ -95,12 +95,9 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun HomeView(
-    userData: UserData?, //TODO esto hay que ponerlo en el viewModel
-    onSignOut: () -> Unit,
     viewModel: homeViewModel,
     navController: NavHostController
     ) {
-    val cartViewModel: CartViewModel = ShoppingCart.getViewModelInstance()
 
 
     val collectionsArray by viewModel.collectionArray.collectAsState()
@@ -119,7 +116,7 @@ fun HomeView(
         horizontalAlignment = Alignment.CenterHorizontally
     ){
         item {
-            MiCarruselConAutoScroll(carouselImageArray)
+            MiCarruselConAutoScroll(carouselImageArray, viewModel, navController)
         }
 
         val chunkedCollections = collectionsArray.drop(2).chunked(2)
@@ -146,25 +143,6 @@ fun HomeView(
                 }
             }
         }
-
-        item {
-            Button(onClick = onSignOut){
-                Text(text = "Cerrar Sesión")
-            }
-        }
-        item {
-            Button(onClick = {
-                //viewModel.getBookAndLog("B9svfDJglRgEPyN6wSAh")
-                //viewModel.getAuthorAndLog("Rkwq8a3v54TV6FSGw2n9")
-                //viewModel.getCollectionAndLog("oBMLVCnbNsPQJiPexKL7")
-                //viewModel.getReviewsAndLog("B9svfDJglRgEPyN6wSAh")
-                //viewModel.uploadReviewTest()
-                //viewModel.tryUpload()
-                viewModel.fetchOrders()
-            }) {
-                Text(text = "Probar el Coso")
-            }
-        }
     }
 
 
@@ -173,13 +151,11 @@ fun HomeView(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun MiCarruselConAutoScroll(carouselImageArray: List<carouselImage>) {
+fun MiCarruselConAutoScroll(carouselImageArray: List<carouselImage>, viewModel: homeViewModel, navController: NavController) {
     val collectionBoxWidth = 150.dp
     val padding = 8.dp
     val spacing = 4.dp
     val totalWidth = (collectionBoxWidth * 2) + (padding * 2) + spacing
-
-    val showAlertDialog = remember { mutableStateOf(false) }
 
     val pagerState = rememberPagerState(
         pageCount = { carouselImageArray.size }
@@ -195,18 +171,7 @@ fun MiCarruselConAutoScroll(carouselImageArray: List<carouselImage>) {
             }
         }
     }
-    if (showAlertDialog.value) {
-        AlertDialog(
-            onDismissRequest = { showAlertDialog.value = false },
-            title = { Text("A donde vas, cachonda?!") },
-            text = { Text("Mira no sé si tiene que ser sheila, andrew, o tú, minerva, pero aquí faltan vistas!!") },
-            confirmButton = {
-                Button(onClick = { showAlertDialog.value = false }) {
-                    Text("Aceptar")
-                }
-            }
-        )
-    }
+
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier.fillMaxWidth()
@@ -217,17 +182,20 @@ fun MiCarruselConAutoScroll(carouselImageArray: List<carouselImage>) {
                 .width(totalWidth)
                 .height(200.dp)
         ) { page ->
+            val currentCarouselImage = carouselImageArray[page]
             Image(
-                painter = painterResource(id = carouselImageArray[page].imagen),
+                painter = painterResource(id = currentCarouselImage.imagen),
                 contentDescription = "Imagen Carrusel",
                 contentScale = ContentScale.Fit,
                 modifier = Modifier
                     .height(150.dp)
                     .width(totalWidth)
-                    .border(2.dp, Color.Black)
                     .clickable {
-                        // Aquí va la lógica al hacer clic en la imagen, por ejemplo:
-                        showAlertDialog.value = true
+                        currentCarouselImage.book?.let { book ->
+                            viewModel.libraryAppState.setBook(book)
+                            viewModel.libraryAppState.setBookId(book.author_id)
+                        }
+                        navController.navigate("bookDetailsView")
                     }
             )
         }
@@ -244,8 +212,14 @@ fun CollectionBox(collection: CollectionSamples, navController: NavController) {
             .width(150.dp)
             .border(2.dp, Color.Black, shape = RectangleShape)
             .clickable {
-                ShoppingCart.setSelectedCategory(collection.route)
-                navController.navigate("category")
+                if(collection.route == "AutoresDestination"){
+                    navController.navigate(collection.route)
+                }
+                else{
+                    ShoppingCart.setSelectedCategory(collection.route)
+                    navController.navigate("category")
+                }
+
             },
         elevation = CardDefaults.elevatedCardElevation(8.dp),
         shape = RectangleShape // Bordes rectos
