@@ -1,23 +1,21 @@
 package com.example.libraryapp.ui
 
 import android.util.Log
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,7 +33,6 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.libraryapp.model.resources.Book
 import com.example.libraryapp.model.resources.Order
-import com.example.libraryapp.theme.green
 import com.example.libraryapp.ui.theme.GreenApp
 import com.example.libraryapp.viewModel.comprasViewModel
 
@@ -77,7 +74,7 @@ fun orders(order: Order, viewModel : comprasViewModel){
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(95.dp)
+                    .height(115.dp)
                     .padding(10.dp)
                     .clickable {
                         open = !open
@@ -97,7 +94,7 @@ fun orders(order: Order, viewModel : comprasViewModel){
                         .padding(10.dp)
                 ) {
                     Text(
-                        text = "Orden número:${order!!.orderId}",
+                        text = "Orden número: ${order!!.orderId}",
                         style = TextStyle(
                             fontSize = 12.sp,
                             fontWeight = FontWeight(400),
@@ -105,7 +102,15 @@ fun orders(order: Order, viewModel : comprasViewModel){
                         )
                     )
                     Text(
-                        text = order!!.orderDate.toString(),
+                        text = order!!.orderDate,
+                        style = TextStyle(
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight(400),
+                            color = Color(0xCC010101),
+                        )
+                    )
+                    Text(
+                        text = order!!.shipmentAdress,
                         style = TextStyle(
                             fontSize = 10.sp,
                             fontWeight = FontWeight(400),
@@ -123,7 +128,7 @@ fun orders(order: Order, viewModel : comprasViewModel){
                 }
             }
             Text(
-                text = "${order.total.toString()}€",
+                text = "${order.total}€",
                 style = TextStyle(
                     fontSize = 15.sp,
                     fontWeight = FontWeight(400),
@@ -141,7 +146,7 @@ fun orders(order: Order, viewModel : comprasViewModel){
                     val books = viewModel.MapBook
                     val book = books[order]
                     for (i in 0 until book!!.size){
-                        bookspreview(book[i],order.booksOrdered.get(book[i]!!.ref))
+                        Bookspreview(book[i],order.booksOrdered.get(book[i]!!.ref))
                     }
                 }
             }
@@ -150,11 +155,11 @@ fun orders(order: Order, viewModel : comprasViewModel){
 }
 
 @Composable
-fun bookspreview(book: Book?, cantidad: Int?){
+fun Bookspreview(book: Book?, cantidad: Int?){
     Box(modifier= Modifier
         .fillMaxWidth()
-        .padding(end= 20.dp)
-        .border(width = 1.dp, color = Color(0xFF000000))
+        .padding(start = 50.dp)
+        .border(1.dp, Color(0xFF000000))
     ){
         Row(
             modifier = Modifier
@@ -192,7 +197,7 @@ fun bookspreview(book: Book?, cantidad: Int?){
                     )
                 )
                 Text(
-                    text = "${book.price.toString()}€",
+                    text = "${book.price}€",
                     style = TextStyle(
                         fontSize = 12.sp,
                         fontWeight = FontWeight(400),

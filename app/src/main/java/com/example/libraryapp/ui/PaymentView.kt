@@ -197,7 +197,7 @@ fun PaymentGateway(navController: NavController,viewModel: PaymentViewModel = hi
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 150.dp, start = 30.dp, end = 30.dp)
+                .padding(top = 100.dp, start = 30.dp, end = 30.dp)
                 .height(40.dp),
             colors = ButtonDefaults.buttonColors(white),
             border = BorderStroke(2.dp, green)
