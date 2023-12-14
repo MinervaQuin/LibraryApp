@@ -281,7 +281,7 @@ fun ShipmentGateway(navController: NavController) {
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 80.dp, start = 30.dp, end = 30.dp)
+                        .padding(top = 10.dp, start = 30.dp, end = 30.dp)
                         .height(40.dp),
                     colors = ButtonDefaults.buttonColors(white),
                     border = BorderStroke(2.dp, green)

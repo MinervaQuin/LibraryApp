@@ -1,6 +1,5 @@
 package com.example.libraryapp.viewModel
 
-import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -8,10 +7,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.libraryapp.model.firebaseAuth.FirestoreRepository
 import com.example.libraryapp.model.firebaseAuth.OrdersFirebaseRepository
-import com.example.libraryapp.model.firebaseAuth.OrdersFirebaseRepositoryImpl
 import com.example.libraryapp.model.resources.Book
 import com.example.libraryapp.model.resources.Order
-import com.example.libraryapp.ui.bookspreview
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
