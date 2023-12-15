@@ -88,7 +88,7 @@ fun AutorScreen (navController: NavController, ViewModel: AuthorViewModel){
         AsyncImage(
             model = autor.cover,
             contentDescription = "image description",
-            contentScale = ContentScale.FillBounds,
+            contentScale = ContentScale.Crop,
             modifier = Modifier
                 .shadow(
                     elevation = 4.dp,

@@ -53,7 +53,7 @@ class CategoryViewModel @Inject constructor(
         private set
     var selectedCategory by mutableStateOf<String>("")
         private set
-    var selectedShort by mutableStateOf<String>("Precio ascendente")
+    var selectedShort by mutableStateOf<String>("Mas valorados")
         private set
     init {
         // Inicializa la lista de libros con datos de prueba o desde algún origen de datos

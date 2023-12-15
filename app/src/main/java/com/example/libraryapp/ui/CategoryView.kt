@@ -29,6 +29,7 @@ import androidx.compose.material.RangeSlider
 import androidx.compose.material.SliderColors
 import androidx.compose.material.SliderDefaults
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Checklist
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material3.Button
@@ -234,7 +235,6 @@ fun booksortDropdown(
             //               .padding(16.dp)
         ) {
             Spacer(modifier = Modifier.width(8.dp))
-            Icon(imageVector = Icons.Default.List, contentDescription = null)
             Text(text = selectedShort?: "Select Short")
         }
         DropdownMenu(
@@ -255,6 +255,7 @@ fun booksortDropdown(
                 )
             }
         }
+        Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = null,modifier = Modifier.align(alignment = Alignment.TopEnd).padding(10.dp))
     }
 }
 
@@ -275,7 +276,6 @@ fun filtrado(viewModel: CategoryViewModel ,onDismiss: () -> Unit){
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(400.dp)
                     .padding(16.dp)
                     .shadow(8.dp),
                 colors = CardDefaults.cardColors(
@@ -319,6 +319,9 @@ fun filtrado(viewModel: CategoryViewModel ,onDismiss: () -> Unit){
                     },
                     modifier = Modifier
                         .align(alignment = Alignment.CenterHorizontally)
+                        .padding(bottom = 10.dp),
+                    colors= ButtonDefaults.buttonColors(
+                        containerColor= GreenApp),
                 ){
                     Text("Aplicar")
                 }
