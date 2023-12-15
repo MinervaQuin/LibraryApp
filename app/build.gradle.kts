@@ -14,7 +14,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.libraryapp"
-        minSdk = 26
+        minSdk = 33
         targetSdk = 33
         versionCode = 1
         versionName = "1.0"
@@ -56,7 +56,7 @@ android {
 }
 
 dependencies {
-
+    implementation(platform("com.google.firebase:firebase-bom:32.7.0"))
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
     implementation("androidx.activity:activity-compose:1.8.0")
     implementation(platform("androidx.compose:compose-bom:2023.03.00"))
@@ -96,7 +96,7 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.4.0")
     implementation ("androidx.compose.material:material-icons-core:1.0.5")
     implementation ("androidx.compose.material:material-icons-extended:1.0.5")
-
+    implementation ("com.google.firebase:firebase-messaging:20.3.0")
     /*
     #####DEPENDENCIAS DE TERCEROS####
     DEPENDENCIAS = https://maxkeppeler.notion.site/Sheets-Compose-Dialogs-804f0ebcb2c84b98b7afa5f687295aed
@@ -143,6 +143,9 @@ dependencies {
     implementation ("com.vanniktech:android-image-cropper:4.5.0")
 
     implementation("androidx.compose.runtime:runtime-livedata:1.3.2")
+    implementation ("com.google.firebase:firebase-analytics:21.5.0")
+    implementation("com.google.firebase:firebase-messaging")
+    implementation("com.google.firebase:firebase-analytics")
 
 }
 
