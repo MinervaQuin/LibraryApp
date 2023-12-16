@@ -1,5 +1,8 @@
 package com.example.libraryapp.ui.theme
 
+import android.util.Log
+import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -33,6 +36,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -42,6 +46,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
@@ -56,44 +61,66 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.example.libraryapp.model.BookDetailsUiState
+import com.example.libraryapp.model.resources.Book
+import com.example.libraryapp.model.resources.Review
 import com.example.libraryapp.theme.LibraryAppTheme
 import com.example.libraryapp.viewModel.BookDetailsViewModel
-import java.time.LocalDateTime
-import java.time.Month
+import com.example.libraryapp.viewModel.ShoppingCart
 import java.time.format.DateTimeFormatter
 
 
 @Composable
 fun BookDetailsScreen(
-    reviews: List<String> = List(5) { "$it" },
-    dates: List<LocalDateTime> = listOf(
-        LocalDateTime.of(2023, Month.NOVEMBER, 14, 12, 30, 0),
-        LocalDateTime.of(2023, Month.NOVEMBER, 13, 12, 30, 0),
-        LocalDateTime.of(2023, Month.NOVEMBER, 5, 12, 30, 0),
-        LocalDateTime.of(2023, Month.NOVEMBER, 14, 10, 40, 0),
-        LocalDateTime.of(2023, Month.JULY, 14, 12, 30, 0)
-    ),
+
     navController: NavHostController,
-    bookDetailsViewModel: BookDetailsViewModel = viewModel()
+    bookDetailsViewModel: BookDetailsViewModel = hiltViewModel(),
 ){
-    val offset = remember { mutableStateOf(0f) }
     val bookUiState by bookDetailsViewModel.bookUiState.collectAsState()
+    val book = bookDetailsViewModel.libraryAppState.getBook()
+
+
+    var reviews by remember { mutableStateOf<List<Review?>>(emptyList()) }
+
+
+    LaunchedEffect(bookDetailsViewModel.refreshReviews) {
+        bookDetailsViewModel.refreshReviews.collect { newRefreshReviewsValue ->
+
+            try {
+                reviews =
+                    bookDetailsViewModel.getReviews(bookDetailsViewModel.libraryAppState.getBookId())
+                Log.d("firebase", "SE HA ACTUALIZADO LAS REVIEWS")
+            } catch (e: Exception) {
+                Log.e("firebase", "Error en BookScreen", e)
+            }
+        }
+    }
 
     Column (modifier = Modifier.verticalScroll(rememberScrollState())
     ){
-
-        BookInitialInfo()
-        BookSinopsis()
-        FactSheet()
-        ReviewBook("Reina Roja", bookDetailsViewModel, bookUiState)
+//
+        BookInitialInfo(book!!, navController,bookDetailsViewModel)
+        BookSinopsis(book!!.sinopsis)
+        FactSheet(book!!)
+        ReviewBook(book!!.title, bookDetailsViewModel, bookUiState)
         Divider()
-        ResumeOfReviews()
-        Column {
-            for (i in dates) {
-                UserReview(reviewDate = i, bookDetailsViewModel = bookDetailsViewModel)
+        ResumeOfReviews(num_opi = reviews.size,
+            bookDetailsViewModel = bookDetailsViewModel
+        )
+        Column (
+            modifier = Modifier
+                .height(400.dp)
+                .verticalScroll(rememberScrollState())
+        ) {
+            for (review in reviews) {
+                Log.d("Reviews", "AAAAAA")
+                if (review != null) {
+                    Log.d("Reviews", review.userName +" : " + review.date.toString())
+                    UserReview(review, bookDetailsViewModel = bookDetailsViewModel)
+                }
             }
         }
     }
@@ -103,21 +130,20 @@ fun BookDetailsScreen(
 
 @Composable
 fun ResumeOfReviews(
-    mediaScore: Number = 4.5,
-    rateScore: Int = 4,
-    num_opi: Int = 124,
+    num_opi: Int,
+    bookDetailsViewModel: BookDetailsViewModel
 ){
+
     Row (modifier = Modifier.padding(top=20.dp, bottom = 10.dp, start = 15.dp)){
         Box (modifier = Modifier.weight(0.2f),
             contentAlignment = Alignment.Center
             ) {
             createCircle()
-            Text(text = mediaScore.toString(),
+            Text(text = bookDetailsViewModel.libraryAppState.getBook()?.score.toString(),
                 style = TextStyle(
                     fontSize = 20.sp,
                     fontWeight = FontWeight(700),
                     color = Color(0xFF342E37),
-
                     textAlign = TextAlign.Center,
                 )
             )
@@ -128,7 +154,7 @@ fun ResumeOfReviews(
                 .padding(start = 10.dp),
             verticalArrangement = Arrangement.Bottom
         ){
-            RatingBar(currentRating = rateScore)
+            RatingBar(currentRating = bookDetailsViewModel.libraryAppState.getBook()?.score?.toDouble() ?: 0.0)
             Text(text = num_opi.toString() + " opiniones")
         }
     }
@@ -150,15 +176,15 @@ fun createCircle(){
 
 @Composable
 fun UserReview(
-    userName: String = "Tobias",
-    rate: Int = 4,
-    reviewDate: LocalDateTime,
-    comment: String = "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
+    review: Review,
     bookDetailsViewModel: BookDetailsViewModel
 ){
     var expanded by remember {mutableStateOf(false)}
     val formatter = DateTimeFormatter.ofPattern("dd/MM/yy")
-    val formattedDate = bookDetailsViewModel.getFormattedTimeAgo(reviewDate)
+    val formattedDate = bookDetailsViewModel.getFormattedTimeAgo(review.date)
+
+    val maxLines = 3
+    val isTextLong = review.description.length > 150
 
     Column(modifier = Modifier.padding(10.dp)) {
         Row {
@@ -173,32 +199,36 @@ fun UserReview(
                 .height(50.dp)
             ) {
                 Row {
-                    Text(text = userName )
-                    Text(text = formattedDate,
+                    Text(text = review.userName )
+                    Text(
+                        text = formattedDate,
                         modifier = Modifier.padding(start = 8.dp),
                         style = TextStyle(color = Color.Gray),
-                        )
+                    )
                 }
-                RatingBar(currentRating = rate)
+                val intValue = review.score
+                RatingBar(currentRating = intValue)
             }
 
         }
-        Text(text = comment,
-            maxLines = if (expanded) Int.MAX_VALUE else 3,
+        Text(
+            text = review.description,
+            maxLines = if (expanded || !isTextLong) Int.MAX_VALUE else maxLines,
             overflow = TextOverflow.Ellipsis,
             textAlign = TextAlign.Justify,
-            modifier = Modifier.padding(5.dp))
-
-        ClickableText(
-            text= if (expanded) AnnotatedString("Leer menos") else AnnotatedString("Leer más"),
-            onClick = {expanded = !expanded},
-
-            style = TextStyle(color = GreenApp, fontWeight =FontWeight.Bold, textDecoration = TextDecoration.Underline ),
-            modifier = Modifier
-                .padding(start = 8.dp, bottom = 5.dp)
-                .fillMaxWidth()
-
+            modifier = Modifier.padding(5.dp)
         )
+
+        if (isTextLong) {
+            ClickableText(
+                text = if (expanded) AnnotatedString("Leer menos") else AnnotatedString("Leer más"),
+                onClick = { expanded = !expanded },
+                style = TextStyle(color = GreenApp, fontWeight = FontWeight.Bold, textDecoration = TextDecoration.Underline),
+                modifier = Modifier
+                    .padding(start = 8.dp, bottom = 5.dp)
+                    .fillMaxWidth()
+            )
+        }
     }
 }
 
@@ -209,6 +239,7 @@ fun ReviewBook(
     bookUiState: BookDetailsUiState
 ){
     var myRating by remember { mutableStateOf(0) }
+
 
     Column (
         modifier = Modifier.padding(bottom = 5.dp),
@@ -230,71 +261,96 @@ fun ReviewBook(
                 .padding(top = 8.dp)
         )
         Text(text = "¿Qué te ha parecido?")
+        var userReview: Review? = bookDetailsViewModel.getReviewFromUser()
         AnimatedRatingBar(
             currentRating = bookUiState.reviewScore,
             onRatingChanged = { bookDetailsViewModel.updateRating(it) }
         )
         Button(
-            onClick = { bookDetailsViewModel.showDialog(true) }, //Ir a la páginad de hacer una opinión
-            colors = ButtonDefaults.buttonColors(containerColor = GreenApp),
-
+            onClick = { bookDetailsViewModel.showDialog(true) }, //Ir a la páginas de hacer una opinión
+            colors = ButtonDefaults.buttonColors(containerColor = GreenApp)
             ) {
-            Text("Deja tu opinión")
-            AddReview(showDialog = bookUiState.showDialog,
-                sendComment = { bookDetailsViewModel.sendReview( it )  },
+
+            if (userReview != null) {
+                Text("Edita tu opinión")
+            }else{
+                Text("Deja tu opinión")
+            }
+            AddReview(
+                showDialog = bookUiState.showDialog,
                 updateRating = { bookDetailsViewModel.updateRating( it ) },
                 bookUiState= bookUiState,
                 bookDetailsViewModel = bookDetailsViewModel,
+                bookTitle = bookTitle,
+                userReview = userReview ?: null
             )
         }
     }
 }
 
-
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddReview(
-    bookTitle: String = "Reina Roja",
+    bookTitle: String,
     showDialog: Boolean,
-    sendComment: (String) -> Unit,
+    userReview: Review?,
     updateRating: (Int) -> Unit,
     bookUiState: BookDetailsUiState,
     bookDetailsViewModel: BookDetailsViewModel,
 
     )
 {
-    var comentarioTexto by remember { mutableStateOf("") }
-    // Dialog composable
+
+    var comentarioTexto by remember { mutableStateOf(userReview?.description ?: "") }
+    var score by remember { mutableStateOf(userReview?.score?.toInt()) }
+
+    LaunchedEffect(userReview) {
+        comentarioTexto = userReview?.description ?: ""
+    }
+
+    LaunchedEffect(userReview) {
+        score = userReview?.score?.toInt() ?: 0
+    }
+
+
+
     if (showDialog) {
+
         Dialog(
-            onDismissRequest = {}
+            onDismissRequest = {
+                bookDetailsViewModel.closeDialog()
+            }
         ) {
+            BackHandler {
+                bookDetailsViewModel.closeDialog()
+            }
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(400.dp)
                     .padding(16.dp)
-
                     .shadow(8.dp),
                 colors = CardDefaults.cardColors(
                     containerColor = Color.White,
                 ),
-                shape = RoundedCornerShape(16.dp),
+                shape = RoundedCornerShape(10.dp),
 
-                ) {
+            ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 10.dp)
-                    //.background(color = Color.White)
+                        .padding(10.dp)
                     ,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
                         "¿Has leído " + bookTitle + "?",
-                        style = TextStyle(fontSize = 25.sp, fontWeight = FontWeight.Bold,),
+                        style = TextStyle(
+                            fontSize = 25.sp,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center),
                         color = Color.Black
+
                     )
                     Text(
                         "Deja tu opinión para ayudar a otros lectores",
@@ -306,13 +362,16 @@ fun AddReview(
                         )
                     )
                     AnimatedRatingBar(
-                        currentRating = bookUiState.reviewScore,
-                        onRatingChanged = { bookDetailsViewModel.updateRating(it)  }) //conectar con la pantalla anterior
+                        currentRating =  bookUiState.reviewScore,
+                        onRatingChanged = {bookDetailsViewModel.updateRating(it) }) //conectar con la pantalla anterior
                     SelectionContainer {
                         OutlinedTextField(
                             value = comentarioTexto,
                             onValueChange = { comentarioTexto = it },
-                            label = { Text("Ingresa tu comentario") },
+                            label = {
+                                Text(if (!comentarioTexto.isEmpty()) "Ingresa tu comentario" else comentarioTexto)
+
+                            },
                             modifier = Modifier
                                 .padding(8.dp)
                                 .fillMaxWidth()
@@ -322,7 +381,7 @@ fun AddReview(
                             ),
                             keyboardActions = KeyboardActions(
                                 onSend = {
-                                    sendComment(comentarioTexto)
+                                    sendComment(comentarioTexto, bookUiState.reviewScore, bookDetailsViewModel)
                                     comentarioTexto = ""
                                 }
                             ),
@@ -335,33 +394,40 @@ fun AddReview(
                     }
                     Button(
                         onClick = {
-                            sendComment(comentarioTexto)
+                            sendComment(comentarioTexto, bookUiState.reviewScore, bookDetailsViewModel)
                             comentarioTexto = ""
                         },
                         colors = ButtonDefaults.buttonColors(GreenApp)
+
                     ) {
                         Text("Enviar") //conectar con la pantalla
                     }
-
                 }
             }
         }
     }
+
+}
+
+fun sendComment(comentarioTexto: String, reviewScore: Int, bookDetailsViewModel: BookDetailsViewModel) {
+    bookDetailsViewModel.sendReview( comentarioTexto, reviewScore )
 }
 
 
 @Composable
-fun BookInitialInfo() {
+fun BookInitialInfo(book: Book, navController: NavHostController, bookDetailsViewModel: BookDetailsViewModel) {
+    val context = LocalContext.current
     Row(
         modifier = Modifier.padding(top=10.dp, bottom = 10.dp)
     ) {
-        LoadBookCover("https://m.media-amazon.com/images/I/41uWfObYYQL._SY445_SX342_.jpg")
+        LoadBookCover(book.cover)
         Column(
             horizontalAlignment = Alignment.Start,
             modifier = Modifier.padding(start = 10.dp)
         ) {
-            BookLittleInfo()
-            Button(onClick = { /**/ }) {//Ir a la pagina de la cesta
+            BookLittleInfo(book, navController,bookDetailsViewModel)
+            Button(onClick = { ShoppingCart.getViewModelInstance().addBookToCart(book)
+                Toast.makeText(context, "Se ha añadido el libro a tu cesta", Toast.LENGTH_SHORT).show()}) {//Ir a la pagina de la cesta
                 Text(text = "Añadir a la cesta")
             }
         }
@@ -371,24 +437,26 @@ fun BookInitialInfo() {
     }
 }
 
+
 @Composable
-fun BookLittleInfo(authorName: String = "Juán Gómez-Jurando",
-                   bookTitle: String = "Reina Roja",
-                   editorial: String = "DEBOLSILLO",
-                   isbn: Number = 9788466335362,
-                   bookPrice: Number = 12.5){
+fun BookLittleInfo(book: Book,navController: NavController, bookDetailsViewModel: BookDetailsViewModel){
+
     Row(modifier = Modifier
         .fillMaxWidth()
         .padding(10.dp)
     ) {
-        Column(modifier = Modifier
-            .weight(0.7f),
+        Column(
+            modifier = Modifier
+                .weight(0.7f),
             verticalArrangement = Arrangement.Center,
         ) {
-            Text(text = bookTitle)
+            Text(text = book.title)
             ClickableText(
-                text= AnnotatedString(authorName),
-                onClick = {}, //pantalla información autor
+                text= AnnotatedString(book.author_name),
+                onClick = {
+                    bookDetailsViewModel.setNewAutorId(book.author_id.toString())
+                    navController.navigate("AuthorDestination")
+                }, //pantalla información autor
 
                 style = TextStyle(color = Color.DarkGray, fontWeight =FontWeight.Bold),
                 modifier = Modifier
@@ -396,13 +464,16 @@ fun BookLittleInfo(authorName: String = "Juán Gómez-Jurando",
                     .fillMaxWidth()
 
             )
-            Text(text = editorial)
-            Text(text = isbn.toString())
-            RatingBar(currentRating = 4)
+            Text(text = book.editorial)
+            Text(text = book.isbn.toString())
+            RatingBar(currentRating = book.score.toDouble())
 
-            Text(text = bookPrice.toString() + "€", modifier = Modifier.padding(end=10.dp),
-                style = TextStyle(color = Color.DarkGray, fontWeight =FontWeight.Bold,
-                    fontSize = 20.sp),
+            Text(
+                text = book.price.toString() + "€", modifier = Modifier.padding(end = 10.dp),
+                style = TextStyle(
+                    color = Color.DarkGray, fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp
+                ),
             )
         }
 
@@ -413,11 +484,7 @@ fun BookLittleInfo(authorName: String = "Juán Gómez-Jurando",
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BookSinopsis(sinopsis: String = "Antonia Scott es una mujer muy especial. Tiene un don que es al mismo tiempo una maldición: una extraordinaria inteligencia. Gracias a ella ha salvado decenas de vidas, pero también lo ha perdido todo. Hoy se parapeta contra el mundo en su piso casi vacío de Lavapiés, del que no piensa volver a salir. Ya no queda nada ahí fuera que le interese lo más mínimo.\n" +
-        "\n" +
-        "El inspector Jon Gutiérrez está acusado de corrupción, suspendido de empleo y sueldo. Es un buen policía metido en un asunto muy feo, y ya no tiene mucho que perder. Por eso acepta la propuesta de un misterioso desconocido: ir a buscar a Antonia y sacarla de su encierro, conseguir que vuelva a hacer lo que fuera que hiciera antes, y el desconocido le ayudará a limpiar su nombre. Un encargo extraño aunque aparentemente fácil.\n" +
-        "\n" +
-        "Pero Jon se dará cuenta en seguida de que con Antonia nada es fácil."){
+fun BookSinopsis( sinopsis: String ){
     var expanded by remember { mutableStateOf(false) }
 
     Column() {
@@ -451,14 +518,7 @@ fun BookSinopsis(sinopsis: String = "Antonia Scott es una mujer muy especial. Ti
 
 
 @Composable
-fun FactSheet(
-    num_pag: Int = 304,
-    editorial: String = "DEBOLSILLO",
-    idioma: String = "Castellano",
-    encuadernacion: String = "Tapa blanda",
-    isbn: Number = 9788466335362,
-    publicationDate: Number = 2011
-){
+fun FactSheet( book: Book ){
     Column() {
         Text(
             text = "Detalles del Libro",
@@ -472,7 +532,7 @@ fun FactSheet(
                 withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                     append("Número de páginas: ")
                 }
-                append(num_pag.toString())
+                append(book.num_pag.toString())
             },
             Modifier
                 .padding(8.dp)
@@ -482,7 +542,7 @@ fun FactSheet(
                 withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                     append("Editorial: ")
                 }
-                append(editorial)
+                append(book.editorial)
             },
             Modifier
                 .padding(8.dp)
@@ -492,7 +552,7 @@ fun FactSheet(
                 withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                     append("Idioma: ")
                 }
-                append(idioma)
+                append(book.language)
             },
             Modifier
                 .padding(8.dp)
@@ -502,7 +562,7 @@ fun FactSheet(
                 withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                     append("Encuadernación: ")
                 }
-                append(encuadernacion.toString())
+                append(book.encuadernacion)
             },
             Modifier
                 .padding(8.dp)
@@ -512,7 +572,7 @@ fun FactSheet(
                 withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                     append("ISBN: ")
                 }
-                append(isbn.toString())
+                append(book.isbn.toString())
             },
             Modifier
                 .padding(8.dp)
@@ -522,7 +582,7 @@ fun FactSheet(
                 withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                     append("Fecha de publicación: ")
                 }
-                append(publicationDate.toString())
+                append(book.publicationDate)
             },
             Modifier
                 .padding(8.dp)
@@ -539,18 +599,18 @@ fun FactSheet(
 
 @Composable
 fun RatingBar(
-    maxRating: Int = 5,
-    currentRating: Int,
+    maxRating: Double = 5.0,
+    currentRating: Double,
     starsColor: Color = Color(0xFFF7D850)
 ){
     Row {
-        for (i in 1..maxRating) {
+        for (i in 1..maxRating.toInt()) {
             Icon(
                 imageVector = if (i <= currentRating) Icons.Filled.Star
                 else Icons.Outlined.Star,
                 contentDescription = null,
                 tint = if (i <= currentRating) starsColor
-                else Color.Unspecified,
+                else Color.LightGray,
 
                 )
         }
@@ -562,7 +622,7 @@ fun AnimatedRatingBar(
     maxRating: Int = 5,
     currentRating: Int,
     onRatingChanged: (Int) -> Unit,
-    starsColor: Color = Color.Yellow
+    starsColor: Color = Color(0xFFF7D850)
 ) {
     Row {
         for (i in 1..maxRating) {
@@ -571,7 +631,7 @@ fun AnimatedRatingBar(
                 else Icons.Outlined.Star,
                 contentDescription = null,
                 tint = if (i <= currentRating) starsColor
-                else Color.Unspecified,
+                else Color.LightGray,
                 modifier = Modifier
                     .clickable { onRatingChanged(i) }
                     .padding(4.dp)
@@ -587,7 +647,7 @@ fun AnimatedRatingBar(
 @Composable
 fun Greeting4Preview() {
     LibraryAppTheme {
-        BookInitialInfo()
+//        BookInitialInfo(book)
     }
 }
 

@@ -12,8 +12,9 @@ val Pink40 = Color(0xFF7D5260)
 
 //Colores de josito
 val verdeFuerte = Color(0xFF77CF7C)
-val grisClaro = Color(0xFF636363)
+
 
 val green = Color(0xFF77CF7C)
 val gray = Color(0xFF342E37)
 val white = Color(0xFFFAFFFD)
+val red = Color(0xFFF87171)

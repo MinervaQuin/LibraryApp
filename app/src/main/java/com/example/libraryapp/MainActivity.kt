@@ -1,206 +1,499 @@
 package com.example.libraryapp
 
-
-import CartViewModel
-import android.app.Activity.RESULT_OK
+import android.Manifest
+import com.example.libraryapp.viewModel.CategoryViewModel
 import android.content.ContentValues
+import android.content.ContentValues.TAG
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
-import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.Box
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.Button
+import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalDrawerSheet
+import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
+import androidx.compose.material3.rememberDrawerState
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.navigation
+import androidx.navigation.compose.rememberNavController
+import com.example.libraryapp.model.firebaseAuth.GoogleAuthUiClient
 import com.example.libraryapp.theme.LibraryAppTheme
+import com.example.libraryapp.ui.Cart
+import com.example.libraryapp.ui.CategoryView
+import com.example.libraryapp.ui.HomeView
 import com.example.libraryapp.ui.LoginView
+import com.example.libraryapp.ui.MapScreen
+import com.example.libraryapp.ui.PaymentGateway
+import com.example.libraryapp.ui.ProfileScreen
+import com.example.libraryapp.ui.ShipmentGateway
+import com.example.libraryapp.ui.autoresView
+import com.example.libraryapp.ui.comprasView
+import com.example.libraryapp.ui.signUpView
+import com.example.libraryapp.ui.theme.BookDetailsScreen
+import com.example.libraryapp.ui.theme.BookScreen
+import com.example.libraryapp.view.AutorScreen
+import com.example.libraryapp.viewModel.AuthorViewModel
+import com.example.libraryapp.viewModel.CartViewModel
+import com.example.libraryapp.viewModel.SearchViewModel
+import com.example.libraryapp.viewModel.ShoppingCart
+import com.example.libraryapp.viewModel.autoresViewModel
+import com.example.libraryapp.viewModel.comprasViewModel
+import com.example.libraryapp.viewModel.homeViewModel
+import com.example.libraryapp.viewModel.loginViewModel
+import com.example.libraryapp.viewModel.profileViewModel
+import com.example.libraryapp.viewModel.topBarViewModel
+import com.google.android.gms.auth.api.identity.Identity
+import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
-import com.google.firebase.Firebase
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
-import com.google.firebase.firestore.firestore
-import androidx.navigation.compose.rememberNavController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import com.example.libraryapp.ui.signUpView
-import com.example.libraryapp.viewModel.loginViewModel
-import androidx.lifecycle.lifecycleScope
-import androidx.navigation.compose.navigation
-import com.example.libraryapp.model.firebaseAuth.GoogleAuthUiClient
-import com.example.libraryapp.ui.Cart
-import com.example.libraryapp.ui.HomeView
-import com.example.libraryapp.ui.theme.AddReview
-import com.example.libraryapp.ui.theme.BookDetailsScreen
-import com.google.android.gms.auth.api.identity.Identity
+import com.google.firebase.messaging.FirebaseMessaging
+import com.google.zxing.integration.android.IntentIntegrator
+//import com.google.zxing.integration.android.IntentIntegrator
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    val db = Firebase.firestore
-    public val googleAuthUiClient by lazy {
-        GoogleAuthUiClient(
-            context = applicationContext,
-            oneTapClient = Identity.getSignInClient(applicationContext)
-        )
+    // Declare the launcher at the top of your Activity/Fragment:
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            // FCM SDK (and your app) can post notifications.
+        } else {
+            // TODO: Inform user that that your app will not show notifications.
+        }
     }
 
-    /*
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            LibraryAppTheme {
-                // Use a Surface container using the 'background' color from the theme
-                Surface(color = MaterialTheme.colorScheme.background) {
-                    LoginView() // Aquí colocamos nuestro composable de inicio de sesión
-                }
+    private fun askNotificationPermission() {
+        // This is only necessary for API level >= 33 (TIRAMISU)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
+                PackageManager.PERMISSION_GRANTED
+            ) {
+                // FCM SDK (and your app) can post notifications.
+            } else if (shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)) {
+                // TODO: display an educational UI explaining to the user the features that will be enabled
+                //       by them granting the POST_NOTIFICATION permission. This UI should provide the user
+                //       "OK" and "No thanks" buttons. If the user selects "OK," directly request the permission.
+                //       If the user selects "No thanks," allow the user to continue without notifications.
+            } else {
+                // Directly ask for the permission
+                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
             }
         }
-    }*/
-    @OptIn(ExperimentalMaterial3Api::class)
+    }
+
+    private fun registrarDispositivo(){
+        FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
+            if (!task.isSuccessful) {
+                Log.w(TAG, "Fetching FCM registration token failed", task.exception)
+                return@OnCompleteListener
+            }
+
+            // Get new FCM registration token
+            val token = task.result
+
+            // Log and toast
+            val msg = getString(R.string.msg_token_fmt, token)
+            Log.d(TAG, msg)
+            //Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
+        })
+    }
+
+
+    @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContent {
+            val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
             val navController = rememberNavController()
-            NavHost(navController = navController, startDestination = "bookDetailsView"){
+            val homeViewModel : homeViewModel = hiltViewModel()
+            val topBarViewModel: topBarViewModel = hiltViewModel()
+            val cartViewModel: CartViewModel = hiltViewModel()
+            ShoppingCart.init(cartViewModel)
+            askNotificationPermission()
+            registrarDispositivo()
+            NavHost(navController = navController, startDestination = "firstScreens"){
+
                 navigation(
                     startDestination = "login",
                     route = "firstScreens"
                 ){
                     composable("login") {
 
-                        val viewModel = viewModel<loginViewModel>()
-                        val state by viewModel.state.collectAsStateWithLifecycle()
-
-                        LaunchedEffect(key1 = Unit){
-                            if(googleAuthUiClient.getSignedInUser() != null){
-                                navController.navigate("seconScreens")
-                            }
-                        }
-
-                        val launcher = rememberLauncherForActivityResult(
-                            contract = ActivityResultContracts.StartIntentSenderForResult(),
-                            onResult = {result ->
-                                if(result.resultCode == RESULT_OK) {
-                                    lifecycleScope.launch {
-                                        val signInResult = googleAuthUiClient.signInWithIntent(
-                                            intent = result.data ?: return@launch
-                                        )
-                                        viewModel.onSignInResult(signInResult)
-                                    }
-                                }
-                            }
-                        )
-
-                        LaunchedEffect(key1 = state.isSignInSuccessful) {
-                            if(state.isSignInSuccessful) {
-                                Toast.makeText(
-                                    applicationContext,
-                                    "Sesión Iniciada",
-                                    Toast.LENGTH_LONG
-                                ).show()
-
-                                navController.navigate("seconScreens")
-                                viewModel.resetState()
-                            }
-                        }
+                        val viewModel : loginViewModel = hiltViewModel()
 
                         LoginView(
                             navController = navController,
-                            state = state,
-                            onSignInClick = {
-                                lifecycleScope.launch {
-                                    val signInIntentSender = googleAuthUiClient.signIn()
-                                    launcher.launch(
-                                        IntentSenderRequest.Builder(
-                                            signInIntentSender ?: return@launch
-                                        ).build()
-                                    )
-                                }
-                            }
-
+                            viewModel = viewModel
                         )
                     }
 
-                    composable("signUp") { signUpView(navController = navController)}
+                    composable("signUp") {
+                        signUpView(
+                            navController = navController
+                        )
+
+                    }
                 }
 
                 navigation(
                     startDestination = "homePage",
-                    route = "seconScreens"
+                    route = "secondScreens"
                 ){
                     composable("homePage"){
-                        Scaffold(
-                            bottomBar = { BottomBar(navController = navController) },
-                            topBar = { TopBar(navController = navController)},
-                            content = { padding ->
-                                Box(
-                                    modifier = Modifier
-                                        .padding(padding),
-                                )
-                                HomeView(
-                                    userData = googleAuthUiClient.getSignedInUser(),
-                                    onSignOut = {
-                                        lifecycleScope.launch {
-                                            googleAuthUiClient.signOut()
-                                            Toast.makeText(
-                                                applicationContext,
-                                                "Sesión Cerrada",
-                                                Toast.LENGTH_LONG
-                                            ).show()
-                                            navController.popBackStack()
-                                        }
+                        ModalNavigationDrawer(
+                            drawerContent = {
+                                // Contenido del cajón (drawer)
+                                ModalDrawerSheet(modifier = Modifier.width(250.dp)
+                                ){ drawer(navController = navController, drawerState = drawerState,topBarViewModel)}
+                            },drawerState = drawerState,){
+                            Scaffold(
+                                bottomBar = { BottomBar(navController = navController) },
+                                topBar = { TopBar(navController = navController, drawerState) },
+                                content = { paddingValues ->
+                                    Column(
+                                        modifier = Modifier
+                                            .padding(paddingValues)
+                                            .fillMaxSize()
+                                    ){
+                                        HomeView(
+
+                                            viewModel = homeViewModel,
+                                            navController = navController
+                                        )
                                     }
-                                ) }
-                        )
+                                }
+                            )
+                        }
+                    }
+                    composable("AutoresDestination") {
+                        val viewModel : autoresViewModel = hiltViewModel()
+                        ModalNavigationDrawer(
+                            drawerContent = {
+                                // Contenido del cajón (drawer)
+                                ModalDrawerSheet(modifier = Modifier.width(250.dp)
+                                ){ drawer(navController = navController, drawerState = drawerState,topBarViewModel)}
+                            },drawerState = drawerState,){
+                            Scaffold(
+                                bottomBar = { BottomBar(navController = navController) },
+                                topBar = { TopBar(navController = navController,drawerState)},
+                                content = { paddingValues ->
+                                    Column(
+                                        modifier = Modifier
+                                            .padding(paddingValues)
+                                            .fillMaxSize()
+                                    ) {
+                                        autoresView(navController, viewModel)
+                                    }
+                                }
+                            )
+                        }
                     }
 
                     composable("cartDestination") {
-                        val viewModel = viewModel<CartViewModel>()
                         // Contenido de la pantalla del carrito
+                        val cartViewModel : CartViewModel = ShoppingCart.getViewModelInstance()
+                        ModalNavigationDrawer(
+                            drawerContent = {
+                                // Contenido del cajón (drawer)
+                                ModalDrawerSheet(modifier = Modifier.width(250.dp)
+                                ){ drawer(navController = navController, drawerState = drawerState,topBarViewModel)}
+                            },drawerState = drawerState,){
+                            Scaffold(
+                                bottomBar = { BottomBar(navController = navController) },
+                                topBar = { TopBar(navController = navController,drawerState)},
+                                content = { paddingValues ->
+                                    Column(
+                                        modifier = Modifier
+                                            .padding(paddingValues)
+                                            .fillMaxSize()
+                                    ) {
+                                        Cart(navController, cartViewModel)
+                                    }
+                                }
+                            )
+                        }
+                    }
+                    composable("Category") {
+                        val viewModel : CategoryViewModel = hiltViewModel()
+                        // Contenido de la pantalla del carrito
+                        ModalNavigationDrawer(
+                            drawerContent = {
+                                // Contenido del cajón (drawer)
+                                ModalDrawerSheet(modifier = Modifier.width(250.dp)
+                                ){ drawer(navController = navController, drawerState = drawerState,topBarViewModel)}
+                            },drawerState = drawerState,){
+                            Scaffold(
+                                bottomBar = { BottomBar(navController = navController) },
+                                topBar = { TopBar(navController = navController, drawerState)},
+                                content = { paddingValues ->
+                                    Column(
+                                        modifier = Modifier
+                                            .padding(paddingValues)
+                                            .fillMaxSize()
+                                    ) {
+                                        CategoryView(navController,viewModel,ShoppingCart.getSelectedCategory())
+                                    }
+                                }
+                            )
+
+                        }
+                    }
+                    composable("AuthorDestination") {
+                        val viewModel : AuthorViewModel = hiltViewModel()
+                        ModalNavigationDrawer(
+                            drawerContent = {
+                                // Contenido del cajón (drawer)
+                                ModalDrawerSheet(modifier = Modifier.width(250.dp)
+                                ){ drawer(navController = navController, drawerState = drawerState,topBarViewModel)}
+                            },drawerState = drawerState,){
+                                Scaffold(
+                                    bottomBar = { BottomBar(navController = navController) },
+                                    topBar = { TopBar(navController = navController,drawerState)},
+                                    content = { paddingValues ->
+                                        Column(
+                                            modifier = Modifier
+                                                .padding(paddingValues)
+                                                .fillMaxSize()
+                                        ) {
+                                            AutorScreen(navController, viewModel)
+                                        }
+                                    }
+                                )
+                        }
+                    }
+
+                    composable("maps"){
+                        ModalNavigationDrawer(
+                            drawerContent = {
+                                // Contenido del cajón (drawer)
+                                ModalDrawerSheet(modifier = Modifier.width(250.dp)
+                                ){ drawer(navController = navController, drawerState = drawerState,topBarViewModel)}
+                            },drawerState = drawerState,){
+                            Scaffold(
+                                bottomBar = { BottomBar(navController = navController) },
+                                topBar = { TopBar(navController = navController, drawerState)},
+                                content = { paddingValues ->
+                                    Column(
+                                        modifier = Modifier
+                                            .padding(paddingValues)
+                                            .fillMaxSize()
+                                    ) {
+                                        MapScreen()
+                                    }
+                                }
+                            )
+                        }
+                    }
+
+                    composable("profile"){
+                        val viewModel : profileViewModel = hiltViewModel()
+                        ModalNavigationDrawer(
+                            drawerContent = {
+                                // Contenido del cajón (drawer)
+                                ModalDrawerSheet(modifier = Modifier.width(250.dp)
+                                ){ drawer(navController = navController, drawerState = drawerState,topBarViewModel)}
+                            },drawerState = drawerState,){
+                                Scaffold(
+                                    bottomBar = { BottomBar(navController = navController) },
+                                    topBar = { TopBar(navController = navController, drawerState)},
+                                    content = { paddingValues ->
+                                        Column(
+                                            modifier = Modifier
+                                                .padding(paddingValues)
+                                                .fillMaxSize()
+                                        ) {
+                                            ProfileScreen(viewModel, navController = navController)
+                                        }
+                                    }
+                                )
+                        }
+                    }
+                    composable("comprasView"){
+                        val viewModel : comprasViewModel = hiltViewModel()
+                        ModalNavigationDrawer(
+                            drawerContent = {
+                                // Contenido del cajón (drawer)
+                                ModalDrawerSheet(modifier = Modifier.width(250.dp)
+                                ){ drawer(navController = navController, drawerState = drawerState,topBarViewModel)}
+                            },drawerState = drawerState,){
+                            Scaffold(
+                                bottomBar = { BottomBar(navController = navController) },
+                                topBar = { TopBar(navController = navController, drawerState)},
+                                content = { paddingValues ->
+                                    Column(
+                                        modifier = Modifier
+                                            .padding(paddingValues)
+                                            .fillMaxSize()
+                                    ) {
+                                        comprasView(navController = navController, viewModel)
+                                    }
+                                }
+                            )
+                        }
+                    }
+
+
+
+                //composable("signUp") { signUpView(navController = navController)}
+
+                    composable("bookDetailsView"){
+                        ModalNavigationDrawer(
+                            drawerContent = {
+                                // Contenido del cajón (drawer)
+                                ModalDrawerSheet(modifier = Modifier.width(250.dp)
+                                ){ drawer(navController = navController, drawerState = drawerState,topBarViewModel)}
+                            },drawerState = drawerState,){
+                            Scaffold(
+                                bottomBar = { BottomBar(navController = navController) },
+                                topBar = { TopBar(navController = navController, drawerState)},
+                                content = { paddingValues ->
+                                    Column(
+                                        modifier = Modifier
+                                            .padding(paddingValues)
+                                            .fillMaxSize()
+                                    ) {
+                                        BookDetailsScreen(navController = navController)
+                                    }
+                                }
+                            )
+                        }
+                    }
+                    composable("addReviewView"){
+    //                    AddReview(navController= navController)
+                    }
+                    composable("cartView"){
+    //                    CartScreen()
+                    }
+
+                }
+
+                //fuera del grafo
+
+
+
+                composable("SearchScreen"){
+                    ModalNavigationDrawer(
+                        drawerContent = {
+                            // Contenido del cajón (drawer)
+                            ModalDrawerSheet(modifier = Modifier.width(250.dp)
+                            ){ drawer(navController = navController, drawerState = drawerState,topBarViewModel)}
+                        },drawerState = drawerState,){
                         Scaffold(
                             bottomBar = { BottomBar(navController = navController) },
-                            topBar = { TopBar(navController = navController)},
-                            content = { padding ->
-                                Box(
+                            topBar = { TopBar(navController = navController, drawerState)},
+                            content = { paddingValues ->
+                                Column(
                                     modifier = Modifier
-                                        .padding(padding),
-                                )
-                                Cart(navController,viewModel)
+                                        .padding(paddingValues)
+                                        .fillMaxSize()
+                                ) {
+                                    BookScreen(navController = navController)
+                                }
                             }
                         )
                     }
                 }
 
-                composable("signUp") { signUpView(navController = navController)}
+                composable("Payment"){
+                    ModalNavigationDrawer(
+                        drawerContent = {
+                            // Contenido del cajón (drawer)
+                            ModalDrawerSheet(modifier = Modifier.width(250.dp)
+                            ){ drawer(navController = navController, drawerState = drawerState,topBarViewModel)}
+                        },drawerState = drawerState,){
+                        Scaffold(
+                            bottomBar = { BottomBar(navController = navController) },
+                            topBar = { TopBar(navController = navController, drawerState)},
+                            content = { paddingValues ->
+                                Column(
+                                    modifier = Modifier
+                                        .padding(paddingValues)
+                                        .fillMaxSize()
+                                ) {
+                                    PaymentGateway(navController)
+                                }
+                            }
+                        )
+                    }
+                }
+                composable("Shipment"){
+                    ModalNavigationDrawer(
+                        drawerContent = {
+                            // Contenido del cajón (drawer)
+                            ModalDrawerSheet(modifier = Modifier.width(250.dp)
+                            ){ drawer(navController = navController, drawerState = drawerState,topBarViewModel)}
+                        },drawerState = drawerState,){
+                        Scaffold(
+                            bottomBar = { BottomBar(navController = navController) },
+                            topBar = { TopBar(navController = navController, drawerState)},
+                            content = { paddingValues ->
+                                Column(
+                                    modifier = Modifier
+                                        .padding(paddingValues)
+                                        .fillMaxSize()
+                                ) {
+                                    ShipmentGateway(navController = navController)
+                                }
+                            }
+                        )
+                    }
+                }
+            }
+        }
+    }
+    val searchViewModel: SearchViewModel by viewModels()
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
 
-                composable("bookDetailsView"){
-                    BookDetailsScreen(navController = navController)
+        var result = IntentIntegrator.parseActivityResult(requestCode,resultCode,data)
+        if (result != null){
+            if(result.contents == null) {
+                Toast.makeText(this,"Cancelado", Toast.LENGTH_SHORT).show()
+            }
+            else{
+                lifecycleScope.launch{
+                    searchViewModel.handleScanResult(result.contents)
                 }
-                composable("addReviewView"){
-//                    AddReview(navController= navController)
-                }
-                composable("cartView"){
-//                    CartScreen()
-                }
+                searchViewModel.isFallo.observe(this, Observer { isFallo ->
+                    if (isFallo) {
+                        Toast.makeText(this,"No se ha encontrado el libro", Toast.LENGTH_SHORT).show()
+                    }
+                })
 
             }
+
+        }else{
+            super.onActivityResult(requestCode, resultCode, data)
         }
     }
 }
