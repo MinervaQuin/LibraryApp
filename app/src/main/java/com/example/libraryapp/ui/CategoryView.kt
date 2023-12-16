@@ -319,9 +319,9 @@ fun filtrado(viewModel: CategoryViewModel ,onDismiss: () -> Unit){
                     },
                     modifier = Modifier
                         .align(alignment = Alignment.CenterHorizontally)
-                        .padding(bottom = 10.dp),
+                        .padding(bottom= 10.dp),
                     colors= ButtonDefaults.buttonColors(
-                        containerColor= GreenApp),
+                        containerColor=GreenApp),
                 ){
                     Text("Aplicar")
                 }
