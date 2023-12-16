@@ -37,7 +37,6 @@ class CategoryViewModel @Inject constructor(
         "Premiados" to "9kPXIbFOl8qG0rwGHnAq",
         "eBooks" to "U5SRP9P3KPzxCIGeX5hV",
         "Novedades" to "aFWNP6mASVxgPwt8wS0c",
-        "Autores" to "",
         "Romance" to "BvTWsslTbG94qnQ36fmI"
 
 
@@ -59,7 +58,7 @@ class CategoryViewModel @Inject constructor(
         // Inicializa la lista de libros con datos de prueba o desde algún origen de datos
         categories = listOf("Todas Las Categorias","Imprescindibles","Ficción", "No Ficción", "Infantil","Misterio", "Romance",
             "Cómic y Manga","Populares", "Recomendados", "Promociones", "Blog", "Premiados",
-            "eBooks", "Autores", "Novedades" )
+            "eBooks", "Novedades" )
     }
 
     fun setNewBook(book: Book){

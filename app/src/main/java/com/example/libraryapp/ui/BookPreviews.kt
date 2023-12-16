@@ -167,7 +167,7 @@ fun BookPreviewWide (obra : Book, navController: NavController, viewModel: Categ
             AsyncImage(
                 model = obra!!.cover,
                 contentDescription = "image description",
-                contentScale = ContentScale.FillBounds,
+                contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .width(120.dp)
                     .height(195.dp)
